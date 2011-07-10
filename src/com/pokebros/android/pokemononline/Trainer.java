@@ -1,39 +1,58 @@
 package com.pokebros.android.pokemononline;
+import java.io.ByteArrayOutputStream;
 
 class DummyQColor {
-	protected
-		byte spec;
-		short alpha;
-		short red;
-		short green;
-		short blue;
-		short pad;
+	protected byte spec;
+	protected short alpha;
+	protected short red;
+	protected short green;
+	protected short blue;
+	protected short pad;
 		
-	public
-		DummyQColor() {
+	public DummyQColor() {
 			spec = 1;
 			alpha |= 0xffff;
 			red = green = blue = 0;
 			pad = 0;
 	}
+	
+	public ByteArrayOutputStream serializeBytes() {
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+		bytes.write(spec);
+		
+		bytes.write(alpha >> 8);
+		bytes.write(alpha);
+		
+		bytes.write(red >> 8);
+		bytes.write(red);
+		
+		bytes.write(green >> 8);
+		bytes.write(green);
+		
+		bytes.write(blue >> 8);
+		bytes.write(blue);
+		
+		bytes.write(pad >> 8);
+		bytes.write(pad);
+		
+		return bytes;
+	}
 }
 public class Trainer {
-	protected
-		String nick;
-		String info;
-		String loseMsg;
-		String winMsg;
+	protected String nick;
+	protected String info;
+	protected String loseMsg;
+	protected String winMsg;
 		
-		short avatar;
-		String defaultTier;
-		Team team;
+	protected short avatar;
+	protected String defaultTier;
+	protected Team team;
 		
-		boolean ladderEnabled;
-		boolean showTeam;
-		DummyQColor nameColor;
+	protected boolean ladderEnabled;
+	protected boolean showTeam;
+	protected DummyQColor nameColor;
 		
-	public
-		Trainer() {
+	public Trainer() {
 			nick = "BROBRO";
 			info = "Sup";
 			loseMsg = "FUCK!";
@@ -43,5 +62,46 @@ public class Trainer {
 			team = new Team();
 			ladderEnabled = showTeam = true;
 			nameColor = new DummyQColor();
+	}
+	
+	protected void putQString(ByteArrayOutputStream b, String s) {
+		b.write(s.length() >> 24);
+		b.write(s.length() >> 16);
+		b.write(s.length() >> 8);
+		b.write(s.length());
+		try {
+			b.write(s.getBytes("UTF-16"));
+		} catch (Exception e) {
+			System.exit(-1);
+		}
+	}	
+	
+	public ByteArrayOutputStream serializeBytes() {
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+		putQString(bytes, nick);
+		putQString(bytes, info);
+		putQString(bytes, loseMsg);
+		putQString(bytes, winMsg);
+		
+		bytes.write(avatar >> 8);
+		bytes.write(avatar);
+		
+		putQString(bytes, defaultTier);
+		
+		try {
+			bytes.write(team.serializeBytes().toByteArray());
+		} catch (Exception e) {
+			System.exit(-1);
+		}
+		
+		bytes.write((int)(ladderEnabled ? 1 : 0));
+		bytes.write((int)(showTeam ? 1 : 0));
+		
+		try {
+			bytes.write(team.serializeBytes().toByteArray());
+		} catch (Exception e) {
+			System.exit(-1);
+		}
+		return bytes;
 	}
 }
