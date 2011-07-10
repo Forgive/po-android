@@ -1,5 +1,7 @@
 package com.pokebros.android.pokemononline;
 import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 class DummyQColor {
 	protected byte spec;
@@ -10,7 +12,7 @@ class DummyQColor {
 	protected short pad;
 		
 	public DummyQColor() {
-			spec = 1;
+			spec = 0;
 			alpha |= 0xffff;
 			red = green = blue = 0;
 			pad = 0;
@@ -65,12 +67,15 @@ public class Trainer {
 	}
 	
 	protected void putQString(ByteArrayOutputStream b, String s) {
-		b.write(s.length() >> 24);
-		b.write(s.length() >> 16);
-		b.write(s.length() >> 8);
-		b.write(s.length());
+		byte[] byteHold = new byte[4];
+		ByteBuffer bb = ByteBuffer.allocate(4);
+		bb.order(ByteOrder.BIG_ENDIAN);
+		bb.putInt(s.length() << 1);
+		bb.rewind();
+		bb.get(byteHold);
 		try {
-			b.write(s.getBytes("UTF-16"));
+			b.write(byteHold);
+			b.write(s.getBytes("UTF-16BE"));
 		} catch (Exception e) {
 			System.exit(-1);
 		}

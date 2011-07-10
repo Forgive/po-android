@@ -1,6 +1,8 @@
 package com.pokebros.android.pokemononline;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.ByteOrder;
+import java.nio.ByteBuffer;
 
 class UniqueID {
 	protected short pokeNum;
@@ -31,7 +33,7 @@ public class Poke {
 	protected boolean shiny;
 	protected byte happiness;
 	protected byte level;
-	protected short[] moves;
+	protected int[] moves;
 	protected byte[] DVs;
 	protected byte[] EVs;
 		
@@ -46,7 +48,7 @@ public class Poke {
 		shiny = true;
 		happiness = 127;
 		level = 100;
-		moves = new short[4];
+		moves = new int[4];
 		moves[0] = 331;
 		moves[1] = 213;
 		moves[2] = 412;
@@ -65,12 +67,16 @@ public class Poke {
 		} catch(IOException e) {
 			System.exit(-1);
 		}
-		bytes.write(nick.length() >> 24);
-		bytes.write(nick.length() >> 16);
-		bytes.write(nick.length() >> 8);
-		bytes.write(nick.length());
+		byte[] byteHold = new byte[4];
+		ByteBuffer b = ByteBuffer.allocate(4);
+		b.order(ByteOrder.BIG_ENDIAN);
+		b.putInt(nick.length() << 1);
+		b.rewind();
+		b.get(byteHold);
+		
 		try {
-			bytes.write(nick.getBytes("UTF-16"));
+			bytes.write(byteHold);
+			bytes.write(nick.getBytes("UTF-16BE"));
 		} catch (Exception e) {
 			System.exit(-1);
 		}
@@ -93,6 +99,8 @@ public class Poke {
 		bytes.write(level);
 		
 		for (int i = 0; i < 4; i++) {
+			bytes.write(moves[i] >> 24);
+			bytes.write(moves[i] >> 16);
 			bytes.write(moves[i] >> 8);
 			bytes.write(moves[i]);
 		}

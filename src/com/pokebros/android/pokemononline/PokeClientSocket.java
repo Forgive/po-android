@@ -41,7 +41,7 @@ public class PokeClientSocket {
 		return true;
 	}
 
-	public boolean sendBytes(ByteArrayOutputStream msgToSend) {
+	public boolean sendBytes(ByteArrayOutputStream msgToSend, byte msgType) {
 		boolean success=false;
 		ByteArrayOutputStream bytesToSend = new ByteArrayOutputStream();
 		byte firstLen = (byte) (msgToSend.size() / 256);
@@ -50,6 +50,7 @@ public class PokeClientSocket {
 		bytesToSend.write(firstLen);
 		System.out.println("THIS SHIT'S ABOUT TO GET REAL5");
 		bytesToSend.write(secondLen);
+		bytesToSend.write(msgType);
 		try {
 			System.out.println("THIS SHIT'S ABOUT TO GET REAL6");
 			bytesToSend.write(msgToSend.toByteArray());

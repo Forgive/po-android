@@ -17,6 +17,6 @@ public class ConnectActivity extends Activity {
         System.out.println("THIS SHIT'S ABOUT TO GET REAL");
         System.out.println(bytes.toString());
         System.out.println("SHIT GOT REAL");
-        s.sendBytes(bytes);
+        s.sendBytes(bytes, (byte)2);
     }
 }
