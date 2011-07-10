@@ -9,6 +9,7 @@ public class Team {
 	public Team() {
 			gen = 5;
 			pokes = new Poke[6];
+			for(int i = 0; i < 6; i++) pokes[i] = new Poke();
 	}
 	
 	public ByteArrayOutputStream serializeBytes() {

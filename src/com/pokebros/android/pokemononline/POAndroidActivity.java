@@ -1,6 +1,7 @@
 package com.pokebros.android.pokemononline;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 
 public class POAndroidActivity extends Activity {
@@ -9,5 +10,7 @@ public class POAndroidActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        Intent myIntent = new Intent(POAndroidActivity.this, ConnectActivity.class);
+        POAndroidActivity.this.startActivity(myIntent);
     }
 }

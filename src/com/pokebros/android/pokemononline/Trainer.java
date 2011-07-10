@@ -98,7 +98,7 @@ public class Trainer {
 		bytes.write((int)(showTeam ? 1 : 0));
 		
 		try {
-			bytes.write(team.serializeBytes().toByteArray());
+			bytes.write(nameColor.serializeBytes().toByteArray());
 		} catch (Exception e) {
 			System.exit(-1);
 		}

@@ -39,9 +39,9 @@ public class Poke {
 		uID = new UniqueID();
 		//gen = 5;
 		nick = "LOLZ";
-		item = 37;
+		item = 0;
 		ability = 65;
-		nature = 2;
+		nature = 0;
 		gender = 1;
 		shiny = true;
 		happiness = 127;

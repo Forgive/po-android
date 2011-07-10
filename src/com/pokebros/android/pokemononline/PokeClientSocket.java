@@ -2,7 +2,7 @@ package com.pokebros.android.pokemononline;
 
 import static java.lang.System.out;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Vector;
@@ -12,7 +12,7 @@ public class PokeClientSocket {
 	private String ipAddr;
 	private int portNum;
 	private Socket socket;
-	private ObjectOutputStream outData;
+	private DataOutputStream outData;
 	private ObjectInputStream inData;
 
 	public PokeClientSocket(String inIpAddr, int inPortNum)
@@ -26,9 +26,13 @@ public class PokeClientSocket {
 
 	public boolean connect() {
 		try {
+			System.out.println("THIS SHIT'S ABOUT TO GET REAL0");
 			socket = new Socket(ipAddr, portNum);
-			outData = new ObjectOutputStream(socket.getOutputStream());
-			inData = new ObjectInputStream(socket.getInputStream());
+			System.out.println("THIS SHIT'S ABOUT TO GET REAL1");
+			outData = new DataOutputStream(socket.getOutputStream());
+			System.out.println("THIS SHIT'S ABOUT TO GET REAL2");
+			//inData = new ObjectInputStream(socket.getInputStream());
+			System.out.println("THIS SHIT'S ABOUT TO GET REAL3");
 		} catch (IOException ioe) {
 			out.println("ERROR: Unable to connect - " +
 					"is the server running?");
@@ -42,17 +46,23 @@ public class PokeClientSocket {
 		ByteArrayOutputStream bytesToSend = new ByteArrayOutputStream();
 		byte firstLen = (byte) (msgToSend.size() / 256);
 		byte secondLen = (byte) (msgToSend.size() % 256);
+		System.out.println("THIS SHIT'S ABOUT TO GET REAL4");
 		bytesToSend.write(firstLen);
+		System.out.println("THIS SHIT'S ABOUT TO GET REAL5");
 		bytesToSend.write(secondLen);
 		try {
+			System.out.println("THIS SHIT'S ABOUT TO GET REAL6");
 			bytesToSend.write(msgToSend.toByteArray());
 		} catch (IOException e) {
 			System.out.println("Caught IOException Writing message");
 			System.exit(-1);
 		}
 		
+		System.out.println("OMFG SEND");
+		System.out.println(bytesToSend.toString());
 		try {
 			outData.write(bytesToSend.toByteArray());
+			System.out.println("THIS SHIT'S ABOUT TO GET REAL7");
 			success = true;
 		} catch (IOException e) {
 			System.out.println("Caught IOException Writing To Socket Stream!");
