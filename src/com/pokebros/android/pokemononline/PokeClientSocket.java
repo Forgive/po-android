@@ -1,8 +1,8 @@
 package com.pokebros.android.pokemononline;
 
 import static java.lang.System.out;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Vector;
@@ -11,8 +11,8 @@ public class PokeClientSocket {
 	private String ipAddr;
 	private int portNum;
 	private Socket socket;
-	private DataOutputStream outData;
-	private DataInputStream inData;
+	private ObjectOutputStream outData;
+	private ObjectInputStream inData;
 
 	public PokeClientSocket(String inIpAddr, int inPortNum)
 	{
@@ -26,8 +26,8 @@ public class PokeClientSocket {
 	public boolean connect() {
 		try {
 			socket = new Socket(ipAddr, portNum);
-			outData = new DataOutputStream(socket.getOutputStream());
-			inData = new DataInputStream(socket.getInputStream());
+			outData = new ObjectOutputStream(socket.getOutputStream());
+			inData = new ObjectInputStream(socket.getInputStream());
 		} catch (IOException ioe) {
 			out.println("ERROR: Unable to connect - " +
 					"is the server running?");
@@ -36,11 +36,11 @@ public class PokeClientSocket {
 		return true;
 	}
 
-	public boolean sendString(String strToSend) {
+	public boolean sendBytes(byte[] bytesToSend) {
 		boolean success=false;
 
 		try {
-			outData.writeBytes(strToSend);
+			outData.write(bytesToSend);
 			success = true;
 		} catch (IOException e) {
 			System.out.println("Caught IOException Writing To Socket Stream!");
