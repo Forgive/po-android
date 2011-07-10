@@ -6,6 +6,7 @@ import java.io.ObjectOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Vector;
+import java.io.ByteArrayOutputStream;
 
 public class PokeClientSocket {
 	private String ipAddr;
@@ -36,11 +37,22 @@ public class PokeClientSocket {
 		return true;
 	}
 
-	public boolean sendBytes(byte[] bytesToSend) {
+	public boolean sendBytes(ByteArrayOutputStream msgToSend) {
 		boolean success=false;
-
+		ByteArrayOutputStream bytesToSend = new ByteArrayOutputStream();
+		byte firstLen = (byte) (msgToSend.size() / 256);
+		byte secondLen = (byte) (msgToSend.size() % 256);
+		bytesToSend.write(firstLen);
+		bytesToSend.write(secondLen);
 		try {
-			outData.write(bytesToSend);
+			bytesToSend.write(msgToSend.toByteArray());
+		} catch (IOException e) {
+			System.out.println("Caught IOException Writing message");
+			System.exit(-1);
+		}
+		
+		try {
+			outData.write(bytesToSend.toByteArray());
 			success = true;
 		} catch (IOException e) {
 			System.out.println("Caught IOException Writing To Socket Stream!");
