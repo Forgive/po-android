@@ -10,7 +10,9 @@ public class POAndroidActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        Intent myIntent = new Intent(POAndroidActivity.this, ConnectActivity.class);
-        POAndroidActivity.this.startActivity(myIntent);
+        /*Intent myIntent = new Intent(POAndroidActivity.this, ConnectActivity.class);
+        POAndroidActivity.this.startActivity(myIntent);*/
+        Thread cThread = new Thread(new PokeClientSocket("141.212.112.139", 5080));
+        cThread.start();
     }
 }

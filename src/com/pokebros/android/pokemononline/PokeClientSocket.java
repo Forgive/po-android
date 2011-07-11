@@ -1,19 +1,19 @@
 package com.pokebros.android.pokemononline;
 
 import static java.lang.System.out;
-import java.io.ObjectInputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Vector;
 import java.io.ByteArrayOutputStream;
 
-public class PokeClientSocket {
+public class PokeClientSocket implements Runnable {
 	private String ipAddr;
 	private int portNum;
 	private Socket socket;
 	private DataOutputStream outData;
-	private ObjectInputStream inData;
+	private DataInputStream inData;
 
 	public PokeClientSocket(String inIpAddr, int inPortNum)
 	{
@@ -24,21 +24,26 @@ public class PokeClientSocket {
 		socket = null;
 	}
 
-	public boolean connect() {
+	public void run() {
+		connect();
+		Trainer trainer = new Trainer();
+		sendBytes(trainer.serializeBytes(), (byte)2);
+	}
+	
+	public void connect() {
 		try {
 			System.out.println("THIS SHIT'S ABOUT TO GET REAL0");
 			socket = new Socket(ipAddr, portNum);
 			System.out.println("THIS SHIT'S ABOUT TO GET REAL1");
 			outData = new DataOutputStream(socket.getOutputStream());
 			System.out.println("THIS SHIT'S ABOUT TO GET REAL2");
-			//inData = new ObjectInputStream(socket.getInputStream());
+			inData = new DataInputStream(socket.getInputStream());
 			System.out.println("THIS SHIT'S ABOUT TO GET REAL3");
 		} catch (IOException ioe) {
 			out.println("ERROR: Unable to connect - " +
 					"is the server running?");
 			System.exit(10);
 		}
-		return true;
 	}
 
 	public boolean sendBytes(ByteArrayOutputStream msgToSend, byte msgType) {

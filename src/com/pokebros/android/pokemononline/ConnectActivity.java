@@ -10,7 +10,7 @@ public class ConnectActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     	Trainer trainer = new Trainer();
-        PokeClientSocket s = new PokeClientSocket("10.0.0.13", 5080);
+        PokeClientSocket s = new PokeClientSocket("141.212.112.139", 5080);
         System.out.println("SOCKET FUCKING CREATED");
         s.connect();
         ByteArrayOutputStream bytes = trainer.serializeBytes();

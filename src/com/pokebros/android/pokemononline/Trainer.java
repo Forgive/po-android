@@ -56,8 +56,8 @@ public class Trainer {
 		
 	public Trainer() {
 			nick = "BROBRO";
-			info = "Sup";
-			loseMsg = "FUCK!";
+			info = "Sup Bro";
+			loseMsg = "SHUCKS!";
 			winMsg = "YEAAAH!!!";
 			avatar = 72;
 			defaultTier = "OU";
