@@ -5,31 +5,25 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Vector;
 import java.io.ByteArrayOutputStream;
 
-public class PokeClientSocket implements Runnable {
+public class PokeClientSocket {
 	private String ipAddr;
 	private int portNum;
 	private Socket socket;
 	private DataOutputStream outData;
 	private DataInputStream inData;
-
-	public PokeClientSocket(String inIpAddr, int inPortNum)
-	{
-		ipAddr = inIpAddr;
-		portNum = inPortNum;
-		inData = null;
-		outData = null;
-		socket = null;
-	}
-
-	public void run() {
-		connect();
-		Trainer trainer = new Trainer();
-		sendBytes(trainer.serializeBytes(), (byte)2);
-	}
 	
+	public PokeClientSocket(String inIpAddr, int inPortNum)
+    {
+            ipAddr = inIpAddr;
+            portNum = inPortNum;
+            inData = null;
+            outData = null;
+            socket = null;
+    }
+	
+	public boolean isConnected() { return socket != null && socket.isConnected(); }
 	public void connect() {
 		try {
 			System.out.println("THIS SHIT'S ABOUT TO GET REAL0");
@@ -46,16 +40,14 @@ public class PokeClientSocket implements Runnable {
 		}
 	}
 
-	public boolean sendBytes(ByteArrayOutputStream msgToSend, byte msgType) {
+	public boolean sendMessage(ByteArrayOutputStream msgToSend, Command msgType) {
 		boolean success=false;
 		ByteArrayOutputStream bytesToSend = new ByteArrayOutputStream();
 		byte firstLen = (byte) (msgToSend.size() / 256);
 		byte secondLen = (byte) (msgToSend.size() % 256);
-		System.out.println("THIS SHIT'S ABOUT TO GET REAL4");
 		bytesToSend.write(firstLen);
-		System.out.println("THIS SHIT'S ABOUT TO GET REAL5");
 		bytesToSend.write(secondLen);
-		bytesToSend.write(msgType);
+		bytesToSend.write((byte)msgType.ordinal());
 		try {
 			System.out.println("THIS SHIT'S ABOUT TO GET REAL6");
 			bytesToSend.write(msgToSend.toByteArray());
@@ -78,7 +70,7 @@ public class PokeClientSocket implements Runnable {
 		return (success);
 	}
 
-	public ByteArrayOutputStream recvBytes() {
+	public ByteArrayOutputStream recvMessage() {
 		ByteArrayOutputStream recvd = new ByteArrayOutputStream();
 		byte firstLen;
 		byte secondLen;
@@ -86,6 +78,8 @@ public class PokeClientSocket implements Runnable {
 		try {
 			firstLen = inData.readByte();
 			secondLen = inData.readByte();
+			if (firstLen == 0 && secondLen == 0) return recvd;
+			System.out.println("FirstLen: " + firstLen + " SecondLen: " + secondLen);
 			for (int i=0; i < (firstLen * 256 + secondLen); ++i) {
 				recvd.write(inData.readByte());
 			}
