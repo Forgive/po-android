@@ -78,32 +78,21 @@ public class PokeClientSocket implements Runnable {
 		return (success);
 	}
 
-	public String recvString() {
-		Vector< Byte > byteVec = new Vector< Byte >();
-		byte [] byteAry;
-		byte recByte;
-		String receivedString = "";
+	public ByteArrayOutputStream recvBytes() {
+		ByteArrayOutputStream recvd = new ByteArrayOutputStream();
+		byte firstLen;
+		byte secondLen;
 
 		try {
-			recByte = inData.readByte();
-			while (recByte != 0) {
-				byteVec.add(recByte);
-				recByte = inData.readByte();
+			firstLen = inData.readByte();
+			secondLen = inData.readByte();
+			for (int i=0; i < (firstLen * 256 + secondLen); ++i) {
+				recvd.write(inData.readByte());
 			}
-
-			byteAry = new byte[byteVec.size()];
-
-			for (int ind = 0; ind < byteVec.size(); ind++) {
-				byteAry[ind] = byteVec.elementAt(ind).byteValue();
-			}
-
-			receivedString = new String(byteAry);
-		} catch (IOException ioe) {
-			out.println("ERROR: receiving string from socket");
-			System.exit(8);
+		} catch (IOException e) {
+			System.out.println("Caught IOException Reading From Socket Stream!");
 		}
-		out.println("Recieved "+receivedString);
-		return (receivedString);
+		return recvd;
 	}
 
 }
