@@ -13,12 +13,12 @@ public class POAndroidActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        PokeClientSocket s = new PokeClientSocket("141.212.112.139", 5080);
+        PokeClientSocket s = new PokeClientSocket("141.212.112.41", 5080);
         Trainer t = new Trainer();
         Thread cThread = new Thread(new NetworkSendThread(s, t.serializeBytes(), Command.Login));
         cThread.start();
         Thread lol = new Thread(new NetworkRecvThread(s, handler));
-        lol.run();
+        lol.start();
     }
     
     

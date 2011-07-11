@@ -78,7 +78,7 @@ public class PokeClientSocket {
 		try {
 			firstLen = inData.readByte();
 			secondLen = inData.readByte();
-			if (firstLen == 0 && secondLen == 0) return recvd;
+			//if (firstLen == 0 && secondLen == 0) return recvd;
 			System.out.println("FirstLen: " + firstLen + " SecondLen: " + secondLen);
 			for (int i=0; i < (firstLen * 256 + secondLen); ++i) {
 				recvd.write(inData.readByte());
