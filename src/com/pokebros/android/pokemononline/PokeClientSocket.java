@@ -24,6 +24,7 @@ public class PokeClientSocket {
     }
 	
 	public boolean isConnected() { return socket != null && socket.isConnected(); }
+	
 	public void connect() {
 		try {
 			System.out.println("THIS SHIT'S ABOUT TO GET REAL0");
@@ -34,7 +35,7 @@ public class PokeClientSocket {
 			inData = new DataInputStream(socket.getInputStream());
 			System.out.println("THIS SHIT'S ABOUT TO GET REAL3");
 		} catch (IOException ioe) {
-			out.println("ERROR: Unable to connect - " +
+			out.println("ERROR: Unable to connect to " + ipAddr + " - " +
 					"is the server running?");
 			System.exit(10);
 		}
