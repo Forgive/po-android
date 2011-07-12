@@ -25,12 +25,12 @@ public class POAndroidActivity extends Activity {
     private Handler handler = new Handler() {
     	@Override
     	public void handleMessage(Message msg) {
-    		changeTimer();
+    		changeName(msg);
     	}
     };
     
-    public void changeTimer() {
+    public void changeName(Message msg) {
     	TextView myView = (TextView) findViewById(R.id.nameA);
-        myView.setText("LOLOLLO");
+        myView.setText(msg.obj.toString());
     }
 }

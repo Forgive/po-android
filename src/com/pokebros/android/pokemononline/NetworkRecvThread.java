@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 
 import android.content.Intent;
 import android.os.Handler;
+import android.os.Message;
 import android.widget.TextView;
 
 enum Command {
@@ -81,11 +82,9 @@ public class NetworkRecvThread implements Runnable {
 	
 	public void run() {
 		while(true) {
-			interpretMsg(socket.recvMessage());
+			ByteArrayOutputStream baos = socket.recvMessage();
+			handler.sendMessage(handler.obtainMessage(0, "BROBRO"));
+					//handler.obtainMessage((int) baos.toByteArray()[2], baos));
 		}
-	}
-	
-	public void interpretMsg(ByteArrayOutputStream msg) {
-		handler.sendEmptyMessage(0);
 	}
 }
