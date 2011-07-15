@@ -79,9 +79,15 @@ public class PokeClientSocket {
 		try {
 			firstLen = inData.readByte();
 			secondLen = inData.readByte();
-			//if (firstLen == 0 && secondLen == 0) return recvd;
-			System.out.println("FirstLen: " + firstLen + " SecondLen: " + secondLen);
-			for (int i=0; i < (firstLen * 256 + secondLen); ++i) {
+			/* Java has only signed data types. We get around
+			 * this by shifting the most significant bits 8 places left
+			 * and then OR'ing it with the 8 least significant bits.
+			 * We need to AND the LSBs with 0xff to get rid of the
+			 * 1's of two's complement (sign is preserved when casting).
+			 */
+			int len = (firstLen << 8) | (secondLen & 0xff);
+			System.out.println("Length: " + len);
+			for (int i=0; i < len; ++i) {
 				recvd.write(inData.readByte());
 			}
 		} catch (IOException e) {

@@ -1,7 +1,7 @@
 package com.pokebros.android.pokemononline;
 import java.io.ByteArrayOutputStream;
 
-class UniqueID {
+class UniqueID extends SerializeBytes {
 	protected short pokeNum;
 	protected byte subNum;
 	
@@ -18,7 +18,7 @@ class UniqueID {
 	}
 }
 
-public class Poke {
+public class Poke extends SerializeBytes {
 	protected UniqueID uID;
 	protected String nick;
 	protected short item;
@@ -55,7 +55,7 @@ public class Poke {
 
 	public ByteArrayOutputStream serializeBytes() {
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-		Utils.putBaos(bytes, uID.serializeBytes());
+		Utils.putBaos(bytes, uID);
 		Utils.putString(bytes, nick);
 		Utils.putShort(bytes, item);
 		Utils.putShort(bytes, ability);

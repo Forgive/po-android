@@ -55,9 +55,9 @@ public class Utils {
 		b.write((byte)(bool ? 1 : 0));
 	}
 	
-	static public void putBaos(ByteArrayOutputStream dest, ByteArrayOutputStream src) {
+	static public void putBaos(ByteArrayOutputStream dest, SerializeBytes src) {
 		try {
-			dest.write(src.toByteArray());
+			dest.write(src.serializeBytes().toByteArray());
 		} catch (Exception e) {
 			System.exit(-1);
 		}

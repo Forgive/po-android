@@ -1,7 +1,7 @@
 package com.pokebros.android.pokemononline;
 import java.io.ByteArrayOutputStream;
 
-class DummyQColor {
+class DummyQColor extends SerializeBytes {
 	protected byte spec;
 	protected short alpha;
 	protected short red;
@@ -30,7 +30,7 @@ class DummyQColor {
 	}
 }
 
-public class Trainer {
+public class Trainer extends SerializeBytes {
 	protected String nick;
 	protected String info;
 	protected String loseMsg;
@@ -64,10 +64,10 @@ public class Trainer {
 		Utils.putString(bytes, winMsg);	
 		Utils.putShort(bytes, avatar);
 		Utils.putString(bytes, defaultTier);
-		Utils.putBaos(bytes, team.serializeBytes());
+		Utils.putBaos(bytes, team);
 		Utils.putBool(bytes, ladderEnabled);
 		Utils.putBool(bytes, showTeam);
-		Utils.putBaos(bytes, nameColor.serializeBytes());
+		Utils.putBaos(bytes, nameColor);
 		return bytes;
 	}
 }
