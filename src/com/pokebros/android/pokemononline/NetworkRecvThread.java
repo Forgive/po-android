@@ -202,6 +202,15 @@ public class NetworkRecvThread implements Runnable {
 				outcome = " had no idea against ";
 			}
 			System.out.println("Outcome of battle " + battleID + ": Player " + id1 + outcome + "Player " + id2);
+		case SendPM:
+			playerID = msg.readInt();
+			// Ignore the message
+			String pm = new String("This user is running the Pokemon Online Android client and cannot respond to private messages.");
+			Baos bb = new Baos();
+			bb.putInt(playerID);
+			bb.putString(pm);
+			socket.sendMessage(bb, Command.SendPM);
+			break;
 		default:
 			System.out.println("Unimplented message");
 		}
