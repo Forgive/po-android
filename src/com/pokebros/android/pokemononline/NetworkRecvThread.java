@@ -99,8 +99,8 @@ public class NetworkRecvThread implements Runnable {
 			System.out.println("Message: " + message);
 			break;
 		case HtmlChannel:
-			String htmlMessage = msg.readQtString();
-			System.out.println("Html Message: " + htmlMessage);
+			String htmlChannel = msg.readQtString();
+			System.out.println("Html Channel: " + htmlChannel);
 			break;
 		case LeaveChannel:
 			playerID = msg.readInt();
@@ -170,8 +170,40 @@ public class NetworkRecvThread implements Runnable {
 			System.out.println("Channel ID: " + chanID);
 			System.out.println("Players: " + playerIDs.toString());
 			break;
-		default:
+		case HtmlMessage:
+			String htmlMessage = msg.readQtString();
+			System.out.println("Html Message: " + htmlMessage);
 			break;
+		/* Only sent when player is in a PM with you and logs out */
+		case Logout:
+			int playerID = msg.readInt();
+			System.out.println("Player " + playerID + " logged out.");
+			break;
+		case BattleFinished:
+			int battleID = msg.readInt();
+			byte battleDesc = msg.readByte();
+			int id1 = msg.readInt();
+			int id2 = msg.readInt();
+			String outcome = new String();
+			switch(battleDesc) {
+			case 0: // Forfeit
+				outcome = " won by forfeit against ";
+				break;
+			case 1: // Win
+				outcome = " won against ";
+				break;
+			case 2: // Tie
+				outcome = " tied with ";
+				break;
+			case 3: // Close
+				outcome = " was close against ";
+				break;
+			default:
+				outcome = " had no idea against ";
+			}
+			System.out.println("Outcome of battle " + battleID + ": Player " + id1 + outcome + "Player " + id2);
+		default:
+			System.out.println("Unimplented message");
 		}
 	}
 }
