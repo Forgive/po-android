@@ -1,7 +1,7 @@
 package com.pokebros.android.pokemononline;
 
-import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 import android.os.Handler;
 
@@ -70,7 +70,7 @@ enum Command {
 public class NetworkRecvThread implements Runnable {
 	private PokeClientSocket socket;
 	private Handler handler;
-	private ByteArrayInputStream msg;
+	private Bais msg;
 	
 	public NetworkRecvThread(PokeClientSocket s, Handler h) {
 		socket = s;
@@ -81,54 +81,34 @@ public class NetworkRecvThread implements Runnable {
 	
 	public void run() {
 		while(true) {
-			msg = new ByteArrayInputStream(socket.recvMessage().toByteArray());
+			msg = new Bais(socket.recvMessage().toByteArray());
 			handleMsg();
 			handler.sendMessage(handler.obtainMessage(0, "BROBRO"));
 					//handler.obtainMessage((int) baos.toByteArray()[2], baos));
 		}
 	}
 	
-	public String readQtString() {
-		int len = readInt();
-		System.out.println("String length: " + len);
-		
-		/* Yeah, I know, everything in Java is signed.
-		 * If you're sending strings too long to fit in
-		 * an unsigned int, may God help you.
-		 */
-		byte[] bytes = new byte[len];
-		msg.read(bytes, 0, len);
-		
-		String str = null;
-		try {
-			str = new String(bytes, "UTF-16BE");
-		} catch (Exception e) {
-			System.exit(-1);
+	public void handleChannelMsg(Command c) {
+		switch(c) {
+		case JoinChannel:
+			int playerID = msg.readInt();
+			System.out.println("Player " + playerID + " joined the channel");
+			break;
+		case ChannelMessage:
+			String message = msg.readQtString();
+			System.out.println("Message: " + message);
+			break;
+		case HtmlChannel:
+			String htmlMessage = msg.readQtString();
+			System.out.println("Html Message: " + htmlMessage);
+			break;
+		case LeaveChannel:
+			playerID = msg.readInt();
+			System.out.println("Player " + playerID + " has left the channel.");
+			break;
+		default:
+			break;
 		}
-		
-		return str;
-	}
-	
-	public short readShort() {
-		short s = 0;
-		s |= (msg.read() << 8);
-		s |= (msg.read() & 0xff);
-		
-		return s;
-	}
-	
-	public byte readByte() {
-		return (byte)msg.read();
-	}
-	
-	public int readInt() {
-		int i = 0;
-		i |= (msg.read() << 24);
-		i |= ((msg.read() & 0xff0000)  << 16);
-		i |= ((msg.read() & 0xff00) << 8);
-		i |= ((msg.read() & 0xff));
-		
-		return i;
 	}
 	
 	public void handleMsg() {
@@ -139,22 +119,31 @@ public class NetworkRecvThread implements Runnable {
 		System.out.println("Command ID: " + i);
 		Command c = Command.values()[i];
 		switch(c) {
+		case BattleList:
+		case JoinChannel:
+		case LeaveChannel:
+		case ChannelBattle:
+		case ChannelMessage:
+		case HtmlChannel:
+			int chanID = msg.readInt();
+			handleChannelMsg(c);
+			break;
 		case TierSelection:
-			readInt();
+			msg.readInt();
 			ArrayList<String> list = new ArrayList<String>();
 			while(msg.available() != 0) {
 				msg.read();
-				list.add(readQtString());
+				list.add(msg.readQtString());
 			}
 			System.out.println(list.toString());
 			break;
 		case ChallengeStuff:
 			byte desc, mode;
 			int opponent, clauses;
-			desc = readByte();
-			opponent = readInt();
-			clauses = readInt();
-			mode = readByte();
+			desc = msg.readByte();
+			opponent = msg.readInt();
+			clauses = msg.readInt();
+			mode = msg.readByte();
 			System.out.println("Desc: " + desc + " Opponent: " + opponent + " Clauses: " + clauses + " Mode: " + mode);
 			Baos b = new Baos();
 			b.write(1);
@@ -163,6 +152,23 @@ public class NetworkRecvThread implements Runnable {
 			b.write(mode);
 			Thread cThread = new Thread(new NetworkSendThread(socket, b, Command.ChallengeStuff));
 	        cThread.start();
+			break;
+		case ChannelsList:
+			int numChannels = msg.readInt();
+			Hashtable<Integer, String> channels = new Hashtable<Integer, String>();
+			for(int k = 0; k < numChannels; k++) {
+				channels.put(msg.readInt(), msg.readQtString());
+			}
+			System.out.println(channels.toString());
+			break;
+		case ChannelPlayers:
+			chanID = msg.readInt();
+			int numPlayers = msg.readInt();
+			ArrayList<Integer> playerIDs = new ArrayList<Integer>();
+			for(int k = 0; k < numPlayers; k++)
+				playerIDs.add(msg.readInt());
+			System.out.println("Channel ID: " + chanID);
+			System.out.println("Players: " + playerIDs.toString());
 			break;
 		default:
 			break;

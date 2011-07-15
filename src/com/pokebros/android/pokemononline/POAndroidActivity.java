@@ -14,6 +14,7 @@ public class POAndroidActivity extends Activity {
         setContentView(R.layout.main);
 
         PokeClientSocket s = new PokeClientSocket("141.212.112.155", 5080);
+        //PokeClientSocket s = new PokeClientSocket("188.165.249.120", 5089);
         Trainer t = new Trainer();
         Thread cThread = new Thread(new NetworkSendThread(s, t.serializeBytes(), Command.Login));
         cThread.start();

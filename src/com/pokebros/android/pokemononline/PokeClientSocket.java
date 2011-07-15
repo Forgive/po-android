@@ -26,13 +26,9 @@ public class PokeClientSocket {
 	
 	public void connect() {
 		try {
-			System.out.println("THIS SHIT'S ABOUT TO GET REAL0");
 			socket = new Socket(ipAddr, portNum);
-			System.out.println("THIS SHIT'S ABOUT TO GET REAL1");
 			outData = new DataOutputStream(socket.getOutputStream());
-			System.out.println("THIS SHIT'S ABOUT TO GET REAL2");
 			inData = new DataInputStream(socket.getInputStream());
-			System.out.println("THIS SHIT'S ABOUT TO GET REAL3");
 		} catch (IOException ioe) {
 			out.println("ERROR: Unable to connect to " + ipAddr + " - " +
 					"is the server running?");
@@ -46,18 +42,14 @@ public class PokeClientSocket {
 		bytesToSend.putShort((short)(msgToSend.size() + 1));
 		bytesToSend.write((byte)msgType.ordinal());
 		try {
-			System.out.println("THIS SHIT'S ABOUT TO GET REAL6");
 			bytesToSend.write(msgToSend.toByteArray());
 		} catch (IOException e) {
 			System.out.println("Caught IOException Writing message");
 			System.exit(-1);
 		}
-		
-		System.out.println("OMFG SEND");
 		System.out.println(bytesToSend.toString());
 		try {
 			outData.write(bytesToSend.toByteArray());
-			System.out.println("THIS SHIT'S ABOUT TO GET REAL7");
 			success = true;
 		} catch (IOException e) {
 			System.out.println("Caught IOException Writing To Socket Stream!");
