@@ -44,10 +44,11 @@ public class PokeClientSocket {
 	public boolean sendMessage(ByteArrayOutputStream msgToSend, Command msgType) {
 		boolean success=false;
 		ByteArrayOutputStream bytesToSend = new ByteArrayOutputStream();
-		byte firstLen = (byte) (msgToSend.size() / 256);
+		/*byte firstLen = (byte) (msgToSend.size() / 256);
 		byte secondLen = (byte) (msgToSend.size() % 256);
 		bytesToSend.write(firstLen);
-		bytesToSend.write(secondLen);
+		bytesToSend.write(secondLen);*/
+		Utils.putShort(bytesToSend, (short)(msgToSend.size() + 1));
 		bytesToSend.write((byte)msgType.ordinal());
 		try {
 			System.out.println("THIS SHIT'S ABOUT TO GET REAL6");

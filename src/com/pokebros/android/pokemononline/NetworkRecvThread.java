@@ -1,6 +1,7 @@
 package com.pokebros.android.pokemononline;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
 import android.os.Handler;
@@ -109,23 +110,16 @@ public class NetworkRecvThread implements Runnable {
 		return str;
 	}
 	
-	public ArrayList<String> readQStringList() {
-		readInt();
-		ArrayList<String> list = new ArrayList<String>();
-		while(msg.available() != 0) {
-			msg.read();
-			list.add(readQtString());
-		}
-		
-		return list;
-	}
-	
 	public short readShort() {
 		short s = 0;
 		s |= (msg.read() << 8);
 		s |= (msg.read() & 0xff);
 		
 		return s;
+	}
+	
+	public byte readByte() {
+		return (byte)msg.read();
 	}
 	
 	public int readInt() {
@@ -138,10 +132,6 @@ public class NetworkRecvThread implements Runnable {
 		return i;
 	}
 	
-	public void handleTierSelection() {
-		System.out.println(readQStringList().toString());
-	}
-	
 	public void handleMsg() {
 		/* Completely obvious way to "convert"
 		 * a byte into a value in an enum.
@@ -150,11 +140,33 @@ public class NetworkRecvThread implements Runnable {
 		System.out.println("Command ID: " + i);
 		Command c = Command.values()[i];
 		switch(c) {
-			case TierSelection:
-				handleTierSelection();
-				break;
-			default:
-				break;
+		case TierSelection:
+			readInt();
+			ArrayList<String> list = new ArrayList<String>();
+			while(msg.available() != 0) {
+				msg.read();
+				list.add(readQtString());
+			}
+			System.out.println(list.toString());
+			break;
+		case ChallengeStuff:
+			byte desc, mode;
+			int opponent, clauses;
+			desc = readByte();
+			opponent = readInt();
+			clauses = readInt();
+			mode = readByte();
+			System.out.println("Desc: " + desc + " Opponent: " + opponent + " Clauses: " + clauses + " Mode: " + mode);
+			ByteArrayOutputStream b = new ByteArrayOutputStream();
+			b.write(1);
+			Utils.putInt(b, opponent);
+			Utils.putInt(b, clauses);
+			b.write(mode);
+			Thread cThread = new Thread(new NetworkSendThread(socket, b, Command.ChallengeStuff));
+	        cThread.start();
+			break;
+		default:
+			break;
 		}
 	}
 }
