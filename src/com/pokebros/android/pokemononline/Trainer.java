@@ -1,7 +1,5 @@
 package com.pokebros.android.pokemononline;
 import java.io.ByteArrayOutputStream;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 class DummyQColor {
 	protected byte spec;
@@ -22,24 +20,16 @@ class DummyQColor {
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 		bytes.write(spec);
 		
-		bytes.write(alpha >> 8);
-		bytes.write(alpha);
-		
-		bytes.write(red >> 8);
-		bytes.write(red);
-		
-		bytes.write(green >> 8);
-		bytes.write(green);
-		
-		bytes.write(blue >> 8);
-		bytes.write(blue);
-		
-		bytes.write(pad >> 8);
-		bytes.write(pad);
+		Utils.putShort(bytes, alpha);
+		Utils.putShort(bytes, red);
+		Utils.putShort(bytes, green);
+		Utils.putShort(bytes, blue);
+		Utils.putShort(bytes, pad);
 		
 		return bytes;
 	}
 }
+
 public class Trainer {
 	protected String nick;
 	protected String info;
@@ -66,47 +56,18 @@ public class Trainer {
 			nameColor = new DummyQColor();
 	}
 	
-	protected void putQString(ByteArrayOutputStream b, String s) {
-		byte[] byteHold = new byte[4];
-		ByteBuffer bb = ByteBuffer.allocate(4);
-		bb.order(ByteOrder.BIG_ENDIAN);
-		bb.putInt(s.length() << 1);
-		bb.rewind();
-		bb.get(byteHold);
-		try {
-			b.write(byteHold);
-			b.write(s.getBytes("UTF-16BE"));
-		} catch (Exception e) {
-			System.exit(-1);
-		}
-	}	
-	
 	public ByteArrayOutputStream serializeBytes() {
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-		putQString(bytes, nick);
-		putQString(bytes, info);
-		putQString(bytes, loseMsg);
-		putQString(bytes, winMsg);
-		
-		bytes.write(avatar >> 8);
-		bytes.write(avatar);
-		
-		putQString(bytes, defaultTier);
-		
-		try {
-			bytes.write(team.serializeBytes().toByteArray());
-		} catch (Exception e) {
-			System.exit(-1);
-		}
-		
-		bytes.write((int)(ladderEnabled ? 1 : 0));
-		bytes.write((int)(showTeam ? 1 : 0));
-		
-		try {
-			bytes.write(nameColor.serializeBytes().toByteArray());
-		} catch (Exception e) {
-			System.exit(-1);
-		}
+		Utils.putString(bytes, nick);
+		Utils.putString(bytes, info);
+		Utils.putString(bytes, loseMsg);
+		Utils.putString(bytes, winMsg);	
+		Utils.putShort(bytes, avatar);
+		Utils.putString(bytes, defaultTier);
+		Utils.putBaos(bytes, team.serializeBytes());
+		Utils.putBool(bytes, ladderEnabled);
+		Utils.putBool(bytes, showTeam);
+		Utils.putBaos(bytes, nameColor.serializeBytes());
 		return bytes;
 	}
 }

@@ -1,6 +1,5 @@
 package com.pokebros.android.pokemononline;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 public class Team {
 	protected byte gen;
@@ -15,13 +14,8 @@ public class Team {
 	public ByteArrayOutputStream serializeBytes() {
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 		bytes.write(gen);
-		for(int i = 0; i < 6; i++) {
-			try {
-				bytes.write(pokes[i].serializeBytes().toByteArray());
-			} catch (IOException e) {
-				System.exit(-1);
-			}
-		}
+		for(int i = 0; i < 6; i++)
+			Utils.putBaos(bytes, pokes[i].serializeBytes());
 		return bytes;
 	}
 }

@@ -13,7 +13,7 @@ public class POAndroidActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        PokeClientSocket s = new PokeClientSocket("192.168.1.116", 5080);
+        PokeClientSocket s = new PokeClientSocket("141.212.112.155", 5080);
         Trainer t = new Trainer();
         Thread cThread = new Thread(new NetworkSendThread(s, t.serializeBytes(), Command.Login));
         cThread.start();

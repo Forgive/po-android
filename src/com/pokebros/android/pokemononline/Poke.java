@@ -1,8 +1,5 @@
 package com.pokebros.android.pokemononline;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.ByteOrder;
-import java.nio.ByteBuffer;
 
 class UniqueID {
 	protected short pokeNum;
@@ -15,8 +12,7 @@ class UniqueID {
 	
 	public ByteArrayOutputStream serializeBytes() {
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-		bytes.write(pokeNum >> 8);
-		bytes.write(pokeNum);
+		Utils.putShort(bytes, pokeNum);
 		bytes.write(subNum);
 		return bytes;
 	}
@@ -24,7 +20,6 @@ class UniqueID {
 
 public class Poke {
 	protected UniqueID uID;
-		//byte gen;
 	protected String nick;
 	protected short item;
 	protected short ability;
@@ -39,7 +34,6 @@ public class Poke {
 		
 	public Poke() {
 		uID = new UniqueID();
-		//gen = 5;
 		nick = "LOLZ";
 		item = 0;
 		ability = 65;
@@ -61,48 +55,17 @@ public class Poke {
 
 	public ByteArrayOutputStream serializeBytes() {
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-		try
-		{
-			bytes.write(uID.serializeBytes().toByteArray());
-		} catch(IOException e) {
-			System.exit(-1);
-		}
-		byte[] byteHold = new byte[4];
-		ByteBuffer b = ByteBuffer.allocate(4);
-		b.order(ByteOrder.BIG_ENDIAN);
-		b.putInt(nick.length() << 1);
-		b.rewind();
-		b.get(byteHold);
-		
-		try {
-			bytes.write(byteHold);
-			bytes.write(nick.getBytes("UTF-16BE"));
-		} catch (Exception e) {
-			System.exit(-1);
-		}
-		
-		bytes.write(item >> 8);
-		bytes.write(item);
-		
-		bytes.write(ability >> 8);
-		bytes.write(ability);
-		
+		Utils.putBaos(bytes, uID.serializeBytes());
+		Utils.putString(bytes, nick);
+		Utils.putShort(bytes, item);
+		Utils.putShort(bytes, ability);
 		bytes.write(nature);
 		bytes.write(gender);
-		
-		byte shinyByte;
-		if(shiny) shinyByte = 1;
-		else shinyByte = 0;
-		bytes.write(shinyByte);
-		
+		Utils.putBool(bytes, shiny);
 		bytes.write(happiness);
 		bytes.write(level);
-		
 		for (int i = 0; i < 4; i++) {
-			bytes.write(moves[i] >> 24);
-			bytes.write(moves[i] >> 16);
-			bytes.write(moves[i] >> 8);
-			bytes.write(moves[i]);
+			Utils.putInt(bytes, moves[i]);
 		}
 		for (int i = 0; i < 6; i++) bytes.write(DVs[i]);
 		for (int i = 0; i < 6; i++) bytes.write(EVs[i]);
