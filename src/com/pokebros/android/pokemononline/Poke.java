@@ -1,5 +1,4 @@
 package com.pokebros.android.pokemononline;
-import java.io.ByteArrayOutputStream;
 
 class UniqueID extends SerializeBytes {
 	protected short pokeNum;
@@ -10,9 +9,9 @@ class UniqueID extends SerializeBytes {
 			subNum = 0;
 	}
 	
-	public ByteArrayOutputStream serializeBytes() {
-		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-		Utils.putShort(bytes, pokeNum);
+	public Baos serializeBytes() {
+		Baos bytes = new Baos();
+		bytes.putShort(pokeNum);
 		bytes.write(subNum);
 		return bytes;
 	}
@@ -53,19 +52,19 @@ public class Poke extends SerializeBytes {
 		EVs[0] = EVs[1] = EVs[2] = EVs[3] = EVs[4] = EVs[5] = 10;
 	}
 
-	public ByteArrayOutputStream serializeBytes() {
-		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-		Utils.putBaos(bytes, uID);
-		Utils.putString(bytes, nick);
-		Utils.putShort(bytes, item);
-		Utils.putShort(bytes, ability);
+	public Baos serializeBytes() {
+		Baos bytes = new Baos();
+		bytes.putBaos(uID);
+		bytes.putString(nick);
+		bytes.putShort(item);
+		bytes.putShort(ability);
 		bytes.write(nature);
 		bytes.write(gender);
-		Utils.putBool(bytes, shiny);
+		bytes.putBool(shiny);
 		bytes.write(happiness);
 		bytes.write(level);
 		for (int i = 0; i < 4; i++) {
-			Utils.putInt(bytes, moves[i]);
+			bytes.putInt(moves[i]);
 		}
 		for (int i = 0; i < 6; i++) bytes.write(DVs[i]);
 		for (int i = 0; i < 6; i++) bytes.write(EVs[i]);

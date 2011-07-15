@@ -1,5 +1,4 @@
 package com.pokebros.android.pokemononline;
-import java.io.ByteArrayOutputStream;
 
 class DummyQColor extends SerializeBytes {
 	protected byte spec;
@@ -16,15 +15,15 @@ class DummyQColor extends SerializeBytes {
 			pad = 0;
 	}
 	
-	public ByteArrayOutputStream serializeBytes() {
-		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+	public Baos serializeBytes() {
+		Baos bytes = new Baos();
 		bytes.write(spec);
 		
-		Utils.putShort(bytes, alpha);
-		Utils.putShort(bytes, red);
-		Utils.putShort(bytes, green);
-		Utils.putShort(bytes, blue);
-		Utils.putShort(bytes, pad);
+		bytes.putShort(alpha);
+		bytes.putShort(red);
+		bytes.putShort(green);
+		bytes.putShort(blue);
+		bytes.putShort(pad);
 		
 		return bytes;
 	}
@@ -56,18 +55,18 @@ public class Trainer extends SerializeBytes {
 			nameColor = new DummyQColor();
 	}
 	
-	public ByteArrayOutputStream serializeBytes() {
-		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-		Utils.putString(bytes, nick);
-		Utils.putString(bytes, info);
-		Utils.putString(bytes, loseMsg);
-		Utils.putString(bytes, winMsg);	
-		Utils.putShort(bytes, avatar);
-		Utils.putString(bytes, defaultTier);
-		Utils.putBaos(bytes, team);
-		Utils.putBool(bytes, ladderEnabled);
-		Utils.putBool(bytes, showTeam);
-		Utils.putBaos(bytes, nameColor);
+	public Baos serializeBytes() {
+		Baos bytes = new Baos();
+		bytes.putString(nick);
+		bytes.putString(info);
+		bytes.putString(loseMsg);
+		bytes.putString(winMsg);	
+		bytes.putShort(avatar);
+		bytes.putString(defaultTier);
+		bytes.putBaos(team);
+		bytes.putBool(ladderEnabled);
+		bytes.putBool(showTeam);
+		bytes.putBaos(nameColor);
 		return bytes;
 	}
 }

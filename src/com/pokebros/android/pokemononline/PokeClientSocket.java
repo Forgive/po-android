@@ -5,7 +5,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.io.ByteArrayOutputStream;
 
 public class PokeClientSocket {
 	private String ipAddr;
@@ -41,14 +40,10 @@ public class PokeClientSocket {
 		}
 	}
 
-	public boolean sendMessage(ByteArrayOutputStream msgToSend, Command msgType) {
+	public boolean sendMessage(Baos msgToSend, Command msgType) {
 		boolean success=false;
-		ByteArrayOutputStream bytesToSend = new ByteArrayOutputStream();
-		/*byte firstLen = (byte) (msgToSend.size() / 256);
-		byte secondLen = (byte) (msgToSend.size() % 256);
-		bytesToSend.write(firstLen);
-		bytesToSend.write(secondLen);*/
-		Utils.putShort(bytesToSend, (short)(msgToSend.size() + 1));
+		Baos bytesToSend = new Baos();
+		bytesToSend.putShort((short)(msgToSend.size() + 1));
 		bytesToSend.write((byte)msgType.ordinal());
 		try {
 			System.out.println("THIS SHIT'S ABOUT TO GET REAL6");
@@ -72,8 +67,8 @@ public class PokeClientSocket {
 		return (success);
 	}
 
-	public ByteArrayOutputStream recvMessage() {
-		ByteArrayOutputStream recvd = new ByteArrayOutputStream();
+	public Baos recvMessage() {
+		Baos recvd = new Baos();
 		byte firstLen;
 		byte secondLen;
 
@@ -96,5 +91,4 @@ public class PokeClientSocket {
 		}
 		return recvd;
 	}
-
 }

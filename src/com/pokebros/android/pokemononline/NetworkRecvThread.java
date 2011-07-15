@@ -1,7 +1,6 @@
 package com.pokebros.android.pokemononline;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
 import android.os.Handler;
@@ -157,10 +156,10 @@ public class NetworkRecvThread implements Runnable {
 			clauses = readInt();
 			mode = readByte();
 			System.out.println("Desc: " + desc + " Opponent: " + opponent + " Clauses: " + clauses + " Mode: " + mode);
-			ByteArrayOutputStream b = new ByteArrayOutputStream();
+			Baos b = new Baos();
 			b.write(1);
-			Utils.putInt(b, opponent);
-			Utils.putInt(b, clauses);
+			b.putInt(opponent);
+			b.putInt(clauses);
 			b.write(mode);
 			Thread cThread = new Thread(new NetworkSendThread(socket, b, Command.ChallengeStuff));
 	        cThread.start();

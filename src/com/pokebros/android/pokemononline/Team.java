@@ -1,5 +1,4 @@
 package com.pokebros.android.pokemononline;
-import java.io.ByteArrayOutputStream;
 
 public class Team extends SerializeBytes {
 	protected byte gen;
@@ -11,11 +10,11 @@ public class Team extends SerializeBytes {
 			for(int i = 0; i < 6; i++) pokes[i] = new Poke();
 	}
 	
-	public ByteArrayOutputStream serializeBytes() {
-		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+	public Baos serializeBytes() {
+		Baos bytes = new Baos();
 		bytes.write(gen);
 		for(int i = 0; i < 6; i++)
-			Utils.putBaos(bytes, pokes[i]);
+			bytes.putBaos(pokes[i]);
 		return bytes;
 	}
 }

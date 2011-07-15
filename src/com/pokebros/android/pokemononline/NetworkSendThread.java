@@ -1,14 +1,12 @@
 package com.pokebros.android.pokemononline;
 
-import java.io.ByteArrayOutputStream;
-
 public class NetworkSendThread implements Runnable {
 	
 	private PokeClientSocket socket;
-	private ByteArrayOutputStream bytes;
+	private Baos bytes;
 	private Command comm;
 	
-	public NetworkSendThread(PokeClientSocket s, ByteArrayOutputStream b, Command c) {
+	public NetworkSendThread(PokeClientSocket s, Baos b, Command c) {
 		socket = s;
 		if(!socket.isConnected())
 			socket.connect();
