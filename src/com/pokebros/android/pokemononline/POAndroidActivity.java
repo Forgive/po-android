@@ -12,31 +12,42 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class POAndroidActivity extends Activity {
-	//private NetworkService netServ = null;
+	private NetworkService netServ = null;
 	private ServiceConnection connection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
-			// netServ = 
-			((NetworkService.LocalBinder)service).getService();
+			netServ =	((NetworkService.LocalBinder)service).getService();
 			Toast.makeText(POAndroidActivity.this, "Service connected",
                     Toast.LENGTH_SHORT).show();
 		}
 		
 		public void onServiceDisconnected(ComponentName className) {
-			//netServ = null;
+			netServ = null;
 			Toast.makeText(POAndroidActivity.this, "Service disconnected",
 					Toast.LENGTH_SHORT).show();
 		}
 	};
+	
+	@Override
+	public void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		Toast.makeText(POAndroidActivity.this, "New Intent", Toast.LENGTH_SHORT);
+	}
 	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-
+        
+        startService(new Intent(this, NetworkService.class));
         bindService(new Intent(POAndroidActivity.this, 
         		NetworkService.class), connection, Context.BIND_AUTO_CREATE);
-        startService(new Intent(this, NetworkService.class));
+    }
+    
+    @Override
+    public void onDestroy() {
+    	unbindService(connection);
+    	super.onDestroy();
     }
 
     public void changeName(Message msg) {
