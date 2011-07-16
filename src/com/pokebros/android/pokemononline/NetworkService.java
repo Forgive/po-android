@@ -12,6 +12,8 @@ public class NetworkService extends Service {
 	private NotificationManager noteMan;
 	private final IBinder binder = new LocalBinder();
 	private int NOTIFICATION = 4356;
+	//private boolean bound = false;
+	
 	public class LocalBinder extends Binder {
 		NetworkService getService() {
 			return NetworkService.this;
@@ -21,11 +23,13 @@ public class NetworkService extends Service {
 	@Override
 	// This is called everytime someone binds to us
 	public IBinder onBind(Intent intent) {
+		//bound = true;
 		return binder;
 	}
 	
 	@Override
 	public boolean onUnbind(Intent intent) {
+		//bound = false;
 		super.onUnbind(intent);
 		return false; // Default, see android documentation
 	}

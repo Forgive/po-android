@@ -12,14 +12,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class POAndroidActivity extends Activity {
+	//private NetworkService netServ = null;
 	private ServiceConnection connection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
+			// netServ = 
 			((NetworkService.LocalBinder)service).getService();
 			Toast.makeText(POAndroidActivity.this, "Service connected",
                     Toast.LENGTH_SHORT).show();
 		}
 		
 		public void onServiceDisconnected(ComponentName className) {
+			//netServ = null;
 			Toast.makeText(POAndroidActivity.this, "Service disconnected",
 					Toast.LENGTH_SHORT).show();
 		}
