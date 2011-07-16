@@ -62,7 +62,7 @@ public class NetworkService extends Service {
         
         // The PendingIntent to launch our activity if the user selects this notification
         PendingIntent notificationIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, POAndroidActivity.class), Intent.FLAG_ACTIVITY_NEW_TASK);
+                new Intent(this, BattleActivity.class), Intent.FLAG_ACTIVITY_NEW_TASK);
         
         notification.setLatestEventInfo(this, "POAndroid", "Text", notificationIntent);
         
