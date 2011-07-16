@@ -4,7 +4,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
@@ -13,8 +12,6 @@ public class NetworkService extends Service {
 	private NotificationManager noteMan;
 	private final IBinder binder = new LocalBinder();
 	private int NOTIFICATION = 4356;
-	private boolean bound = false;
-	
 	public class LocalBinder extends Binder {
 		NetworkService getService() {
 			return NetworkService.this;
@@ -24,13 +21,11 @@ public class NetworkService extends Service {
 	@Override
 	// This is called everytime someone binds to us
 	public IBinder onBind(Intent intent) {
-		bound = true;
 		return binder;
 	}
 	
 	@Override
 	public boolean onUnbind(Intent intent) {
-		bound = false;
 		super.onUnbind(intent);
 		return false; // Default, see android documentation
 	}

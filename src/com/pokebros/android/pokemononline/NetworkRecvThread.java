@@ -3,8 +3,6 @@ package com.pokebros.android.pokemononline;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import android.os.Handler;
-
 enum Command {
     WhatAreYou, //= 0,
     WhoAreYou,
