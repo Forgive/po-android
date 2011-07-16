@@ -69,12 +69,10 @@ enum Command {
 
 public class NetworkRecvThread implements Runnable {
 	private PokeClientSocket socket;
-	private Handler handler;
 	private Bais msg;
 	
-	public NetworkRecvThread(PokeClientSocket s, Handler h) {
+	public NetworkRecvThread(PokeClientSocket s) {
 		socket = s;
-		handler = h;
 		if(!socket.isConnected())
 			socket.connect();
 	}
@@ -83,8 +81,6 @@ public class NetworkRecvThread implements Runnable {
 		while(true) {
 			msg = new Bais(socket.recvMessage().toByteArray());
 			handleMsg();
-			handler.sendMessage(handler.obtainMessage(0, "BROBRO"));
-					//handler.obtainMessage((int) baos.toByteArray()[2], baos));
 		}
 	}
 	
