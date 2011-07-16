@@ -11,18 +11,18 @@ import android.os.Message;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class POAndroidActivity extends Activity {
+public class BattleActivity extends Activity {
 	private NetworkService netServ = null;
 	private ServiceConnection connection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			netServ =	((NetworkService.LocalBinder)service).getService();
-			Toast.makeText(POAndroidActivity.this, "Service connected",
+			Toast.makeText(BattleActivity.this, "Service connected",
                     Toast.LENGTH_SHORT).show();
 		}
 		
 		public void onServiceDisconnected(ComponentName className) {
 			netServ = null;
-			Toast.makeText(POAndroidActivity.this, "Service disconnected",
+			Toast.makeText(BattleActivity.this, "Service disconnected",
 					Toast.LENGTH_SHORT).show();
 		}
 	};
@@ -30,7 +30,7 @@ public class POAndroidActivity extends Activity {
 	@Override
 	public void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
-		Toast.makeText(POAndroidActivity.this, "New Intent", Toast.LENGTH_SHORT);
+		Toast.makeText(BattleActivity.this, "New Intent", Toast.LENGTH_SHORT);
 	}
 	
     /** Called when the activity is first created. */
@@ -40,7 +40,7 @@ public class POAndroidActivity extends Activity {
         setContentView(R.layout.main);
         
         startService(new Intent(this, NetworkService.class));
-        bindService(new Intent(POAndroidActivity.this, 
+        bindService(new Intent(BattleActivity.this, 
         		NetworkService.class), connection, Context.BIND_AUTO_CREATE);
     }
     
