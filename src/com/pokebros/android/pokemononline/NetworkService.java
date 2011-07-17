@@ -22,13 +22,14 @@ public class NetworkService extends Service {
 	private Messenger messenger;
 	
 	Thread sThread, rThread;
-	PokeClientSocket socket = new PokeClientSocket("67.194.65.215", 5080);
+	PokeClientSocket socket = new PokeClientSocket("76.10.13.190", 5080);
 	private Bais msg;
 	
 	private Trainer trainer = new Trainer();
 	
 	private Hashtable<Integer, Channel> channels = new Hashtable<Integer, Channel>();
-
+	private Hashtable<Integer, Trainer> trainers = new Hashtable<Integer, Trainer>();
+	
 	public class LocalBinder extends Binder {
 		NetworkService getService() {
 			return NetworkService.this;
@@ -112,17 +113,17 @@ public class NetworkService extends Service {
 		if(ch != null) {
 			switch(c) {
 			case JoinChannel:
-				ch.addPlayer(msg.readInt());
+				//ch.addTrainer(msg.readInt(), new Trainer(msg));
 				break;
 			case ChannelMessage:
-				ch.printLine(msg.readQtString());
+				ch.printLine(msg.readQString());
 				break;
 			case HtmlChannel:
-				String htmlChannel = msg.readQtString();
+				String htmlChannel = msg.readQString();
 				System.out.println("Html Channel: " + htmlChannel);
 				break;
 			case LeaveChannel:
-				ch.removePlayer(msg.readInt());
+				ch.removeTrainer(msg.readInt());
 				break;
 			default:
 				break;
@@ -153,7 +154,7 @@ public class NetworkService extends Service {
 			ArrayList<String> list = new ArrayList<String>();
 			while(msg.available() != 0) {
 				msg.read();
-				list.add(msg.readQtString());
+				list.add(msg.readQString());
 			}
 			System.out.println(list.toString());
 			break;
@@ -176,7 +177,7 @@ public class NetworkService extends Service {
 			int numChannels = msg.readInt();
 			for(int k = 0; k < numChannels; k++) {
 				int chanID = msg.readInt();
-				channels.put(chanID, new Channel(chanID, msg.readQtString()));
+				channels.put(chanID, new Channel(chanID, msg.readQString()));
 			}
 			System.out.println(channels.toString());
 			break;
@@ -185,14 +186,15 @@ public class NetworkService extends Service {
 			int numPlayers = msg.readInt();
 			if(ch != null) {
 				for(int k = 0; k < numPlayers; k++) {
-					ch.addPlayer(msg.readInt());
+					int id = msg.readInt();
+					ch.addTrainer(trainers.get(id));
 				}
 			}
 			else
 				System.out.println("Received message for nonexistant channel");
 			break;
 		case HtmlMessage:
-			String htmlMessage = msg.readQtString();
+			String htmlMessage = msg.readQString();
 			System.out.println("Html Message: " + htmlMessage);
 			break;
 		/* Only sent when player is in a PM with you and logs out */
@@ -231,6 +233,14 @@ public class NetworkService extends Service {
 			bb.putInt(playerID);
 			bb.putString(pm);
 			socket.sendMessage(bb, Command.SendPM);
+			break;
+		case PlayersList:
+			while(msg.available() > 0) {
+				Trainer t = new Trainer(msg);
+				if(!trainers.containsKey(t.id))
+					trainers.put(t.id, t);
+			}
+			System.out.println("Trainer list: " + trainers.toString());
 			break;
 		default:
 			System.out.println("Unimplented message");

@@ -1,6 +1,6 @@
 package com.pokebros.android.pokemononline;
 
-import java.util.ArrayList;
+import java.util.Hashtable;
 
 public class Channel {
 	protected String name;
@@ -8,8 +8,7 @@ public class Channel {
 	protected int events = 0;
 	protected boolean isReadyToQuit = false;
 	
-
-	protected ArrayList<Integer> playerIDs = new ArrayList<Integer>();
+	protected Hashtable<Integer, Trainer> trainers = new Hashtable<Integer, Trainer>();
 	
 	public String toString() {
 		return name;
@@ -20,14 +19,17 @@ public class Channel {
 		name = n;
 	}
 	
-	public void addPlayer(int p) {
-		playerIDs.add(p);
-		System.out.println("Player " + p + " joined channel " + name);
+	public void addTrainer(Trainer t) {
+		if(t != null) {
+			trainers.put(t.id, t);
+			System.out.println("Player " + t.nick + " joined channel " + name);
+		}
+		else
+			System.out.println("Unknown player in channel " + name);
 	}
 	
-	public void removePlayer(int p) {
-		// ArrayList.remove(int) and ArrayList.remove(Object) are different functions
-		if(playerIDs.remove(new Integer(p)))
+	public void removeTrainer(int p) {
+		if(trainers.remove(new Integer(p)) != null)
 			System.out.println("Player " + p + " has left channel " + name);
 	}
 	

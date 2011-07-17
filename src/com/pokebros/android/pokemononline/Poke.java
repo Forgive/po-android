@@ -4,6 +4,11 @@ class UniqueID extends SerializeBytes {
 	protected short pokeNum;
 	protected byte subNum;
 	
+	public UniqueID(Bais msg) {
+		pokeNum = msg.readShort();
+		subNum = msg.readByte();
+	}
+	
 	public UniqueID() {
 			pokeNum = 1;
 			subNum = 0;
@@ -27,10 +32,29 @@ public class Poke extends SerializeBytes {
 	protected boolean shiny;
 	protected byte happiness;
 	protected byte level;
-	protected int[] moves;
-	protected byte[] DVs;
-	protected byte[] EVs;
+	protected int[] moves = new int[4];
+	protected byte[] DVs = new byte[6];
+	protected byte[] EVs = new byte[6];
+	
+	public Poke(Bais msg) {
+		uID = new UniqueID(msg);
+		nick = msg.readQString();
+		item = msg.readShort();
+		ability = msg.readShort();
+		nature = msg.readByte();
+		gender = msg.readByte();
+		shiny = msg.readBool();
+		happiness = msg.readByte();
+		level = msg.readByte();
 		
+		for(int i = 0; i < 4; i++)
+			moves[i] = msg.readInt();
+		for(int i = 0; i < 6; i++)
+			DVs[i] = msg.readByte();
+		for(int i = 0; i < 6; i++)
+			EVs[i] = msg.readByte();
+	}
+	
 	public Poke() {
 		uID = new UniqueID();
 		nick = "LOLZ";
@@ -41,14 +65,11 @@ public class Poke extends SerializeBytes {
 		shiny = true;
 		happiness = 127;
 		level = 100;
-		moves = new int[4];
 		moves[0] = 331;
 		moves[1] = 213;
 		moves[2] = 412;
 		moves[3] = 210;
-		DVs = new byte[6];
 		DVs[0] = DVs[1] = DVs[2] = DVs[3] = DVs[4] = DVs[5] = 31;
-		EVs = new byte[6];
 		EVs[0] = EVs[1] = EVs[2] = EVs[3] = EVs[4] = EVs[5] = 10;
 	}
 
