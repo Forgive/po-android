@@ -10,11 +10,16 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
+import android.widget.Toast;
 
 public class NetworkService extends Service {
 	private final IBinder binder = new LocalBinder();
 	private int NOTIFICATION = 4356;
 	private boolean bound = false;
+	private Messenger messenger;
 	
 	Thread sThread, rThread;
 	PokeClientSocket socket = new PokeClientSocket("67.194.65.215", 5080);
@@ -33,6 +38,14 @@ public class NetworkService extends Service {
 	@Override
 	// This is called every time someone binds to us
 	public IBinder onBind(Intent intent) {
+		messenger = (Messenger) intent.getExtras().get("Messenger");
+        Message message = Message.obtain();
+        message.obj = "BROBRO";
+        try {
+			messenger.send(message);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
 		bound = true;
 		return binder;
 	}

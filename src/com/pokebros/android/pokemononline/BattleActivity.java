@@ -6,13 +6,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.Messenger;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class BattleActivity extends Activity {
 	private NetworkService netServ = null;
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+                changeName(msg);
+        }
+    };
+    private Messenger messenger = new Messenger(handler);
 	private ServiceConnection connection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			netServ =	((NetworkService.LocalBinder)service).getService();
@@ -38,10 +47,11 @@ public class BattleActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        
+
         startService(new Intent(this, NetworkService.class));
-        bindService(new Intent(BattleActivity.this, 
-        		NetworkService.class), connection, Context.BIND_AUTO_CREATE);
+        Intent intent = new Intent(BattleActivity.this, NetworkService.class);
+        intent.putExtra("Messenger", messenger);
+        bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }
     
     @Override
