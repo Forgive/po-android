@@ -25,6 +25,7 @@ public class BattleActivity extends Activity {
 	private ServiceConnection connection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			netServ =	((NetworkService.LocalBinder)service).getService();
+			netServ.herp();
 			Toast.makeText(BattleActivity.this, "Service connected",
                     Toast.LENGTH_SHORT).show();
 		}

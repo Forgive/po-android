@@ -236,4 +236,7 @@ public class NetworkService extends Service {
 			System.out.println("Unimplented message");
 		}
 	}
+	protected void herp() {
+		System.out.println("HERP");
+	}
 }
