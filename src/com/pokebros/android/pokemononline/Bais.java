@@ -7,7 +7,7 @@ public class Bais extends ByteArrayInputStream {
 		super(b);
 	}
 	
-	public String readQtString() {
+	public String readQString() {
 		int len = readInt();
 		System.out.println("String length: " + len);
 		
@@ -48,5 +48,11 @@ public class Bais extends ByteArrayInputStream {
 		i |= ((read() & 0xff));
 		
 		return i;
+	}
+	
+	public boolean readBool() {
+		boolean ret = false;
+		if(read() == 1) ret = true;
+		return ret;
 	}
 }
