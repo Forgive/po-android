@@ -12,13 +12,12 @@ import android.os.Binder;
 import android.os.IBinder;
 
 public class NetworkService extends Service {
-	private NotificationManager noteMan;
 	private final IBinder binder = new LocalBinder();
 	private int NOTIFICATION = 4356;
 	private boolean bound = false;
 	
 	Thread sThread, rThread;
-	PokeClientSocket socket = new PokeClientSocket("76.10.13.190", 5080);
+	PokeClientSocket socket = new PokeClientSocket("67.194.65.215", 5080);
 	private Bais msg;
 	
 	private Trainer trainer = new Trainer();
@@ -41,8 +40,7 @@ public class NetworkService extends Service {
 	@Override
 	public boolean onUnbind(Intent intent) {
 		bound = false;
-		super.onUnbind(intent);
-		return false; // Default, see android documentation
+		return super.onUnbind(intent);
 	}
 	
 	@Override
@@ -72,7 +70,6 @@ public class NetworkService extends Service {
         	}
         });
         rThread.start();
-		noteMan = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		showNotification();
 	}
 	
@@ -80,12 +77,6 @@ public class NetworkService extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		super.onStartCommand(intent, flags, startId);
 		return START_STICKY;
-	}
-	
-	@Override
-	public void onDestroy() {
-		noteMan.cancel(NOTIFICATION);
-		super.onDestroy();
 	}
 	
     private void showNotification() {
@@ -96,19 +87,11 @@ public class NetworkService extends Service {
         
         // The PendingIntent to launch our activity if the user selects this notification
         PendingIntent notificationIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, BattleActivity.class), PendingIntent.FLAG_UPDATE_CURRENT+Intent.FLAG_ACTIVITY_NEW_TASK);
+                new Intent(this, BattleActivity.class), Intent.FLAG_ACTIVITY_NEW_TASK);
         
         notification.setLatestEventInfo(this, "POAndroid", "Text", notificationIntent);
-        //notification.contentIntent = notificationIntent;
-        
-        // Set the info for the views that show in the notification panel.
-/*        notification.setLatestEventInfo(this, "POAndroid_Label", // XXX should probably be in R.String
-                       text, contentIntent);*/
         
         this.startForeground(NOTIFICATION, notification);
-
-        // Send the notification.
-        //noteMan.notify(NOTIFICATION, notification);
     }
     
 	public void handleChannelMsg(Command c) {
