@@ -9,6 +9,10 @@ public class Baos extends ByteArrayOutputStream {
 		super();
 	}
 	
+	public Baos(int size) {
+		super(size);
+	}
+	
 	public void putInt(int i) {
 		byte[] bytes = new byte[4];
 		

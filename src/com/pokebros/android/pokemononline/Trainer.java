@@ -1,6 +1,6 @@
 package com.pokebros.android.pokemononline;
 
-class DummyQColor extends SerializeBytes {
+class DummyQColor extends Player {
 	protected byte spec;
 	protected short alpha;
 	protected short red;
@@ -29,9 +29,7 @@ class DummyQColor extends SerializeBytes {
 	}
 }
 
-public class Trainer extends SerializeBytes {
-	protected String nick;
-	protected String info;
+public class Trainer extends Player {
 	protected String loseMsg;
 	protected String winMsg;
 		
@@ -44,8 +42,7 @@ public class Trainer extends SerializeBytes {
 	protected DummyQColor nameColor;
 		
 	public Trainer() {
-			nick = "BROBRO";
-			info = "Sup Bro";
+			super();
 			loseMsg = "SHUCKS!";
 			winMsg = "YEAAAH!!!";
 			avatar = 72;
