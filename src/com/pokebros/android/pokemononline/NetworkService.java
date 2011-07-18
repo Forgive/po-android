@@ -3,6 +3,12 @@ package com.pokebros.android.pokemononline;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+import com.pokebros.android.pokemononline.battle.Battle;
+import com.pokebros.android.pokemononline.battle.BattleConf;
+import com.pokebros.android.pokemononline.battle.BattleTeam;
+import com.pokebros.android.pokemononline.player.FullPlayerInfo;
+import com.pokebros.android.pokemononline.player.PlayerInfo;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -25,10 +31,12 @@ public class NetworkService extends Service {
 	PokeClientSocket socket = new PokeClientSocket("76.10.13.190", 5080);
 	private Bais msg;
 	
-	private Trainer trainer = new Trainer();
+	private FullPlayerInfo meLoginPlayer = new FullPlayerInfo();
+	private PlayerInfo mePlayer = new PlayerInfo();
+	Battle battle;// = new Battle();
 	
 	private Hashtable<Integer, Channel> channels = new Hashtable<Integer, Channel>();
-	private Hashtable<Integer, Trainer> trainers = new Hashtable<Integer, Trainer>();
+	private Hashtable<Integer, PlayerInfo> players = new Hashtable<Integer, PlayerInfo>();
 	
 	public class LocalBinder extends Binder {
 		NetworkService getService() {
@@ -66,7 +74,7 @@ public class NetworkService extends Service {
 		// Sending messages no longer blocks, so there
 		// is no need to spawn a new thread.
 		socket.waitConnect();
-		socket.sendMessage(trainer.serializeBytes(), Command.Login);
+		socket.sendMessage(meLoginPlayer.serializeBytes(), Command.Login);
 		
 		// Polling the socket also no longer blocks, but we'll just
 		// throw it in its own thread until we think of something better
@@ -138,8 +146,8 @@ public class NetworkService extends Service {
 		 * a byte into a value in an enum.
 		 */
 		int i = msg.read();
-		System.out.println("Command ID: " + i);
 		Command c = Command.values()[i];
+		System.out.println("Received: " + c.toString());
 		switch(c) {
 		case BattleList:
 		case JoinChannel:
@@ -187,7 +195,7 @@ public class NetworkService extends Service {
 			if(ch != null) {
 				for(int k = 0; k < numPlayers; k++) {
 					int id = msg.readInt();
-					ch.addTrainer(trainers.get(id));
+					ch.addTrainer(players.get(id));
 				}
 			}
 			else
@@ -236,11 +244,36 @@ public class NetworkService extends Service {
 			break;
 		case PlayersList:
 			while(msg.available() > 0) {
-				Trainer t = new Trainer(msg);
-				if(!trainers.containsKey(t.id))
-					trainers.put(t.id, t);
+				PlayerInfo p = new PlayerInfo(msg);
+				if(!players.containsKey(p.id()))
+					players.put(p.id(), p);
 			}
-			System.out.println("Trainer list: " + trainers.toString());
+			System.out.println("Trainer list: " + players.toString());
+			break;
+		case BattleMessage:
+			msg.readInt(); // currently support only one battle, unneeded
+			msg.readInt(); // discard the size, unneeded 
+			battle.receiveCommand(msg);
+			break;
+		case EngageBattle:
+			int bID = msg.readInt();
+			int pID1 = msg.readInt();
+			int pID2 = msg.readInt();
+			// This is us!
+			if(pID1 == 0 || pID2 == 0) {
+				BattleConf conf = new BattleConf(msg);
+				BattleTeam team = new BattleTeam(msg);
+				// Start the battle
+				if(pID1 == 0) // we're the one who got challenged
+					battle = new Battle(players.get(pID2), mePlayer, 0);
+				else // we're the challenger
+					battle = new Battle(mePlayer, players.get(pID2), 0);
+				System.out.println("The battle between " + mePlayer.nick() + 
+						" and " + players.get(pID2).nick() + " has begun!");
+			}
+			break;
+		case Login:
+			mePlayer = new PlayerInfo(msg);
 			break;
 		default:
 			System.out.println("Unimplented message");

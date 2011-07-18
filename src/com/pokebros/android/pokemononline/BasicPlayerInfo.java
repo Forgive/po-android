@@ -1,10 +1,11 @@
 package com.pokebros.android.pokemononline;
 
-public class Player extends SerializeBytes {
+// This class represents players in the player list.
+public class BasicPlayerInfo extends SerializeBytes {
 	protected String nick;
 	protected String info;
 	
-	public Player() {
+	public BasicPlayerInfo() {
 		nick = "BROBRO";
 		info = "Sup Bro";
 	}

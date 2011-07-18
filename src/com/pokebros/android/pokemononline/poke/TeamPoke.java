@@ -1,28 +1,11 @@
-package com.pokebros.android.pokemononline;
+package com.pokebros.android.pokemononline.poke;
 
-class UniqueID extends SerializeBytes {
-	protected short pokeNum;
-	protected byte subNum;
-	
-	public UniqueID(Bais msg) {
-		pokeNum = msg.readShort();
-		subNum = msg.readByte();
-	}
-	
-	public UniqueID() {
-			pokeNum = 1;
-			subNum = 0;
-	}
-	
-	public Baos serializeBytes() {
-		Baos bytes = new Baos();
-		bytes.putShort(pokeNum);
-		bytes.write(subNum);
-		return bytes;
-	}
-}
+import com.pokebros.android.pokemononline.Bais;
+import com.pokebros.android.pokemononline.Baos;
+import com.pokebros.android.pokemononline.SerializeBytes;
 
-public class Poke extends SerializeBytes {
+// This class is how a poke is represented in the teambuilder.
+public class TeamPoke extends SerializeBytes {
 	protected UniqueID uID;
 	protected String nick;
 	protected short item;
@@ -36,7 +19,7 @@ public class Poke extends SerializeBytes {
 	protected byte[] DVs = new byte[6];
 	protected byte[] EVs = new byte[6];
 	
-	public Poke(Bais msg) {
+	public TeamPoke(Bais msg) {
 		uID = new UniqueID(msg);
 		nick = msg.readQString();
 		item = msg.readShort();
@@ -55,7 +38,7 @@ public class Poke extends SerializeBytes {
 			EVs[i] = msg.readByte();
 	}
 	
-	public Poke() {
+	public TeamPoke() {
 		uID = new UniqueID();
 		nick = "LOLZ";
 		item = 0;

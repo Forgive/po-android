@@ -1,16 +1,18 @@
 package com.pokebros.android.pokemononline;
 
+import com.pokebros.android.pokemononline.poke.TeamPoke;
+
 public class Team extends SerializeBytes {
 	protected byte gen = 5;
-	protected Poke[] pokes = new Poke[6];
+	protected TeamPoke[] pokes = new TeamPoke[6];
 	
 	public Team(Bais msg) {
 		gen = msg.readByte();
 		for(int i = 0; i < 6; i++)
-			pokes[i] = new Poke(msg);
+			pokes[i] = new TeamPoke(msg);
 	}
 	public Team() {
-			for(int i = 0; i < 6; i++) pokes[i] = new Poke();
+			for(int i = 0; i < 6; i++) pokes[i] = new TeamPoke();
 	}
 	
 	public Baos serializeBytes() {

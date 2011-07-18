@@ -2,13 +2,15 @@ package com.pokebros.android.pokemononline;
 
 import java.util.Hashtable;
 
+import com.pokebros.android.pokemononline.player.PlayerInfo;
+
 public class Channel {
 	protected String name;
 	protected int id;
 	protected int events = 0;
 	protected boolean isReadyToQuit = false;
 	
-	protected Hashtable<Integer, Trainer> trainers = new Hashtable<Integer, Trainer>();
+	protected Hashtable<Integer, PlayerInfo> players = new Hashtable<Integer, PlayerInfo>();
 	
 	public String toString() {
 		return name;
@@ -19,17 +21,17 @@ public class Channel {
 		name = n;
 	}
 	
-	public void addTrainer(Trainer t) {
-		if(t != null) {
-			trainers.put(t.id, t);
-			System.out.println("Player " + t.nick + " joined channel " + name);
+	public void addTrainer(PlayerInfo p) {
+		if(p != null) {
+			players.put(p.id(), p);
+			System.out.println("Player " + p.nick() + " joined channel " + name);
 		}
 		else
 			System.out.println("Unknown player in channel " + name);
 	}
 	
 	public void removeTrainer(int p) {
-		if(trainers.remove(new Integer(p)) != null)
+		if(players.remove(new Integer(p)) != null)
 			System.out.println("Player " + p + " has left channel " + name);
 	}
 	
