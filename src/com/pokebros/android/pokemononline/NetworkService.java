@@ -30,15 +30,17 @@ public class NetworkService extends Service {
 	
 	Thread sThread, rThread;
 	PokeClientSocket socket = null;
+	
 	private Bais msg;
 	
 	private FullPlayerInfo meLoginPlayer = new FullPlayerInfo();
 	private PlayerInfo mePlayer = new PlayerInfo();
-	Battle battle;// = new Battle();
+	protected Battle battle;// = new Battle();
 	
 	private Hashtable<Integer, Channel> channels = new Hashtable<Integer, Channel>();
 	private Hashtable<Integer, PlayerInfo> players = new Hashtable<Integer, PlayerInfo>();
 	
+	int bID = -1;
 	public class LocalBinder extends Binder {
 		NetworkService getService() {
 			return NetworkService.this;
@@ -135,7 +137,7 @@ public class NetworkService extends Service {
         
         this.startForeground(NOTIFICATION, notification);
     }
-    
+
 	public void handleChannelMsg(Command c) {
 		Channel ch = channels.get(msg.readInt());
 		if(ch != null) {
@@ -276,7 +278,7 @@ public class NetworkService extends Service {
 			battle.receiveCommand(msg);
 			break;
 		case EngageBattle:
-			int bID = msg.readInt();
+			bID = msg.readInt();
 			int pID1 = msg.readInt();
 			int pID2 = msg.readInt();
 			// This is us!
@@ -290,12 +292,6 @@ public class NetworkService extends Service {
 					battle = new Battle(mePlayer, players.get(pID2), 0);
 				System.out.println("The battle between " + mePlayer.nick() + 
 						" and " + players.get(pID2).nick() + " has begun!");
-				while(true) { // XXX quick hack to show battling in action
-					Baos bbb = new Baos();
-					bbb.putInt(bID);
-					bbb.putBaos(battle.battleChoice());
-					socket.sendMessage(bbb, Command.BattleMessage);
-				}
 			}
 			break;
 		case Login:

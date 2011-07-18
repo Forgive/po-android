@@ -71,10 +71,8 @@ public class BattlePoke extends SerializeBytes {
 			b.putShort(stats[i]);
 		for(int i = 0; i < 4; i++)
 			b.putBaos(moves[i]);
-		//b.putInt(6); // It's a QList, so need number of items
 		for(int i = 0; i < 6; i++)
 			b.write(EVs[i]);
-		//b.putInt(6);
 		for(int i = 0; i < 6; i++)
 			b.write(DVs[i]);
 		return b;
