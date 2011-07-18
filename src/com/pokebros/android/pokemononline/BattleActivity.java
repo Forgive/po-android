@@ -27,7 +27,8 @@ public class BattleActivity extends Activity {
 			netServ =	((NetworkService.LocalBinder)service).getService();
 			netServ.herp();
 			Bundle bundle = getIntent().getExtras();
-			netServ.connect(bundle.getString("ip"), bundle.getShort("port"));
+			if (bundle != null && bundle.containsKey("ip"))
+				netServ.connect(bundle.getString("ip"), bundle.getShort("port"));
 			Toast.makeText(BattleActivity.this, "Service connected",
                     Toast.LENGTH_SHORT).show();
 		}
