@@ -20,8 +20,12 @@ public class PokeClientSocket {
 	{	
 		try {
 			schan = SocketChannel.open();
-			schan.configureBlocking(false);
+			System.err.println("CONNECTING TO " + inIpAddr + " : " + inPortNum);
 			schan.connect(new InetSocketAddress(inIpAddr, inPortNum));
+			System.err.println("CONNECTED!");
+			schan.configureBlocking(false);
+			System.err.println("Blocked!");
+
 		} catch (IOException e) {	
 			System.exit(-1);
 		}
@@ -30,7 +34,7 @@ public class PokeClientSocket {
 	public boolean isConnected() { 
 		boolean ret = false;
 		try {
-			ret = schan.finishConnect(); 
+			ret = schan.finishConnect();
 		} catch (IOException e) {
 			System.exit(-1);
 		}
@@ -79,57 +83,62 @@ public class PokeClientSocket {
 		// item in the queue, returning null 
 		// if there is none.
 		// I know, great name, right?
+		
 		return msgs.poll();
 	}
 
-	public void recvMessagePoll() {
-		try {
-			currentData.clear();
-			dataLen = schan.read(currentData);
-			currentData.flip();
-			// Loop while there's still data in the buffer.
-			while(dataLen > 0) {
-				//System.out.println("dataLen: " + dataLen);
-				// If we're at the start of a new message,
-				// and the buffer has at least the size of the
-				// next message in it, start reading it in.
-				if(remaining == 0 && dataLen >= 2) {
-					remaining = currentData.getShort();
-					dataLen -= 2;
+	public void recvMessagePoll() throws IOException {
+		currentData.clear();
+		dataLen = schan.read(currentData);
+		currentData.flip();
+		// Loop while there's still data in the buffer.
+		while(dataLen > 0) {
+			//System.out.println("dataLen: " + dataLen);
+			// If we're at the start of a new message,
+			// and the buffer has at least the size of the
+			// next message in it, start reading it in.
+			if(remaining == 0 && dataLen >= 2) {
+				remaining = currentData.getShort();
+				dataLen -= 2;
 
-					/* Java has only signed data types. We get around
-					 * this by shifting the most significant bits 8 places left
-					 * and then OR'ing it with the 8 least significant bits.
-					 * We need to AND the LSBs with 0xff to get rid of the
-					 * 1's of two's complement (sign is preserved when casting).
-					 */
-					//System.out.println("Length: " + remaining);
-				}
-				// There's enough data in the buffer to finish the current message.
-				if(remaining <= dataLen) {
-					byte[] bytes = new byte[remaining];
-					currentData.get(bytes, 0, remaining);
-					thisMsg.write(bytes);
-					
-					// Add the read in message to the queue of
-					// unprocessed messages.
-					msgs.add(thisMsg);
-					thisMsg = new Baos();
-					dataLen -= remaining;
-					remaining = 0;
-				}
-				// Otherwise, read what we can and put it into
-				// the incomplete message.
-				else {
-					byte[] bytes = new byte[dataLen];
-					currentData.get(bytes, 0, dataLen);
-					thisMsg.write(bytes);
-					remaining -= dataLen;
-					dataLen = 0;
-				}
+				/* Java has only signed data types. We get around
+				 * this by shifting the most significant bits 8 places left
+				 * and then OR'ing it with the 8 least significant bits.
+				 * We need to AND the LSBs with 0xff to get rid of the
+				 * 1's of two's complement (sign is preserved when casting).
+				 */
+				//System.out.println("Length: " + remaining);
 			}
-		}  catch (Exception e) {
-			System.out.println("Caught IOException Reading From Socket Stream!");
+			// There's enough data in the buffer to finish the current message.
+			if(remaining <= dataLen) {
+				byte[] bytes = new byte[remaining];
+				currentData.get(bytes, 0, remaining);
+				thisMsg.write(bytes);
+
+				// Add the read in message to the queue of
+				// unprocessed messages.
+				msgs.add(thisMsg);
+				thisMsg = new Baos();
+				dataLen -= remaining;
+				remaining = 0;
+			}
+			// Otherwise, read what we can and put it into
+			// the incomplete message.
+			else {
+				byte[] bytes = new byte[dataLen];
+				currentData.get(bytes, 0, dataLen);
+				thisMsg.write(bytes);
+				remaining -= dataLen;
+				dataLen = 0;
+			}
+		}
+	}
+
+	public void close() {
+		try {
+			schan.close();
+		} catch (IOException e) {
+			// TODO Should this be thrown or caught?
 		}
 	}
 }

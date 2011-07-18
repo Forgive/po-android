@@ -1,5 +1,6 @@
 package com.pokebros.android.pokemononline;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
@@ -28,7 +29,7 @@ public class NetworkService extends Service {
 	private Messenger messenger;
 	
 	Thread sThread, rThread;
-	PokeClientSocket socket = new PokeClientSocket("76.10.13.190", 5080);
+	PokeClientSocket socket = null;
 	private Bais msg;
 	
 	private FullPlayerInfo meLoginPlayer = new FullPlayerInfo();
@@ -54,6 +55,8 @@ public class NetworkService extends Service {
 			messenger.send(message);
 		} catch (RemoteException e) {
 			e.printStackTrace();
+		} catch (RuntimeException e) {
+			e.printStackTrace(); 	
 		}
 		bound = true;
 		return binder;
@@ -69,11 +72,16 @@ public class NetworkService extends Service {
 	// This is called once
 	public void onCreate() {
 		super.onCreate();
+	}
+	
+	public void connect(String ip, int port) {
+		socket = new PokeClientSocket(ip, port);
         /*sThread = new Thread(new NetworkSendThread(socket, trainer.serializeBytes(), Command.Login));
         sThread.start();*/
 		// Sending messages no longer blocks, so there
 		// is no need to spawn a new thread.
 		socket.waitConnect();
+
 		socket.sendMessage(meLoginPlayer.serializeBytes(), Command.Login);
 		
 		// Polling the socket also no longer blocks, but we'll just
@@ -82,17 +90,29 @@ public class NetworkService extends Service {
 		rThread = new Thread(new Runnable() {
         	public void run() {
         		while(true) {
-        			socket.recvMessagePoll();
+        			try {
+        				socket.recvMessagePoll();
+        			} catch (IOException e) {
+        				// Disconnected
+        				break;
+        			}
         			Baos tmp = socket.getMsg();
         			if(tmp != null) {
         				msg = new Bais(tmp.toByteArray());
         				handleMsg();
+        			} else {
+        				// don't use all CPU when no message
+        				try {
+							Thread.sleep(10);
+						} catch (InterruptedException e) {
+							// no action
+						}
         			}
         		}
         	}
         });
         rThread.start();
-		showNotification();
+        showNotification();
 	}
 	
 	@Override

@@ -1,166 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Container -->
-<LinearLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
-	android:background="#FFFFFF"
-	>
-	
-	<!-- START Player A Title -->
-	<LinearLayout
-		android:orientation="horizontal"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:layout_weight="0"
-		android:layout_marginTop="3dp"
-		android:layout_marginBottom="3dp"
-		android:layout_marginLeft="4dp"
-		android:layout_marginRight="4dp"
-		>
-		
-		<TextView
-			android:text="Timer A"
-			android:layout_width="fill_parent"
-			android:layout_height="fill_parent"
-			android:layout_weight="2"
-			android:textColor="#000000"
-			android:background="@drawable/battle_border"
-			android:gravity="center"
-		/>
-		<TextView
-			android:text="Name A"
-			android:layout_width="fill_parent"
-			android:layout_height="fill_parent"
-			android:layout_weight="1"
-			android:textColor="#000000"
-			android:gravity="right|center_vertical"
-		/>
-		
-	</LinearLayout>
-	<!-- END Player A Title -->
-	
-	<!-- START Battle Screen -->
-<!-- 	<include -->
-<!-- 		layout="@layout/battle_screen" -->
-<!-- 		android:layout_width="wrap_content" -->
-<!-- 		android:layout_height="wrap_content" -->
-<!-- 		android:layout_weight="8" -->
-<!-- 		> -->
-<!-- 	</include> -->
-	<TextView
-		android:text="Battle Screen"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:layout_weight="8"
-		android:textColor="#000000"
-		android:background="@drawable/battle_border"
-		android:gravity="center"
-		android:layout_marginTop="0dp"
-		android:layout_marginBottom="3dp"
-		android:layout_marginLeft="4dp"
-		android:layout_marginRight="4dp"
-	/>
-	<!-- END Battle Screen -->
-	
-	<!-- START Player B Title -->
-	<LinearLayout
-		android:orientation="horizontal"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:layout_weight="0"
-		android:layout_marginTop="0dp"
-		android:layout_marginBottom="3dp"
-		android:layout_marginLeft="4dp"
-		android:layout_marginRight="4dp"
-		>
-		
-		<TextView
-			android:id="@+id/nameA"
-			android:text="Name B"
-			android:layout_width="fill_parent"
-			android:layout_height="fill_parent"
-			android:layout_weight="1"
-			android:textColor="#000000"
-			android:gravity="left|center_vertical"
-		/>
-		<TextView
-			android:text="Timer B"
-			android:layout_width="fill_parent"
-			android:layout_height="fill_parent"
-			android:layout_weight="2"
-			android:textColor="#000000"
-			android:background="@drawable/battle_border"
-			android:gravity="center"
-		/>
-		
-	</LinearLayout>
-	<!-- END Player B Title -->
-	
-	<!-- START Info Window -->
-	<TextView
-		android:text="Info Window"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:layout_weight="4"
-		android:textColor="#000000"
-		android:background="@drawable/battle_border"
-		android:layout_marginTop="0dp"
-		android:layout_marginBottom="3dp"
-		android:layout_marginLeft="4dp"
-		android:layout_marginRight="4dp"
-	/>
-	<!-- START Info Window -->
-	
-	<!-- START Action Buttons -->
-	<LinearLayout
-		android:orientation="horizontal"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:layout_weight="1"
-		>
-		
-		<Button
-			android:text="Attack 1"
-			android:layout_width="fill_parent"
-			android:layout_height="fill_parent"
-			android:layout_weight="1"
-			android:gravity="center"
-		/>
-		<Button
-			android:text="Attack 2"
-			android:layout_width="fill_parent"
-			android:layout_height="fill_parent"
-			android:layout_weight="1"
-			android:gravity="center"
-		/>
-		
-	</LinearLayout>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+<TextView android:id="@+id/textView1" android:textAppearance="?android:attr/textAppearanceLarge" android:layout_height="wrap_content" android:text="@string/connect" android:layout_width="wrap_content"></TextView>
+<TextView android:layout_height="wrap_content" android:text="@string/inputip" android:layout_width="fill_parent"></TextView>
+<EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/ipedit">
+</EditText>
+<TextView android:id="@+id/textView2" android:layout_height="wrap_content" android:text="@string/inputport" android:layout_width="wrap_content"></TextView>
+<EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/portedit"></EditText>
+<Button android:text="@string/connect" android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/connectbutton"></Button>
+<TextView android:id="@+id/packettype" android:layout_height="wrap_content" android:layout_width="wrap_content"></TextView>
+<ListView android:layout_height="wrap_content"
+          android:layout_width="fill_parent" 
+          android:id="@+id/serverlisting"></ListView>
 
-	<LinearLayout
-		android:orientation="horizontal"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:layout_weight="1"
-		>
-		
-		<Button
-			android:text="Attack 3"
-			android:layout_width="fill_parent"
-			android:layout_height="fill_parent"
-			android:layout_weight="1"
-			android:gravity="center"
-		/>
-		<Button
-			android:text="Attack 4"
-			android:layout_width="fill_parent"
-			android:layout_height="fill_parent"
-			android:layout_weight="1"
-			android:gravity="center"
-		/>
-		
-	</LinearLayout>
-	<!-- END Action Buttons -->
-	
 </LinearLayout>

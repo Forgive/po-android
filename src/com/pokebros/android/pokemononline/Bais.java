@@ -9,11 +9,17 @@ public class Bais extends ByteArrayInputStream {
 	
 	public String readQString() {
 		int len = readInt();
-		//System.out.println("String length: " + len);
+		/*
+		 * QString has a special value of 0xFFFFFFFF
+		 * if it's NULL, here empty string will do
+		 */
+		if (len < 0) {
+			return "";
+		}
 		
 		/* Yeah, I know, everything in Java is signed.
-		 * If you're sending strings too long to fit in
-		 * an unsigned int, may God help you.
+		 * Big enough number would turn into a negative size.
+		 * Luckily most bytes in a packet is 65635 in PO protocol.
 		 */
 		byte[] bytes = new byte[len];
 		read(bytes, 0, len);
@@ -41,13 +47,17 @@ public class Bais extends ByteArrayInputStream {
 	}
 	
 	public int readInt() {
-		int i = 0;
+		// I changed this because it wasn't working,
+		// please fix it if you want the faster version again
+		// -Lamperi
+		return read()*256*256*256 + read()*256*256 + read()*256 + read();
+		/*int i = 0;
 		i |= (read() << 24);
 		i |= ((read() & 0xff0000)  << 16);
 		i |= ((read() & 0xff00) << 8);
 		i |= ((read() & 0xff));
 		
-		return i;
+		return i;*/
 	}
 	
 	public boolean readBool() {

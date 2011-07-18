@@ -26,6 +26,9 @@ public class BattleActivity extends Activity {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			netServ =	((NetworkService.LocalBinder)service).getService();
 			netServ.herp();
+			Bundle bundle = getIntent().getExtras();
+			System.err.println("BattleActivity: Connecting to " + bundle.getString("ip")+ ":" + bundle.getShort("port"));
+			netServ.connect(bundle.getString("ip"), bundle.getShort("port"));
 			Toast.makeText(BattleActivity.this, "Service connected",
                     Toast.LENGTH_SHORT).show();
 		}
@@ -47,12 +50,13 @@ public class BattleActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        setContentView(R.layout.battle);
 
-        startService(new Intent(this, NetworkService.class));
         Intent intent = new Intent(BattleActivity.this, NetworkService.class);
         intent.putExtra("Messenger", messenger);
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        startService(intent);//new Intent(this, NetworkService.class));
+
     }
     
     @Override
@@ -62,7 +66,9 @@ public class BattleActivity extends Activity {
     }
 
     public void changeName(Message msg) {
-    	TextView myView = (TextView) findViewById(R.id.nameA);
-        myView.setText(msg.obj.toString());
+    	if (msg != null && msg.obj != null) {
+    		TextView myView = (TextView) findViewById(R.id.nameA);
+    		myView.setText(msg.obj.toString());
+    	}
     }
 }
