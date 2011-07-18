@@ -20,12 +20,8 @@ public class PokeClientSocket {
 	{	
 		try {
 			schan = SocketChannel.open();
-			System.err.println("CONNECTING TO " + inIpAddr + " : " + inPortNum);
 			schan.connect(new InetSocketAddress(inIpAddr, inPortNum));
-			System.err.println("CONNECTED!");
 			schan.configureBlocking(false);
-			System.err.println("Blocked!");
-
 		} catch (IOException e) {	
 			System.exit(-1);
 		}
