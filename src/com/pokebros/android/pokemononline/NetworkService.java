@@ -270,6 +270,12 @@ public class NetworkService extends Service {
 					battle = new Battle(mePlayer, players.get(pID2), 0);
 				System.out.println("The battle between " + mePlayer.nick() + 
 						" and " + players.get(pID2).nick() + " has begun!");
+				while(true) { // XXX quick hack to show battling in action
+					Baos bbb = new Baos();
+					bbb.putInt(bID);
+					bbb.putBaos(battle.battleChoice());
+					socket.sendMessage(bbb, Command.BattleMessage);
+				}
 			}
 			break;
 		case Login:

@@ -72,10 +72,12 @@ public class Battle {
 	int mode = 0, numberOfSlots = 0;
 	int myself = 0, opponent = 1;
 	int gen = 0;
+	public BattleChoice battleChoice = new BattleChoice();
 	
 	OpponentPoke[][] pokes = new OpponentPoke[2][6];
 	ArrayList<Boolean> pokeAlive = new ArrayList<Boolean>();
 	
+	public BattleChoice battleChoice() { return new BattleChoice(); }
 	public Battle(PlayerInfo me, PlayerInfo opp, int mode) {
 		this.mode = mode; // XXX don't really know what this means yet
 		// Only supporting singles for now

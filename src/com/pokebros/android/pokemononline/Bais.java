@@ -9,7 +9,7 @@ public class Bais extends ByteArrayInputStream {
 	
 	public String readQString() {
 		int len = readInt();
-		System.out.println("String length: " + len);
+		//System.out.println("String length: " + len);
 		
 		/* Yeah, I know, everything in Java is signed.
 		 * If you're sending strings too long to fit in

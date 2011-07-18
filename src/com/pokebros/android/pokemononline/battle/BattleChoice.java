@@ -1,5 +1,7 @@
 package com.pokebros.android.pokemononline.battle;
 
+import java.util.Random;
+
 import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
 import com.pokebros.android.pokemononline.SerializeBytes;
@@ -28,6 +30,12 @@ class CancelChoice extends Choice {
 class AttackChoice extends Choice {
 	byte attackSlot;
 	byte attackTarget;
+	
+	public AttackChoice() {
+		Random r = new Random();
+		attackSlot = (byte)r.nextInt(4);
+		attackTarget = 0;
+	}
 	
 	public AttackChoice(Bais msg) {
 		attackSlot = msg.readByte();
@@ -99,6 +107,13 @@ public class BattleChoice extends SerializeBytes {
 	protected byte playerSlot;
 	protected Choice choice;
 	ChoiceType choiceType;
+	
+	public BattleChoice() {
+		playerSlot = 1;
+		type = (byte)ChoiceType.AttackType.ordinal();
+		choice = new AttackChoice();
+		choiceType = ChoiceType.AttackType;
+	}
 	
 	public BattleChoice(Bais msg) {
 		playerSlot = msg.readByte();

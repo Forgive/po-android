@@ -89,7 +89,7 @@ public class PokeClientSocket {
 			currentData.flip();
 			// Loop while there's still data in the buffer.
 			while(dataLen > 0) {
-				System.out.println("dataLen: " + dataLen);
+				//System.out.println("dataLen: " + dataLen);
 				// If we're at the start of a new message,
 				// and the buffer has at least the size of the
 				// next message in it, start reading it in.
@@ -103,7 +103,7 @@ public class PokeClientSocket {
 					 * We need to AND the LSBs with 0xff to get rid of the
 					 * 1's of two's complement (sign is preserved when casting).
 					 */
-					System.out.println("Length: " + remaining);
+					//System.out.println("Length: " + remaining);
 				}
 				// There's enough data in the buffer to finish the current message.
 				if(remaining <= dataLen) {
