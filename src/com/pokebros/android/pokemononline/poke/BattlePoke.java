@@ -23,7 +23,7 @@ public class BattlePoke extends SerializeBytes {
 	boolean shiny = false;
 	
 	short[] stats = new short[5];
-	BattleMove[] moves = new BattleMove[4];
+	public BattleMove[] moves = new BattleMove[4];
 	
 	int[] DVs = new int[6];
 	int[] EVs = new int[6];

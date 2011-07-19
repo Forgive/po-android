@@ -5,8 +5,9 @@ import com.pokebros.android.pokemononline.Baos;
 import com.pokebros.android.pokemononline.SerializeBytes;
 import com.pokebros.android.pokemononline.Team;
 
+// Player as represented in the teambuilder.
 public class PlayerTeam extends SerializeBytes {
-	protected String nick = "BROLOLZ";
+	protected String nick = "BROLOLZHAH";
 	protected String info = "SUP";
 	protected String loseMsg = "SHUCKS!";
 	protected String winMsg = "YEEEAAAAHH!!!";

@@ -25,12 +25,15 @@ public class Battle {
 	int gen = 0;
 	int bID = 0;
 	
+	BattleTeam myTeam;
+	
 	OpponentPoke[][] pokes = new OpponentPoke[2][6];
 	ArrayList<Boolean> pokeAlive = new ArrayList<Boolean>();
 	
 	public Battle(BattleConf conf, BattleTeam team, PlayerInfo p1, PlayerInfo p2, int meID, int bID) {
 		mode = conf.mode; // singles, doubles, triples
 		this.bID = bID;
+		myTeam = team;
 		// Only supporting singles for now
 		numberOfSlots = 2;
 		players[0] = p1;
@@ -58,6 +61,15 @@ public class Battle {
 		return pokes[spot % 2][spot / 2];
 	}
 	
+	public ArrayList<String> myMoves(int n) {
+		ArrayList<String> moves = new ArrayList<String>();
+		for(int i = 0; i < 4; i++) {
+			short moveNum = myTeam.pokes[n].moves[i].num;
+			String moveName = MoveName.values()[moveNum].toString();
+			moves.add(moveName.replaceAll("([A-Z])", " $1"));
+		}
+		return moves;
+	}
 	public Baos constructAttack(byte attack) {
 		Baos b = new Baos();
 		b.putInt(bID);

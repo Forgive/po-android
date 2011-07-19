@@ -1,5 +1,7 @@
 package com.pokebros.android.pokemononline;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -20,6 +22,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class BattleActivity extends Activity {
+	Button[] attack = new Button[4];
+	
 	private NetworkService netServ = null;
     private Handler handler = new Handler() {
         @Override
@@ -34,6 +38,10 @@ public class BattleActivity extends Activity {
 			netServ.herp();
 			Toast.makeText(BattleActivity.this, "Service connected",
                     Toast.LENGTH_SHORT).show();
+			
+	        ArrayList<String> moves = netServ.battle.myMoves(0);
+	        for(int i = 0; i < 4; i++)
+	        	attack[i].setText(moves.get(i));
 		}
 		
 		public void onServiceDisconnected(ComponentName className) {
@@ -62,15 +70,14 @@ public class BattleActivity extends Activity {
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
         //startService(intent);//new Intent(this, NetworkService.class));
         //Capture out button from layout
-        Button attack1 = (Button)findViewById(R.id.attack1);
-        Button attack2 = (Button)findViewById(R.id.attack2);
-        Button attack3 = (Button)findViewById(R.id.attack3);
-        Button attack4 = (Button)findViewById(R.id.attack4);
+        attack[0] = (Button)findViewById(R.id.attack1);
+        attack[1] = (Button)findViewById(R.id.attack2);
+        attack[2] = (Button)findViewById(R.id.attack3);
+        attack[3] = (Button)findViewById(R.id.attack4);
+        
         //Register the onCLick listener with the implementation above
-        attack1.setOnClickListener(battleListener);
-        attack2.setOnClickListener(battleListener);
-        attack3.setOnClickListener(battleListener);
-        attack4.setOnClickListener(battleListener);
+        for(int i = 0; i < 4; i++)
+        	attack[i].setOnClickListener(battleListener);
     }
     
     @Override
