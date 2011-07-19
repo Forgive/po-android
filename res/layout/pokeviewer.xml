@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent" >
+    <TableLayout android:id="@+id/tableLayout1" android:layout_height="fill_parent" android:layout_width="fill_parent">
+        <TableRow android:id="@+id/tableRow1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/battle_border">
+            <ImageView android:layout_height="wrap_content" android:layout_width="wrap_content" android:src="@drawable/icon" android:id="@+id/imageView1"></ImageView>
+            <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout1" android:orientation="vertical" android:layout_width="wrap_content">
+                <TextView android:layout_height="wrap_content" android:text="pokename1" android:layout_width="wrap_content" android:id="@+id/pokename1"></TextView>
+                <TextView android:layout_height="wrap_content" android:text="@string/notinbattle" android:layout_width="wrap_content" android:id="@+id/hp1"></TextView>
+            </LinearLayout>
+        </TableRow>
+        <TableRow android:id="@+id/tableRow2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/battle_border">
+            <ImageView android:layout_height="wrap_content" android:layout_width="wrap_content" android:src="@drawable/icon" android:id="@+id/imageView2"></ImageView>
+            <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout2" android:orientation="vertical" android:layout_width="wrap_content">
+                <TextView android:layout_height="wrap_content" android:text="pokename2" android:layout_width="wrap_content" android:id="@+id/pokename2"></TextView>
+                <TextView android:layout_height="wrap_content" android:text="@string/app_name" android:layout_width="wrap_content" android:id="@+id/hp2"></TextView>
+            </LinearLayout>
+        </TableRow>
+        <TableRow android:id="@+id/tableRow3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/battle_border">
+            <ImageView android:layout_height="wrap_content" android:layout_width="wrap_content" android:src="@drawable/icon" android:id="@+id/imageView3"></ImageView>
+            <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout3" android:orientation="vertical" android:layout_width="wrap_content">
+                <TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="pokename3" android:id="@+id/pokename3"></TextView>
+                <TextView android:layout_height="wrap_content" android:text="@string/tobattlescreen" android:layout_width="wrap_content" android:id="@+id/hp3"></TextView>
+            </LinearLayout>
+        </TableRow>
+        <TableRow android:id="@+id/tableRow4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/battle_border">
+            <ImageView android:layout_height="wrap_content" android:layout_width="wrap_content" android:src="@drawable/icon" android:id="@+id/imageView4"></ImageView>
+            <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout4" android:orientation="vertical" android:layout_width="wrap_content">
+                <TextView android:layout_height="wrap_content" android:text="pokename4" android:layout_width="wrap_content" android:id="@+id/pokename4"></TextView>
+                <TextView android:layout_height="wrap_content" android:text="@string/viewpokemon" android:layout_width="wrap_content" android:id="@+id/hp4"></TextView>
+            </LinearLayout>
+        </TableRow>
+        <TableRow android:id="@+id/tableRow5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/battle_border">
+            <ImageView android:layout_height="wrap_content" android:layout_width="wrap_content" android:src="@drawable/icon" android:id="@+id/imageView5"></ImageView>
+            <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout5" android:orientation="vertical" android:layout_width="wrap_content">
+                <TextView android:layout_height="wrap_content" android:text="pokename5" android:layout_width="wrap_content" android:id="@+id/pokename5"></TextView>
+                <TextView android:layout_height="wrap_content" android:text="@string/inputip" android:layout_width="wrap_content" android:id="@+id/hp5"></TextView>
+            </LinearLayout>
+        </TableRow>
+        <TableRow android:id="@+id/tableRow6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/battle_border">
+            <ImageView android:layout_height="wrap_content" android:layout_width="wrap_content" android:src="@drawable/icon" android:id="@+id/imageView6"></ImageView>
+            <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout6" android:orientation="vertical" android:layout_width="wrap_content">
+                <TextView android:layout_height="wrap_content" android:text="pokename6" android:layout_width="wrap_content" android:id="@+id/pokename6"></TextView>
+                <TextView android:layout_height="wrap_content" android:text="@string/choose" android:layout_width="wrap_content" android:id="@+id/hp6"></TextView>
+            </LinearLayout>
+        </TableRow>
+    </TableLayout>
+    
+</LinearLayout>

@@ -42,13 +42,6 @@
 	<!-- END Player A Title -->
 	
 	<!-- START Battle Screen -->
-<!-- 	<include -->
-<!-- 		layout="@layout/battle_screen" -->
-<!-- 		android:layout_width="wrap_content" -->
-<!-- 		android:layout_height="wrap_content" -->
-<!-- 		android:layout_weight="8" -->
-<!-- 		> -->
-<!-- 	</include> -->
 	<TextView
 		android:text="Battle Screen"
 		android:layout_width="fill_parent"
