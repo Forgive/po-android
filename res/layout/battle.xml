@@ -28,7 +28,7 @@
 			android:textColor="#000000"
 			android:background="@drawable/battle_border"
 			android:gravity="center"
-		/>
+		android:id="@+id/timerA"/>
 		<TextView
 			android:text="Name A"
 			android:layout_width="fill_parent"
@@ -36,7 +36,7 @@
 			android:layout_weight="1"
 			android:textColor="#000000"
 			android:gravity="right|center_vertical"
-		/>
+		android:id="@+id/nameA"/>
 		
 	</LinearLayout>
 	<!-- END Player A Title -->
@@ -61,7 +61,7 @@
 		android:layout_marginBottom="3dp"
 		android:layout_marginLeft="4dp"
 		android:layout_marginRight="4dp"
-	/>
+	android:id="@+id/battleScreen"/>
 	<!-- END Battle Screen -->
 	
 	<!-- START Player B Title -->
@@ -77,14 +77,13 @@
 		>
 		
 		<TextView
-			android:id="@+id/nameA"
 			android:text="Name B"
 			android:layout_width="fill_parent"
 			android:layout_height="fill_parent"
 			android:layout_weight="1"
 			android:textColor="#000000"
 			android:gravity="left|center_vertical"
-		/>
+		android:id="@+id/nameB"/>
 		<TextView
 			android:text="Timer B"
 			android:layout_width="fill_parent"
@@ -93,7 +92,7 @@
 			android:textColor="#000000"
 			android:background="@drawable/battle_border"
 			android:gravity="center"
-		/>
+		android:id="@+id/timerB"/>
 		
 	</LinearLayout>
 	<!-- END Player B Title -->
@@ -110,7 +109,7 @@
 		android:layout_marginBottom="3dp"
 		android:layout_marginLeft="4dp"
 		android:layout_marginRight="4dp"
-	/>
+	android:id="@+id/infoWindow"/>
 	<!-- START Info Window -->
 	
 	<!-- START Action Buttons -->
@@ -127,14 +126,14 @@
 			android:layout_height="fill_parent"
 			android:layout_weight="1"
 			android:gravity="center"
-		/>
+		android:id="@+id/attack1"/>
 		<Button
 			android:text="Attack 2"
 			android:layout_width="fill_parent"
 			android:layout_height="fill_parent"
 			android:layout_weight="1"
 			android:gravity="center"
-		/>
+		android:id="@+id/attack2"/>
 		
 	</LinearLayout>
 
@@ -151,14 +150,14 @@
 			android:layout_height="fill_parent"
 			android:layout_weight="1"
 			android:gravity="center"
-		/>
+		android:id="@+id/attack3"/>
 		<Button
 			android:text="Attack 4"
 			android:layout_width="fill_parent"
 			android:layout_height="fill_parent"
 			android:layout_weight="1"
 			android:gravity="center"
-		/>
+		android:id="@+id/attack4"/>
 		
 	</LinearLayout>
 	<!-- END Action Buttons -->

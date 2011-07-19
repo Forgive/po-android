@@ -10,6 +10,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,8 +56,14 @@ public class BattleActivity extends Activity {
         intent.putExtra("Messenger", messenger);
         intent.putExtra("Type", "battle");
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
-//        startService(intent);//new Intent(this, NetworkService.class));
-
+        //startService(intent);//new Intent(this, NetworkService.class));
+        //Capture out button from layout
+        Button attack1 = (Button)findViewById(R.id.attack1);
+        Button attack2 = (Button)findViewById(R.id.attack2);
+        //Register the onCLick listener with the implementation above
+        attack1.setOnClickListener(battleListener);
+        attack2.setOnClickListener(battleListener);
+        
     }
     
     @Override
@@ -69,4 +78,16 @@ public class BattleActivity extends Activity {
     		myView.setText(msg.obj.toString());
     	}
     }
+    
+    public OnClickListener battleListener = new OnClickListener() {
+    	public void onClick(View v) {
+    		//attack!!
+    		if(v == findViewById(R.id.attack1)){
+    		netServ.socket.sendMessage(netServ.battle.constructAttack((byte)0), Command.BattleMessage);
+    		}
+    		else if(v == findViewById(R.id.attack2)){
+    			netServ.socket.sendMessage(netServ.battle.constructAttack((byte)1), Command.BattleMessage);
+    		}
+    	}
+    };
 }
