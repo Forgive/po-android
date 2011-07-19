@@ -11,7 +11,11 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -38,30 +42,13 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
          
 		ip = (EditText)RegistryActivity.this.findViewById(R.id.ipedit);
 		port = (EditText)RegistryActivity.this.findViewById(R.id.portedit);
-
-        Button button = (Button)findViewById(R.id.connectbutton);
-        button.setOnClickListener(new View.OnClickListener() {
-			
-			public void onClick(View view) {
-				short portVal = -1;
-				try {
-					portVal = Short.parseShort(port.getText().toString());
-				} catch(NumberFormatException e) {
-					// No need to act
-				}
-				if (portVal < 1 || portVal > 65535) {
-					// TODO: R.string
-					Toast.makeText(RegistryActivity.this, "Invalid value for port", Toast.LENGTH_LONG);
-        			return;
-				}
-
-				Intent intent = new Intent(RegistryActivity.this, NetworkService.class);
-				intent.putExtra("ip", ip.getText().toString());
-				intent.putExtra("port", portVal);
-				startService(intent);
-				startActivity(new Intent(RegistryActivity.this, ChatActivity.class));
-			}
-		});
+		
+		//Capture out button from layout
+        Button conbutton = (Button)findViewById(R.id.connectbutton);
+        Button importbutton = (Button)findViewById(R.id.importteambutton);
+        //Register onClick listener
+        conbutton.setOnClickListener(registryListener);
+        importbutton.setOnClickListener(registryListener);
         
         ListView servers = (ListView)findViewById(R.id.serverlisting);
         adapter = new ServerListAdapter(this, R.id.serverlisting);
@@ -75,6 +62,8 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 				port.setText(String.valueOf(server.port));
 			}        	
 		});
+        
+        
         servers.setOnItemLongClickListener(new OnItemLongClickListener() {
 
 			public boolean onItemLongClick(AdapterView<?> parent, View view,
@@ -95,6 +84,47 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
         startService(intent); 
         Log.v(TAG, "Service started!");
         
+    }
+    
+    private OnClickListener registryListener = new OnClickListener() {
+    	public void onClick(View v) {
+    		if (v == findViewById(R.id.connectbutton)){
+    			short portVal = -1;
+				try {
+					portVal = Short.parseShort(port.getText().toString());
+				} catch(NumberFormatException e) {
+					// No need to act
+				}
+				if (portVal < 1 || portVal > 65535) {
+					// TODO: R.string
+					Toast.makeText(RegistryActivity.this, "Invalid value for port", Toast.LENGTH_LONG);
+        			return;
+				}
+
+				Intent intent = new Intent(RegistryActivity.this, NetworkService.class);
+				intent.putExtra("ip", ip.getText().toString());
+				intent.putExtra("port", portVal);
+				startService(intent);
+				startActivity(new Intent(RegistryActivity.this, ChatActivity.class));
+    		}
+    		else if (v == findViewById(R.id.importteambutton)){
+    			Toast.makeText(getApplicationContext(), "You are super cool!", Toast.LENGTH_LONG).show();
+    		}
+    	}
+    };
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.mainoptions, menu);
+        return true;
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        	Toast.makeText(this, "You pressed the icon!", Toast.LENGTH_LONG).show();
+        return true;
     }
     
 	public void ServerListEnd() {
@@ -119,7 +149,7 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 		service = ((RegistryConnectionService.LocalBinder)binder).getService();
 		service.setListener(this);
 	}
-
+	
 	public void onServiceDisconnected(ComponentName name) {
 		if (service != null)
 	    	service.setListener(null);

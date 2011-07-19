@@ -5,4 +5,5 @@
     <string name="connect">Connect to a server!</string>
     <string name="inputip">Input IP address</string>
     <string name="inputport">Input a port</string>
+    <string name="importteam">Import Team</string>
 </resources>

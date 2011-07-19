@@ -77,7 +77,7 @@ public class BattleActivity extends Activity {
 
     public void changeName(Message msg) {
     	if (msg != null && msg.obj != null) {
-    		TextView myView = (TextView) findViewById(R.id.nameA);
+    		TextView myView = (TextView)findViewById(R.id.nameA);
     		myView.setText(msg.obj.toString());
     	}
     }
