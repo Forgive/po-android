@@ -55,10 +55,11 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
         			return;
 				}
 
-				Intent intent = new Intent(RegistryActivity.this, BattleActivity.class);
+				Intent intent = new Intent(RegistryActivity.this, NetworkService.class);
 				intent.putExtra("ip", ip.getText().toString());
 				intent.putExtra("port", portVal);
-				RegistryActivity.this.startActivity(intent);
+				startService(intent);
+				startActivity(new Intent(RegistryActivity.this, ChatActivity.class));
 			}
 		});
         
@@ -123,4 +124,10 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 		if (service != null)
 	    	service.setListener(null);
 	}
+    
+    @Override
+    public void onDestroy() {
+    	unbindService(this);
+    	super.onDestroy();
+    }
 }

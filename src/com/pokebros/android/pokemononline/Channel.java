@@ -21,7 +21,7 @@ public class Channel {
 		name = n;
 	}
 	
-	public void addTrainer(PlayerInfo p) {
+	public void addPlayer(PlayerInfo p) {
 		if(p != null) {
 			players.put(p.id(), p);
 			System.out.println("Player " + p.nick() + " joined channel " + name);
@@ -30,7 +30,7 @@ public class Channel {
 			System.out.println("Unknown player in channel " + name);
 	}
 	
-	public void removeTrainer(int p) {
+	public void removePlayer(int p) {
 		if(players.remove(new Integer(p)) != null)
 			System.out.println("Player " + p + " has left channel " + name);
 	}

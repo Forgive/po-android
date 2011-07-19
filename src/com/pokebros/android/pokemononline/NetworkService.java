@@ -10,12 +10,14 @@ import com.pokebros.android.pokemononline.battle.BattleTeam;
 import com.pokebros.android.pokemononline.player.FullPlayerInfo;
 import com.pokebros.android.pokemononline.player.PlayerInfo;
 
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
@@ -25,8 +27,7 @@ import android.widget.Toast;
 public class NetworkService extends Service {
 	private final IBinder binder = new LocalBinder();
 	private int NOTIFICATION = 4356;
-	private boolean bound = false;
-	private Messenger messenger;
+	protected Messenger battleMsgr, chatMsgr;
 	
 	Thread sThread, rThread;
 	PokeClientSocket socket = null;
@@ -50,24 +51,35 @@ public class NetworkService extends Service {
 	@Override
 	// This is called every time someone binds to us
 	public IBinder onBind(Intent intent) {
-		messenger = (Messenger) intent.getExtras().get("Messenger");
-        Message message = Message.obtain();
-        message.obj = "BROBRO";
-        try {
-			messenger.send(message);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		} catch (RuntimeException e) {
-			e.printStackTrace(); 	
-		}
-		bound = true;
+		setMessengers(intent);
 		return binder;
 	}
 	
 	@Override
+	public void onRebind(Intent intent) {
+		setMessengers(intent);
+	}
+	
+	private void setMessengers(Intent intent) {
+		String type = intent.getExtras().getString("Type"); // XXX is there a better way to determine intent source?
+		if (type.equals("battle")) {
+			battleMsgr = (Messenger) intent.getExtras().get("Messenger");
+			showNotification(BattleActivity.class);
+		} else if (type.equals("chat")) {
+			chatMsgr = (Messenger) intent.getExtras().get("Messenger");
+			showNotification(ChatActivity.class);
+		}		
+	}
+	
+	@Override
 	public boolean onUnbind(Intent intent) {
-		bound = false;
-		return super.onUnbind(intent);
+		String type = intent.getExtras().getString("Type"); // XXX is there a better way to determine intent source?
+		if (type.equals("battle")) {
+			battleMsgr = null;
+		} else if (type.equals("chat")) {
+			chatMsgr = null;
+		}
+		return true; // So that onRebind will be called
 	}
 	
 	@Override
@@ -114,16 +126,18 @@ public class NetworkService extends Service {
         	}
         });
         rThread.start();
-        showNotification();
 	}
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		super.onStartCommand(intent, flags, startId);
+		Bundle bundle = intent.getExtras();
+		if (bundle != null && bundle.containsKey("ip"))
+			connect(bundle.getString("ip"), bundle.getShort("port"));
 		return START_STICKY;
 	}
 	
-    private void showNotification() {
+    private void showNotification(Class<?> toStart) {
         CharSequence text = "Service Started!"; // XXX should probably be in R.String
 
         Notification notification = new Notification(R.drawable.icon, text,
@@ -131,7 +145,7 @@ public class NetworkService extends Service {
         
         // The PendingIntent to launch our activity if the user selects this notification
         PendingIntent notificationIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, BattleActivity.class), Intent.FLAG_ACTIVITY_NEW_TASK);
+                new Intent(this, toStart), Intent.FLAG_ACTIVITY_NEW_TASK);
         
         notification.setLatestEventInfo(this, "POAndroid", "Text", notificationIntent);
         
@@ -143,17 +157,29 @@ public class NetworkService extends Service {
 		if(ch != null) {
 			switch(c) {
 			case JoinChannel:
-				//ch.addTrainer(msg.readInt(), new Trainer(msg));
+				ch.addPlayer(new PlayerInfo(msg));
 				break;
 			case ChannelMessage:
-				ch.printLine(msg.readQString());
+				String line = msg.readQString();
+				ch.printLine(line);
+				if (chatMsgr != null) {
+					Message mess = Message.obtain();
+					Bundle bund = new Bundle();
+					bund.putString(c.toString(), line);
+					mess.setData(bund);
+					try {
+						chatMsgr.send(mess);
+					} catch (RemoteException e) {
+						e.printStackTrace();
+					}
+				}
 				break;
 			case HtmlChannel:
 				String htmlChannel = msg.readQString();
 				System.out.println("Html Channel: " + htmlChannel);
 				break;
 			case LeaveChannel:
-				ch.removeTrainer(msg.readInt());
+				ch.removePlayer(msg.readInt());
 				break;
 			default:
 				break;
@@ -217,7 +243,7 @@ public class NetworkService extends Service {
 			if(ch != null) {
 				for(int k = 0; k < numPlayers; k++) {
 					int id = msg.readInt();
-					ch.addTrainer(players.get(id));
+					ch.addPlayer(players.get(id));
 				}
 			}
 			else

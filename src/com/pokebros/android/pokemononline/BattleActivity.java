@@ -26,9 +26,6 @@ public class BattleActivity extends Activity {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			netServ =	((NetworkService.LocalBinder)service).getService();
 			netServ.herp();
-			Bundle bundle = getIntent().getExtras();
-			if (bundle != null && bundle.containsKey("ip"))
-				netServ.connect(bundle.getString("ip"), bundle.getShort("port"));
 			Toast.makeText(BattleActivity.this, "Service connected",
                     Toast.LENGTH_SHORT).show();
 		}
@@ -54,8 +51,9 @@ public class BattleActivity extends Activity {
 
         Intent intent = new Intent(BattleActivity.this, NetworkService.class);
         intent.putExtra("Messenger", messenger);
+        intent.putExtra("Type", "battle");
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
-        startService(intent);//new Intent(this, NetworkService.class));
+//        startService(intent);//new Intent(this, NetworkService.class));
 
     }
     
