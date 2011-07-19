@@ -21,19 +21,29 @@ public class Battle {
 	int[] startingTime = new int[2];
 	
 	int mode = 0, numberOfSlots = 0;
-	//int myself = 0, opponent = 1;
+	byte me = 0, opp = 1;
 	int gen = 0;
+	int bID = 0;
 	
 	OpponentPoke[][] pokes = new OpponentPoke[2][6];
 	ArrayList<Boolean> pokeAlive = new ArrayList<Boolean>();
 	
-	public Battle(PlayerInfo me, PlayerInfo opp, int mode) {
-		this.mode = mode; // XXX don't really know what this means yet
+	public Battle(BattleConf conf, BattleTeam team, PlayerInfo p1, PlayerInfo p2, int meID, int bID) {
+		mode = conf.mode; // singles, doubles, triples
+		this.bID = bID;
 		// Only supporting singles for now
 		numberOfSlots = 2;
-		
-		players[0] = me;
-		players[1] = opp;
+		players[0] = p1;
+		players[1] = p2;
+		// Figure out who's who
+		if(players[0].id() == meID) {
+			me = 0;
+			opp = 1;
+		}
+		else {
+			me = 1;
+			opp = 0;
+		}
 		
 		time[0] = time[1] = 5*60;
 		ticking[0] = ticking[1] = false;
@@ -50,8 +60,9 @@ public class Battle {
 	
 	public Baos constructAttack(byte attack) {
 		Baos b = new Baos();
-		AttackChoice ac = new AttackChoice(attack, (byte)1);
-		b.putBaos(new BattleChoice((byte)0, ac, ChoiceType.AttackType));
+		b.putInt(bID);
+		AttackChoice ac = new AttackChoice(attack, opp);
+		b.putBaos(new BattleChoice(me, ac, ChoiceType.AttackType));
 		return b;
 	}
 	
@@ -63,13 +74,15 @@ public class Battle {
 		case SendOut:
 			boolean isSilent = msg.readBool();
 			byte fromSpot = msg.readByte();
-			OpponentPoke p = new OpponentPoke(msg);
-			// XXX have no idea wtf toSpot means
-			System.out.println(playerBySpot(toSpot).nick() + " sent out " + p.nick() + "!");
+			if(msg.available() > 0) // this is the first time you've seen it
+				pokes[toSpot % 2][toSpot / 2] = new OpponentPoke(msg);
+			System.out.println(playerBySpot(toSpot).nick() + " sent out " + 
+					currentPokeBySpot(toSpot).nick() + "!");
 			break;
 		case UseAttack:
 			short attack = msg.readShort();
-			System.out.println(playerBySpot(toSpot) + "'s " + currentPokeBySpot(toSpot).nick() +
+			System.out.println(playerBySpot(toSpot) + "'s " + 
+					currentPokeBySpot(toSpot).nick() +
 					" used " + MoveName.values()[attack].toString() + "!");
 		default:
 			System.out.println("Battle command unimplemented");

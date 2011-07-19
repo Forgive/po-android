@@ -5,10 +5,13 @@ import com.pokebros.android.pokemononline.Baos;
 import com.pokebros.android.pokemononline.SerializeBytes;
 
 public class BattleConf extends SerializeBytes {
-	byte gen = 0;
-	byte mode = 0;
-	int[] ids = new int[2];
-	int clauses;
+	protected byte gen = 0;
+	protected byte mode = 0;
+	protected int[] ids = new int[2];
+	protected int clauses;
+	
+	public int id(int i) { return ids[i]; }
+	public byte mode() { return mode; };
 	
 	public BattleConf(Bais msg) {
 		gen = msg.readByte();

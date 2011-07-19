@@ -308,20 +308,24 @@ public class NetworkService extends Service {
 			int pID1 = msg.readInt();
 			int pID2 = msg.readInt();
 			// This is us!
-			if(pID1 == 0 || pID2 == 0) {
+			if(pID1 == 0) {
 				BattleConf conf = new BattleConf(msg);
 				BattleTeam team = new BattleTeam(msg);
 				// Start the battle
-				if(pID1 == 0) // we're the one who got challenged
-					battle = new Battle(players.get(pID2), mePlayer, 0);
-				else // we're the challenger
-					battle = new Battle(mePlayer, players.get(pID2), 0);
-				System.out.println("The battle between " + mePlayer.nick() + 
+				if(pID1 == 0) { // This is us!
+					battle = new Battle(conf, team, players.get(conf.id(0)),
+						players.get(conf.id(1)), mePlayer.id(), bID);
+					System.out.println("The battle between " + mePlayer.nick() + 
 						" and " + players.get(pID2).nick() + " has begun!");
+					Intent in = new Intent(this, BattleActivity.class);
+					in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+					startActivity(in);
+				}
 			}
 			break;
 		case Login:
 			mePlayer = new PlayerInfo(msg);
+			players.put(mePlayer.id(), mePlayer);
 			break;
 		default:
 			System.out.println("Unimplented message");

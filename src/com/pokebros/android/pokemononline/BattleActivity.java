@@ -49,6 +49,7 @@ public class BattleActivity extends Activity {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+    	System.out.println("BattleActivity Created");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.battle);
 
@@ -86,15 +87,19 @@ public class BattleActivity extends Activity {
     	public void onClick(View v) {
     		//attack!!
     		if(v == findViewById(R.id.attack1)){
-    		netServ.socket.sendMessage(netServ.battle.constructAttack((byte)0), Command.BattleMessage);
+    			System.out.println("Attack 1 pressed");
+    			netServ.socket.sendMessage(netServ.battle.constructAttack((byte)0), Command.BattleMessage);
     		}
     		else if(v == findViewById(R.id.attack2)){
+    			System.out.println("Attack 2 pressed");
     			netServ.socket.sendMessage(netServ.battle.constructAttack((byte)1), Command.BattleMessage);
     		}
     		else if(v == findViewById(R.id.attack3)){
+    			System.out.println("Attack 3 pressed");
     			netServ.socket.sendMessage(netServ.battle.constructAttack((byte)2), Command.BattleMessage);
     		}
     		else if(v == findViewById(R.id.attack4)){
+    			System.out.println("Attack 4 pressed");
     			netServ.socket.sendMessage(netServ.battle.constructAttack((byte)3), Command.BattleMessage);
     		}
     	}
