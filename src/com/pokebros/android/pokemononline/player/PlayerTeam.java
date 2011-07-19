@@ -31,6 +31,12 @@ public class PlayerTeam extends SerializeBytes {
 	
 	public PlayerTeam(PokeParser p) {
 		nick = p.getNick();
+		info = p.getInfo();
+		loseMsg = p.getLoseMsg();
+		winMsg = p.getWinMsg();
+		avatar = p.getAvatar();
+		defaultTier = p.getDefaultTier();
+		System.out.println("GIANT COCCCCCKKKKSSSSS " + nick + " " + info + " " + loseMsg + " " + winMsg + " " + avatar + " " + defaultTier);
 	}
 	
 	public PlayerTeam() {}

@@ -7,9 +7,11 @@ import org.xml.sax.helpers.DefaultHandler;
 public class XMLHandler extends DefaultHandler {
 	private boolean inTrainer = false;
 	private XMLDataSet myParsedTeam = new XMLDataSet();
+
 	public XMLDataSet getParsedData() {
 		return this.myParsedTeam;
 	}
+
 	@Override
 	public void startDocument() throws SAXException {
 		this.myParsedTeam = new XMLDataSet();
@@ -27,8 +29,21 @@ public class XMLHandler extends DefaultHandler {
 	@Override
 	public void startElement(String namespaceURI, String localName,
 			String qName, Attributes atts) throws SAXException {
-		if (localName.equals("Trainer")) {
+		if (localName.equals("Team")) {
+			String DefaultTier = atts.getValue("defaultTier");
+			myParsedTeam.setDefaultTier(DefaultTier);
+		}
+		else if (localName.equals("Trainer")) {
 			inTrainer = true;
+			String loseMsg = atts.getValue("loseMsg");
+			myParsedTeam.setLoseMsg(loseMsg);
+			String avatar = atts.getValue("avatar");
+			short a = (short) (Integer.parseInt(avatar));
+			myParsedTeam.setAvatar(a);
+			String winMsg = atts.getValue("winMsg");
+			myParsedTeam.setWinMsg(winMsg);
+			String infoMsg = atts.getValue("infoMsg");
+			myParsedTeam.setInfo(infoMsg);
 		}
 	}
 
@@ -38,6 +53,9 @@ public class XMLHandler extends DefaultHandler {
 	@Override
 	public void endElement(String namespaceURI, String localName, String qName)
 			throws SAXException {
+		if (localName.equals("Trainer")) {
+			inTrainer = false;
+		}
 	}
 
 	/**

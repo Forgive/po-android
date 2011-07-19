@@ -49,4 +49,24 @@ public class PokeParser extends DefaultHandler
 	public String getNick() {
 		return parsedTeam.getNick();
 	}
+	
+	public String getInfo() {
+		return parsedTeam.getInfo();
+	}
+	
+	public String getLoseMsg() {
+		return parsedTeam.getLoseMsg();
+	}
+	
+	public String getWinMsg() {
+		return parsedTeam.getWinMsg();
+	}
+	
+	public short getAvatar() {
+		return parsedTeam.getAvatar();
+	}
+	
+	public String getDefaultTier() {
+		return parsedTeam.getDefaultTier();
+	}
 }
