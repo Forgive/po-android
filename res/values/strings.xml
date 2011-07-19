@@ -7,4 +7,5 @@
     <string name="inputport">Input a port</string>
     <string name="importteam">Import Team</string>
     <string name="viewpokemon">View Pokémon</string>
+    <string name="tobattlescreen">Back to Battle Screen</string>
 </resources>

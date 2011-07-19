@@ -92,7 +92,7 @@ public class BattleActivity extends Activity {
     		myView.setText(msg.obj.toString());
     	}
     }
-    //XXX During the battle we should intercept the back key and prompt the user to make sure he wants to forfeit the match
+    
     public OnClickListener battleListener = new OnClickListener() {
     	public void onClick(View v) {
     		//attack!!

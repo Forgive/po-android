@@ -11,6 +11,9 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.text.method.ScrollingMovementMethod;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnKeyListener;
 import android.widget.ScrollView;
@@ -81,6 +84,22 @@ public class ChatActivity extends Activity {
                 return false;
             }
         });
+    }
+	
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.chatoptions, menu);
+        return true;
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+		Intent in = new Intent(this, BattleActivity.class);
+		in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		startActivity(in);
+        return true;
     }
 	
     @Override
