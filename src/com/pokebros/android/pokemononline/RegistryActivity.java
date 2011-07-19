@@ -1,5 +1,8 @@
 package com.pokebros.android.pokemononline;
 
+import java.io.IOException;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import com.pokebros.android.pokemononline.RegistryConnectionService.RegistryCommandListener;
 import com.pokebros.android.pokemononline.ServerListAdapter.Server;
@@ -107,7 +110,13 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 				startService(intent);
 				startActivity(new Intent(RegistryActivity.this, ChatActivity.class));
     		}
-    		else if (v == findViewById(R.id.importteambutton)){
+    		else if (v == findViewById(R.id.importteambutton)) {
+					try {
+						PokeParser p = new PokeParser();
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
     			Toast.makeText(getApplicationContext(), "You are super cool!", Toast.LENGTH_SHORT).show();
     		}
     	}

@@ -1,5 +1,23 @@
 package com.pokebros.android.pokemononline;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+
+import com.pokebros.android.pokemononline.player.PlayerTeam;
+import com.pokebros.android.pokemononline.poke.TeamPoke;
+
 public class PokeParser
 {
 	String nick, info, loseMsg, winMsg, defaultTier;
@@ -16,6 +34,39 @@ public class PokeParser
 	short[] moves;
 	byte[] DVs;
 	byte[] EVs;
+	FileInputStream in;
+	StringBuffer inLine;
+	InputStreamReader isr;
+	BufferedReader inRd;
+	
+	public PokeParser() throws Exception {
+		in = new FileInputStream("/sdcard/team.xml");
+		inLine = new StringBuffer();
+		isr = new InputStreamReader(in);
+		 
+		inRd = new BufferedReader(isr);
+		System.out.println(getOriginalMyXML());
+	}
+	
+	private String getOriginalMyXML() throws Exception{
+		String text;
+		while ((text = inRd.readLine()) != null) {
+			inLine.append(text);
+			inLine.append("\n");
+		}
+		in.close();
+		return inLine.toString();
+	}
+	
+	public TeamPoke getPoke() {
+		TeamPoke tp = new TeamPoke();
+		return tp;				
+	}
+	
+	public PlayerTeam getPlayer() {
+		PlayerTeam pt = new PlayerTeam();
+		return pt;
+	}
 	
 	public String getNick() {return nick;}
 	public String getInfo() {return info;}
