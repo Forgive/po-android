@@ -60,10 +60,13 @@ public class BattleActivity extends Activity {
         //Capture out button from layout
         Button attack1 = (Button)findViewById(R.id.attack1);
         Button attack2 = (Button)findViewById(R.id.attack2);
+        Button attack3 = (Button)findViewById(R.id.attack3);
+        Button attack4 = (Button)findViewById(R.id.attack4);
         //Register the onCLick listener with the implementation above
         attack1.setOnClickListener(battleListener);
         attack2.setOnClickListener(battleListener);
-        
+        attack3.setOnClickListener(battleListener);
+        attack4.setOnClickListener(battleListener);
     }
     
     @Override
@@ -87,6 +90,12 @@ public class BattleActivity extends Activity {
     		}
     		else if(v == findViewById(R.id.attack2)){
     			netServ.socket.sendMessage(netServ.battle.constructAttack((byte)1), Command.BattleMessage);
+    		}
+    		else if(v == findViewById(R.id.attack3)){
+    			netServ.socket.sendMessage(netServ.battle.constructAttack((byte)2), Command.BattleMessage);
+    		}
+    		else if(v == findViewById(R.id.attack4)){
+    			netServ.socket.sendMessage(netServ.battle.constructAttack((byte)3), Command.BattleMessage);
     		}
     	}
     };
