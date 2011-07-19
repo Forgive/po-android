@@ -7,26 +7,29 @@
 	android:layout_height="fill_parent"
 	android:background="#FFFFFF"
 	>
-	
-	<TextView
-		android:id="@+id/chatBox"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:layout_weight="4"
-		android:textColor="#000000"
-		android:background="@drawable/battle_border"
-		android:layout_marginTop="0dp"
-		android:layout_marginBottom="3dp"
+	<ScrollView
+		android:id="@+id/chatScroll"
+		android:layout_marginBottom="50dp"
 		android:layout_marginLeft="4dp"
 		android:layout_marginRight="4dp"
-	/>
-
-	<EditText
-		android:id="@+id/chatInput"
-		android:layout_height="wrap_content"
+		android:layout_height="fill_parent"
 		android:layout_width="fill_parent"
+		android:fillViewport="true"
+	>
+		<TextView
+			android:layout_height="wrap_content"
+			android:textColor="#000000"
+			android:id="@+id/chatBox"
+			android:background="@drawable/battle_border"
+			android:layout_width="fill_parent"
 		>
-		<requestFocus></requestFocus>
-	</EditText>
-	
+		</TextView>
+	</ScrollView>
+		<EditText
+			android:id="@+id/chatInput"
+			android:layout_marginTop="-48dp"
+			android:layout_height="wrap_content"
+			android:layout_width="fill_parent"
+		>
+		</EditText>
 </LinearLayout>
