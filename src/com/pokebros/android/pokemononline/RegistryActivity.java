@@ -108,7 +108,7 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 				startActivity(new Intent(RegistryActivity.this, ChatActivity.class));
     		}
     		else if (v == findViewById(R.id.importteambutton)){
-    			Toast.makeText(getApplicationContext(), "You are super cool!", Toast.LENGTH_LONG).show();
+    			Toast.makeText(getApplicationContext(), "You are super cool!", Toast.LENGTH_SHORT).show();
     		}
     	}
     };

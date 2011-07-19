@@ -10,6 +10,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -82,7 +85,7 @@ public class BattleActivity extends Activity {
     		myView.setText(msg.obj.toString());
     	}
     }
-    
+    //XXX During the battle we should intercept the back key and prompt the user to make sure he wants to forfeit the match
     public OnClickListener battleListener = new OnClickListener() {
     	public void onClick(View v) {
     		//attack!!
@@ -104,4 +107,19 @@ public class BattleActivity extends Activity {
     		}
     	}
     };
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.battleoptions, menu);
+        return true;
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        	Toast.makeText(this, "You pressed the icon in the battle!", Toast.LENGTH_LONG).show();
+        return true;
+    }
+    
 }
