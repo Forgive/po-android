@@ -2,6 +2,8 @@ package com.pokebros.android.pokemononline.battle;
 
 import java.util.ArrayList;
 
+import android.os.SystemClock;
+
 import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
 import com.pokebros.android.pokemononline.player.PlayerInfo;
@@ -16,12 +18,12 @@ public class Battle {
 	// 0 = you, 1 = opponent
 	PlayerInfo[] players = new PlayerInfo[2];
 	
-	short[] time = new short[2];
-	boolean[] ticking = new boolean[2];
-	int[] startingTime = new int[2];
+	public short[] time = new short[2];
+	public boolean[] ticking = new boolean[2];
+	public long[] startingTime = new long[2];
 	
 	int mode = 0, numberOfSlots = 0;
-	byte me = 0, opp = 1;
+	public byte me = 0, opp = 1;
 	int gen = 0;
 	int bID = 0;
 	
@@ -52,6 +54,25 @@ public class Battle {
 		ticking[0] = ticking[1] = false;
 	}
 	
+	public Boolean isMyTimerTicking() {
+		return ticking[me];
+	}
+	
+	public Boolean isOppTimerTicking() {
+		return ticking[opp];
+	}
+	public long myStartingTime() {
+		return startingTime[me];
+	}
+	
+	public short myTime() {
+		return time[me];
+	}
+	
+	public short oppTime() {
+		return time[opp];
+	}
+	
 	// This is mainly for compatibility with doubles.
 	private PlayerInfo playerBySpot(int spot) {
 		return players[spot % 2];
@@ -70,6 +91,15 @@ public class Battle {
 		}
 		return moves;
 	}
+	
+	public String myNick() {
+		return players[me].nick();
+	}
+	
+	public String oppNick() {
+		return players[opp].nick();
+	}
+	
 	public Baos constructAttack(byte attack) {
 		Baos b = new Baos();
 		b.putInt(bID);
@@ -96,6 +126,15 @@ public class Battle {
 			System.out.println(playerBySpot(toSpot) + "'s " + 
 					currentPokeBySpot(toSpot).nick() +
 					" used " + MoveName.values()[attack].toString() + "!");
+		case ClockStart:
+			time[toSpot % 2] = msg.readShort();
+			startingTime[toSpot % 2] = SystemClock.uptimeMillis();
+			ticking[toSpot % 2] = true;
+			break;
+		case ClockStop:
+			time[toSpot % 2] = msg.readShort();
+			ticking[toSpot % 2] = false;
+			break;
 		default:
 			System.out.println("Battle command unimplemented");
 		}
