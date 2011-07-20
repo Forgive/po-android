@@ -55,13 +55,11 @@ public class ChatActivity extends Activity {
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
-		System.out.println("CREATED");
-		Toast.makeText(ChatActivity.this, "I R CREATE",
-                Toast.LENGTH_SHORT).show();
+		System.out.println("CREATED CHAT ACTIVITY");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat);
         chatScroll = (ScrollView) findViewById(R.id.chatScroll);
-    	chatBox = (TextView) findViewById(R.id.chatBox);
+    	chatBox = (TextView)findViewById(R.id.chatBox);
         
         Intent intent = new Intent(ChatActivity.this, NetworkService.class);
         intent.putExtra("Messenger", messenger);

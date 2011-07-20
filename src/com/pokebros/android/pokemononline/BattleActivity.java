@@ -22,9 +22,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 
 public class BattleActivity extends Activity {
 	public Button[] attack = new Button[4];
@@ -36,7 +39,12 @@ public class BattleActivity extends Activity {
     private static final int SWIPE_THRESHOLD_VELOCITY = 200;
     private GestureDetector gestureDetector;
 	private NetworkService netServ = null;
-
+	private ViewFlipper battleFlipper;
+	private Animation slideLeftIn;
+	private Animation slideLeftOut;
+	private Animation slideRightIn;
+    private Animation slideRightOut;
+	
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -106,7 +114,6 @@ public class BattleActivity extends Activity {
 
 	        handler.postDelayed(updateUITask, 50);
 	        handler.postDelayed(updateTimeTask, 100);
-	        //infoView.setText("SOENTHOENTHUONTEUHNOETHUNOTEHUNTOEHUNTOEHUNTOHEUN\nTHOEUNTHOESNHTUDOETNSHIDOENSHTIDOERICDERICDOEUHDOERNSCUHOENTCUHO\nEUHOENTUHONETUHOENIDHRCIDNSCOEHUROGUHO\nEIDNOESUHOEGDUHROEIDEONSIUHOERIDOESRIDOESNDOERIDORLSIDOIRELGCDOIELRCDIRLSGCIDRGIDRCOIDCOEUHRCOEUHRLCOEUHRCSOEUHROUHROEUHRSOEUHRNOEHNITOCHDEOIRCDOIERCDOIERLCSDHOEUNSTHOESNUTHOERHOEUSNCH");
 		}
 		
 		public void onServiceDisconnected(ComponentName className) {
@@ -127,7 +134,7 @@ public class BattleActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
     	System.out.println("BattleActivity Created");
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.battle);
+        setContentView(R.layout.battle_pokeviewer);
 
         Intent intent = new Intent(BattleActivity.this, NetworkService.class);
         intent.putExtra("Type", "battle");
@@ -139,14 +146,14 @@ public class BattleActivity extends Activity {
         attack[2] = (Button)findViewById(R.id.attack3);
         attack[3] = (Button)findViewById(R.id.attack4);
 
-        infoView = (TextView)findViewById(R.id.infoView);
+        infoView = (TextView)findViewById(R.id.infoWindow);
         //Register the onCLick listener with the implementation above
         for(int i = 0; i < 4; i++)
         	attack[i].setOnClickListener(battleListener);
         
         // Set the touch listener for the whole screen to be our custom gesture listener
         gestureDetector = new GestureDetector(new MyGestureDetector());
-        findViewById(R.id.battlelayout).setOnTouchListener(new View.OnTouchListener() {
+        findViewById(R.id.battle_pokeviewerlayout).setOnTouchListener(new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
                 if (gestureDetector.onTouchEvent(event)) {
                     return true;
@@ -154,6 +161,11 @@ public class BattleActivity extends Activity {
                 return false;
             }
         });
+        battleFlipper = (ViewFlipper)findViewById(R.id.battleflipper);
+        slideLeftIn = AnimationUtils.loadAnimation(this, R.anim.slide_in_left);
+        slideLeftOut = AnimationUtils.loadAnimation(this, R.anim.slide_out_left);
+        slideRightIn = AnimationUtils.loadAnimation(this, R.anim.slide_in_right);
+        slideRightOut = AnimationUtils.loadAnimation(this, R.anim.slide_out_right);
     }
     
     @Override
@@ -194,26 +206,23 @@ public class BattleActivity extends Activity {
     class MyGestureDetector extends SimpleOnGestureListener {
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-	    Intent intent = new Intent(BattleActivity.this.getBaseContext(), BattleActivity.class);
- 
             if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH) {
                 return false;
             }
  
             // right to left swipe
             if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-    		startActivity(intent);
-    		BattleActivity.this.overridePendingTransition(
-			R.anim.slide_in_right,
-			R.anim.slide_out_left
-    		);
-    	    // right to left swipe
+            System.out.println("RIGHT TO LEFT SWIPE");
+            battleFlipper.showNext();
+    		battleFlipper.setInAnimation(slideLeftIn);
+    		battleFlipper.setOutAnimation(slideLeftOut);
+    		
+    	    // left to right swipe
             }  else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-    		startActivity(intent);
-    		BattleActivity.this.overridePendingTransition(
-			R.anim.slide_in_left, 
-			R.anim.slide_out_right
-    		);
+    		System.out.println("LEFT TO RIGHT SWIPE");
+    		battleFlipper.setInAnimation(slideRightIn);
+    		battleFlipper.setOutAnimation(slideRightOut);
+    		battleFlipper.showPrevious();
             }
  
             return false;

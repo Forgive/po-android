@@ -3,9 +3,12 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:orientation="vertical"
   android:layout_width="fill_parent"
-  android:layout_height="fill_parent" android:id="@+id/battle_pokeviewerlayout">
+  android:layout_height="fill_parent" 
+  android:id="@+id/battle_pokeviewerlayout">
   
-    <ViewFlipper android:id="@+id/viewFlipper1" android:layout_height="fill_parent" android:layout_width="fill_parent">
+  <ViewFlipper android:layout_height="fill_parent" 
+  android:layout_width="fill_parent" 
+  android:id="@+id/battleflipper">
    <!-- Begin Page 1 -->
     <LinearLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
@@ -19,23 +22,23 @@
 	<LinearLayout
 		android:orientation="horizontal"
 		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:layout_weight="0"
 		android:layout_marginTop="3dp"
 		android:layout_marginBottom="3dp"
 		android:layout_marginLeft="4dp"
 		android:layout_marginRight="4dp"
-		>
+		android:layout_margin="4dp" 
+		android:layout_weight="1" 
+		android:layout_height="22dp">
 		
 		<TextView
 			android:text="Timer A"
-			android:layout_width="fill_parent"
 			android:layout_height="fill_parent"
 			android:layout_weight="2"
 			android:textColor="#000000"
 			android:background="@drawable/battle_border"
 			android:gravity="center"
-		android:id="@+id/timerA"/>
+			android:id="@+id/timerA" 
+			android:layout_width="match_parent"/>
 		<TextView
 			android:text="Name A"
 			android:layout_width="fill_parent"
@@ -43,7 +46,7 @@
 			android:layout_weight="1"
 			android:textColor="#000000"
 			android:gravity="right|center_vertical"
-		android:id="@+id/nameA"/>
+			android:id="@+id/nameA"/>
 		
 	</LinearLayout>
 	<!-- END Player A Title -->
@@ -52,8 +55,6 @@
 	<TextView
 		android:text="Battle Screen"
 		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:layout_weight="8"
 		android:textColor="#000000"
 		android:background="@drawable/battle_border"
 		android:gravity="center"
@@ -61,20 +62,21 @@
 		android:layout_marginBottom="3dp"
 		android:layout_marginLeft="4dp"
 		android:layout_marginRight="4dp"
-	android:id="@+id/battleScreen"/>
+		android:id="@+id/battleScreen"  
+		android:layout_height="100dp" 
+		android:layout_weight="30"/>
 	<!-- END Battle Screen -->
 	
 	<!-- START Player B Title -->
 	<LinearLayout
 		android:orientation="horizontal"
 		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:layout_weight="0"
 		android:layout_marginTop="0dp"
 		android:layout_marginBottom="3dp"
 		android:layout_marginLeft="4dp"
 		android:layout_marginRight="4dp"
-		>
+		android:layout_margin="4dp" 
+		android:layout_weight="1" android:layout_height="22dp">
 		
 		<TextView
 			android:text="Name B"
@@ -83,42 +85,46 @@
 			android:layout_weight="1"
 			android:textColor="#000000"
 			android:gravity="left|center_vertical"
-		android:id="@+id/nameB"/>
+			android:id="@+id/nameB"/>
 		<TextView
 			android:text="Timer B"
-			android:layout_width="fill_parent"
 			android:layout_height="fill_parent"
 			android:layout_weight="2"
 			android:textColor="#000000"
 			android:background="@drawable/battle_border"
 			android:gravity="center"
-		android:id="@+id/timerB"/>
-		
+			android:id="@+id/timerB" 
+			android:layout_width="match_parent"/>
 	</LinearLayout>
 	<!-- END Player B Title -->
 	
 	<!-- START Info Window -->
-	<TextView
-		android:text="Info Window"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:layout_weight="4"
-		android:textColor="#000000"
-		android:background="@drawable/battle_border"
-		android:layout_marginTop="0dp"
-		android:layout_marginBottom="3dp"
-		android:layout_marginLeft="4dp"
-		android:layout_marginRight="4dp"
-	android:id="@+id/infoWindow"/>
-	<!-- START Info Window -->
+	<ScrollView android:layout_width="match_parent" 
+	android:id="@+id/scrollView1" 
+	android:padding="5dp" 
+	android:background="@drawable/battle_border" 
+	android:layout_marginLeft="4dp" 
+	android:layout_marginRight="4dp" 
+	android:layout_marginTop="1dp" 
+	android:layout_weight="40" 
+	android:layout_height="0dp">
+		<TextView android:layout_width="fill_parent" 
+		android:id="@+id/infoWindow" 
+		android:textColor="#000000" 
+		android:text="Info Box" 
+		android:layout_marginBottom="8dp"
+		android:layout_height="match_parent">
+		</TextView>
+	</ScrollView>
+	<!-- END Info Window -->
 	
 	<!-- START Action Buttons -->
 	<LinearLayout
 		android:orientation="horizontal"
 		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:layout_weight="1"
-		>
+		android:layout_height="45dp" 
+		android:layout_weight="10" 
+		android:layout_marginTop="4dp">
 		
 		<Button
 			android:text="Attack 1"
@@ -126,96 +132,235 @@
 			android:layout_height="fill_parent"
 			android:layout_weight="1"
 			android:gravity="center"
-		android:id="@+id/attack1"/>
+			android:id="@+id/attack1"/>
 		<Button
 			android:text="Attack 2"
 			android:layout_width="fill_parent"
 			android:layout_height="fill_parent"
 			android:layout_weight="1"
 			android:gravity="center"
-		android:id="@+id/attack2"/>
+			android:id="@+id/attack2"/>
 		
 	</LinearLayout>
 
 	<LinearLayout
 		android:orientation="horizontal"
 		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:layout_weight="1"
+		android:layout_height="45dp"
+		android:layout_weight="10" 
 		>
-		
 		<Button
 			android:text="Attack 3"
 			android:layout_width="fill_parent"
 			android:layout_height="fill_parent"
 			android:layout_weight="1"
 			android:gravity="center"
-		android:id="@+id/attack3"/>
+			android:id="@+id/attack3"/>
 		<Button
 			android:text="Attack 4"
 			android:layout_width="fill_parent"
 			android:layout_height="fill_parent"
 			android:layout_weight="1"
 			android:gravity="center"
-		android:id="@+id/attack4"/>
+			android:id="@+id/attack4"/>
 		
 	</LinearLayout>
 	<!-- END Action Buttons -->
 	
-	</LinearLayout>
+</LinearLayout>
+<!-- END Page 1 -->
 	
 <!-- Begin Page 2 -->
   <LinearLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:orientation="vertical"
   android:layout_width="fill_parent"
-  android:layout_height="fill_parent" android:id="@+id/pokeviewlayout">
-    <TableLayout android:id="@+id/tableLayout1" android:layout_height="fill_parent" android:layout_width="fill_parent">
-        <TableRow android:id="@+id/tableRow1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/battle_border">
-            <ImageView android:layout_height="wrap_content" android:layout_width="wrap_content" android:src="@drawable/icon" android:id="@+id/imageView1"></ImageView>
-            <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout1" android:orientation="vertical" android:layout_width="wrap_content">
-                <TextView android:layout_height="wrap_content" android:text="pokename1" android:layout_width="wrap_content" android:id="@+id/pokename1"></TextView>
-                <TextView android:layout_height="wrap_content" android:text="@string/notinbattle" android:layout_width="wrap_content" android:id="@+id/hp1"></TextView>
+  android:layout_height="fill_parent" >
+    <TableLayout android:id="@+id/tableLayout1" 
+    android:layout_height="fill_parent" 
+    android:layout_width="fill_parent">
+        <TableRow android:id="@+id/tableRow1" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:background="@drawable/battle_border">
+            <ImageView android:layout_height="wrap_content" 
+            android:layout_width="wrap_content" 
+            android:src="@drawable/icon" 
+            android:id="@+id/imageView1">
+            </ImageView>
+            <LinearLayout android:layout_height="wrap_content" 
+            android:id="@+id/linearLayout1" 
+            android:orientation="vertical" 
+            android:layout_width="wrap_content">
+                <TextView android:layout_height="wrap_content" 
+                android:text="pokename1" 
+                android:layout_width="wrap_content" 
+                android:id="@+id/pokename1">
+                </TextView>
+                <TextView android:layout_height="wrap_content" 
+                android:text="hp1" 
+                android:layout_width="wrap_content" 
+                android:id="@+id/hp1">
+                </TextView>
             </LinearLayout>
+            <TextView android:text="TextView" 
+            android:id="@+id/textView1" 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content">
+            </TextView>
         </TableRow>
-        <TableRow android:id="@+id/tableRow2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/battle_border">
-            <ImageView android:layout_height="wrap_content" android:layout_width="wrap_content" android:src="@drawable/icon" android:id="@+id/imageView2"></ImageView>
-            <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout2" android:orientation="vertical" android:layout_width="wrap_content">
-                <TextView android:layout_height="wrap_content" android:text="pokename2" android:layout_width="wrap_content" android:id="@+id/pokename2"></TextView>
-                <TextView android:layout_height="wrap_content" android:text="@string/app_name" android:layout_width="wrap_content" android:id="@+id/hp2"></TextView>
+        <TableRow android:id="@+id/tableRow2" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:background="@drawable/battle_border">
+            <ImageView android:layout_height="wrap_content" 
+            android:layout_width="wrap_content" 
+            android:src="@drawable/icon" 
+            android:id="@+id/imageView2">
+            </ImageView>
+            <LinearLayout android:layout_height="wrap_content" 
+            android:id="@+id/linearLayout2" 
+            android:orientation="vertical" 
+            android:layout_width="wrap_content">
+                <TextView android:layout_height="wrap_content" 
+                android:text="pokename2" 
+                android:layout_width="wrap_content" 
+                android:id="@+id/pokename2">
+                </TextView>
+                <TextView android:layout_height="wrap_content" 
+                android:text="hp2" 
+                android:layout_width="wrap_content" 
+                android:id="@+id/hp2">
+                </TextView>
             </LinearLayout>
+            <TextView android:text="TextView" 
+            android:id="@+id/textView2" 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content">
+            </TextView>
         </TableRow>
-        <TableRow android:id="@+id/tableRow3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/battle_border">
-            <ImageView android:layout_height="wrap_content" android:layout_width="wrap_content" android:src="@drawable/icon" android:id="@+id/imageView3"></ImageView>
-            <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout3" android:orientation="vertical" android:layout_width="wrap_content">
-                <TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="pokename3" android:id="@+id/pokename3"></TextView>
-                <TextView android:layout_height="wrap_content" android:text="@string/tobattlescreen" android:layout_width="wrap_content" android:id="@+id/hp3"></TextView>
+        <TableRow android:id="@+id/tableRow3" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:background="@drawable/battle_border">
+            <ImageView android:layout_height="wrap_content" 
+            android:layout_width="wrap_content" 
+            android:src="@drawable/icon" 
+            android:id="@+id/imageView3">
+            </ImageView>
+            <LinearLayout android:layout_height="wrap_content" 
+            android:id="@+id/linearLayout3" 
+            android:orientation="vertical" 
+            android:layout_width="wrap_content">
+                <TextView android:layout_height="wrap_content" 
+                android:layout_width="wrap_content" 
+                android:text="pokename3" 
+                android:id="@+id/pokename3">
+                </TextView>
+                <TextView android:layout_height="wrap_content" 
+                android:text="hp3" 
+                android:layout_width="wrap_content" 
+                android:id="@+id/hp3">
+                </TextView>
             </LinearLayout>
+            <TextView android:text="TextView" 
+            android:id="@+id/textView3" 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content">
+            </TextView>
         </TableRow>
-        <TableRow android:id="@+id/tableRow4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/battle_border">
-            <ImageView android:layout_height="wrap_content" android:layout_width="wrap_content" android:src="@drawable/icon" android:id="@+id/imageView4"></ImageView>
-            <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout4" android:orientation="vertical" android:layout_width="wrap_content">
-                <TextView android:layout_height="wrap_content" android:text="pokename4" android:layout_width="wrap_content" android:id="@+id/pokename4"></TextView>
-                <TextView android:layout_height="wrap_content" android:text="@string/viewpokemon" android:layout_width="wrap_content" android:id="@+id/hp4"></TextView>
+        <TableRow android:id="@+id/tableRow4" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:background="@drawable/battle_border">
+            <ImageView android:layout_height="wrap_content" 
+            android:layout_width="wrap_content" 
+            android:src="@drawable/icon" 
+            android:id="@+id/imageView4">
+            </ImageView>
+            <LinearLayout android:layout_height="wrap_content" 
+            android:id="@+id/linearLayout4" 
+            android:orientation="vertical" 
+            android:layout_width="wrap_content">
+                <TextView android:layout_height="wrap_content" 
+                android:text="pokename4" 
+                android:layout_width="wrap_content" 
+                android:id="@+id/pokename4">
+                </TextView>
+                <TextView android:layout_height="wrap_content" 
+                android:text="hp4" 
+                android:layout_width="wrap_content" 
+                android:id="@+id/hp4">
+                </TextView>
             </LinearLayout>
+            <TextView android:text="TextView" 
+            android:id="@+id/textView4" 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content">
+            </TextView>
         </TableRow>
-        <TableRow android:id="@+id/tableRow5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/battle_border">
-            <ImageView android:layout_height="wrap_content" android:layout_width="wrap_content" android:src="@drawable/icon" android:id="@+id/imageView5"></ImageView>
-            <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout5" android:orientation="vertical" android:layout_width="wrap_content">
-                <TextView android:layout_height="wrap_content" android:text="pokename5" android:layout_width="wrap_content" android:id="@+id/pokename5"></TextView>
-                <TextView android:layout_height="wrap_content" android:text="@string/inputip" android:layout_width="wrap_content" android:id="@+id/hp5"></TextView>
+        <TableRow android:id="@+id/tableRow5" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:background="@drawable/battle_border">
+            <ImageView android:layout_height="wrap_content" 
+            android:layout_width="wrap_content" 
+            android:src="@drawable/icon" 
+            android:id="@+id/imageView5">
+            </ImageView>
+            <LinearLayout android:layout_height="wrap_content" 
+            android:id="@+id/linearLayout5" 
+            android:orientation="vertical" 
+            android:layout_width="wrap_content">
+                <TextView android:layout_height="wrap_content" 
+                android:text="pokename5" 
+                android:layout_width="wrap_content" 
+                android:id="@+id/pokename5">
+                </TextView>
+                <TextView android:layout_height="wrap_content" 
+                android:text="hp5" 
+                android:layout_width="wrap_content" 
+                android:id="@+id/hp5">
+                </TextView>
             </LinearLayout>
+            <TextView android:text="TextView" 
+            android:id="@+id/textView5" 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content">
+            </TextView>
         </TableRow>
-        <TableRow android:id="@+id/tableRow6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/battle_border">
-            <ImageView android:layout_height="wrap_content" android:layout_width="wrap_content" android:src="@drawable/icon" android:id="@+id/imageView6"></ImageView>
-            <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout6" android:orientation="vertical" android:layout_width="wrap_content">
-                <TextView android:layout_height="wrap_content" android:text="pokename6" android:layout_width="wrap_content" android:id="@+id/pokename6"></TextView>
-                <TextView android:layout_height="wrap_content" android:text="@string/choose" android:layout_width="wrap_content" android:id="@+id/hp6"></TextView>
+        <TableRow android:id="@+id/tableRow6" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:background="@drawable/battle_border">
+            <ImageView android:layout_height="wrap_content" 
+            android:layout_width="wrap_content" 
+            android:src="@drawable/icon" 
+            android:id="@+id/imageView6">
+            </ImageView>
+            <LinearLayout android:layout_height="wrap_content" 
+            android:id="@+id/linearLayout6" 
+            android:orientation="vertical" 
+            android:layout_width="wrap_content">
+                <TextView android:layout_height="wrap_content" 
+                android:text="pokename6" 
+                android:layout_width="wrap_content" 
+                android:id="@+id/pokename6">
+                </TextView>
+                <TextView android:layout_height="wrap_content" 
+                android:text="hp6" 
+                android:layout_width="wrap_content" 
+                android:id="@+id/hp6">
+                </TextView>
             </LinearLayout>
+            <TextView android:text="TextView" 
+            android:id="@+id/textView6" 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content">
+            </TextView>
         </TableRow>
     </TableLayout>
-    
 </LinearLayout>
-    </ViewFlipper>
-    
+<!-- END Page 2 -->
+</ViewFlipper>
 </LinearLayout>
