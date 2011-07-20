@@ -26,9 +26,13 @@ public class FullPlayerInfo extends SerializeBytes {
 	public FullPlayerInfo() {
 		try {
 			p = new PokeParser();
+			playerTeam = new PlayerTeam(p);
 		}
-		catch (Exception e) {}
-		playerTeam = new PlayerTeam(p);
+		catch (Exception e) {
+			//TODO: Warn Player that the default team has been loaded with a toast.
+			System.out.println("NO TEAM IMPORTED, SYSTEM LOADED DEFAULT TEAM");
+			playerTeam = new PlayerTeam();
+		}
 	}
 	
 	public String toString() { return playerTeam.nick(); }

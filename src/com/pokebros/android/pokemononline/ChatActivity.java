@@ -56,6 +56,8 @@ public class ChatActivity extends Activity {
 	@Override
     public void onCreate(Bundle savedInstanceState) {
 		System.out.println("CREATED");
+		Toast.makeText(ChatActivity.this, "I R CREATE",
+                Toast.LENGTH_SHORT).show();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat);
         chatScroll = (ScrollView) findViewById(R.id.chatScroll);
@@ -95,10 +97,17 @@ public class ChatActivity extends Activity {
     
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+    	if(netServ.battle != null){
 		Intent in = new Intent(this, BattleActivity.class);
 		in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		startActivity(in);
         return true;
+    	}
+        else{
+        	Toast.makeText(ChatActivity.this, R.string.notinbattle,
+                    Toast.LENGTH_SHORT).show();
+    	return true;
+        }
     }
 	
     @Override

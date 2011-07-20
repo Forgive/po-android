@@ -8,8 +8,8 @@ import com.pokebros.android.pokemononline.Team;
 
 // Player as represented in the teambuilder.
 public class PlayerTeam extends SerializeBytes {
-	protected String nick = "BROLOLZHAH";
-	protected String info = "SUP";
+	protected String nick = "SYSTEMDEFAULT";
+	protected String info = "SUP, I AM THE DEFAULT TEAM. PLEASE IMPORT YOUR OWN TEAM!";
 	protected String loseMsg = "SHUCKS!";
 	protected String winMsg = "YEEEAAAAHH!!!";
 	protected String defaultTier = "OU";
