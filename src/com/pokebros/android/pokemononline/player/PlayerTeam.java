@@ -36,7 +36,7 @@ public class PlayerTeam extends SerializeBytes {
 		winMsg = p.getWinMsg();
 		avatar = p.getAvatar();
 		defaultTier = p.getDefaultTier();
-		System.out.println("GIANT COCCCCCKKKKSSSSS " + nick + " " + info + " " + loseMsg + " " + winMsg + " " + avatar + " " + defaultTier);
+		team = new Team();
 	}
 	
 	public PlayerTeam() {}

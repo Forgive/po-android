@@ -4,8 +4,19 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import com.pokebros.android.pokemononline.poke.TeamPoke;
+
 public class XMLHandler extends DefaultHandler {
 	private boolean inTrainer = false;
+	private boolean inPokemon = false;
+	private boolean inMove = false;
+	private boolean inDV = false;
+	private boolean inEV = false;
+	private int numPoke = 0;
+	private int numMove = 0;
+	private int numEV = 0;
+	private int numDV = 0;
+	private TeamPoke[] myTeam = new TeamPoke[6];
 	private XMLDataSet myParsedTeam = new XMLDataSet();
 
 	public XMLDataSet getParsedData() {
@@ -30,6 +41,9 @@ public class XMLHandler extends DefaultHandler {
 	public void startElement(String namespaceURI, String localName,
 			String qName, Attributes atts) throws SAXException {
 		if (localName.equals("Team")) {
+			String gen = atts.getValue("gen");
+			byte g = (byte)(Integer.parseInt(gen));
+			myParsedTeam.setGen(g);
 			String DefaultTier = atts.getValue("defaultTier");
 			myParsedTeam.setDefaultTier(DefaultTier);
 		}
@@ -45,6 +59,15 @@ public class XMLHandler extends DefaultHandler {
 			String infoMsg = atts.getValue("infoMsg");
 			myParsedTeam.setInfo(infoMsg);
 		}
+		else if (localName.equals("Pokemon")) {
+			inPokemon = true;
+			String pokeNum = atts.getValue("Num");
+			short pn = (short)(Integer.parseInt(pokeNum));
+			myParsedTeam.setPokeNum(pn);
+			String subNum = atts.getValue("Forme");
+			byte sn = (byte)(Integer.parseInt(subNum));
+			myParsedTeam.setSubNum(sn);
+		}
 	}
 
 	/**
@@ -56,6 +79,18 @@ public class XMLHandler extends DefaultHandler {
 		if (localName.equals("Trainer")) {
 			inTrainer = false;
 		}
+		if (localName.equals("Pokemon")) {
+			inPokemon = false;
+		}
+		if (localName.equals("Move")) {
+			inPokemon = false;
+		}
+		if (localName.equals("DV")) {
+			inPokemon = false;
+		}
+		if (localName.equals("EV")) {
+			inPokemon = false;
+		}
 	}
 
 	/**
@@ -65,7 +100,6 @@ public class XMLHandler extends DefaultHandler {
 	public void characters(char ch[], int start, int length) {
 		if (inTrainer) {
 			myParsedTeam.setNick(new String(ch, start, length));
-			inTrainer = false;
 		}
 	}
 }

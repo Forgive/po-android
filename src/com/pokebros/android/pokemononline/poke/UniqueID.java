@@ -13,6 +13,11 @@ public class UniqueID extends SerializeBytes {
 		subNum = msg.readByte();
 	}
 	
+	public UniqueID(short s, byte b) {
+		pokeNum = s;
+		subNum = b;
+	}
+	
 	public UniqueID() {
 			pokeNum = 1;
 			subNum = 0;

@@ -12,7 +12,7 @@ public class XMLDataSet {
 	byte nature, gender;
 	boolean shiny;
 	byte happiness, level;
-	short[] moves;
+	int[] moves;
 	byte[] DVs;
 	byte[] EVs;
 	
@@ -35,7 +35,7 @@ public class XMLDataSet {
 	public boolean getShiny() {return shiny;}
 	public byte getHappiness() {return happiness;}
 	public byte getLevel() {return level;}
-	public short[] getmoves() {return moves;}
+	public int[] getMoves() {return moves;}
 	public byte[] getDVs() {return DVs;}
 	public byte[] getEVs() {return EVs;}
 	

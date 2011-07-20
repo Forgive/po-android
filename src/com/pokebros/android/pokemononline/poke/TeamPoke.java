@@ -2,6 +2,7 @@ package com.pokebros.android.pokemononline.poke;
 
 import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
+import com.pokebros.android.pokemononline.PokeParser;
 import com.pokebros.android.pokemononline.SerializeBytes;
 
 // This class is how a poke is represented in the teambuilder.
@@ -56,6 +57,10 @@ public class TeamPoke extends SerializeBytes {
 		EVs[0] = EVs[1] = EVs[2] = EVs[3] = EVs[4] = EVs[5] = 10;
 	}
 
+	public TeamPoke (PokeParser p) {
+		
+	}
+	
 	public Baos serializeBytes() {
 		Baos bytes = new Baos();
 		bytes.putBaos(uID);

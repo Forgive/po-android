@@ -7,9 +7,7 @@ import java.io.InputStreamReader;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -46,27 +44,24 @@ public class PokeParser extends DefaultHandler
 		parsedTeam = myHandler.getParsedData();
 	}
 
-	public String getNick() {
-		return parsedTeam.getNick();
-	}
-	
-	public String getInfo() {
-		return parsedTeam.getInfo();
-	}
-	
-	public String getLoseMsg() {
-		return parsedTeam.getLoseMsg();
-	}
-	
-	public String getWinMsg() {
-		return parsedTeam.getWinMsg();
-	}
-	
-	public short getAvatar() {
-		return parsedTeam.getAvatar();
-	}
-	
-	public String getDefaultTier() {
-		return parsedTeam.getDefaultTier();
-	}
+	public String getNick() {return parsedTeam.getNick();}
+	public String getInfo() {return parsedTeam.getInfo();}
+	public String getLoseMsg() {return parsedTeam.getLoseMsg();}
+	public String getWinMsg() {return parsedTeam.getWinMsg();}
+	public short getAvatar() {return parsedTeam.getAvatar();}
+	public String getDefaultTier() {return parsedTeam.getDefaultTier();}
+	public byte getGen() {return parsedTeam.getGen();}
+	public short getPokeNum() {return parsedTeam.pokeNum();}
+	public byte getSubNum() {return parsedTeam.subNum();}
+	public String getPokeNick() {return parsedTeam.getPokeNick();}
+	public short getItem() {return parsedTeam.getItem();}
+	public short getAbility() {return parsedTeam.getAbility();}
+	public byte getNature() {return parsedTeam.getNature();}
+	public byte getGender() {return parsedTeam.getGender();}
+	public boolean getShiny() {return parsedTeam.getShiny();}
+	public byte getHappiness() {return parsedTeam.getHappiness();}
+	public byte getLevel() {return parsedTeam.getLevel();}
+	public int[] getMoves() {return parsedTeam.getMoves();}
+	public byte[] getDVs() {return parsedTeam.getDVs();}
+	public byte[] getEVs() {return parsedTeam.getEVs();}
 }
