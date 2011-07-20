@@ -2,7 +2,6 @@ package com.pokebros.android.pokemononline;
 
 import java.util.ArrayList;
 import java.util.TimerTask;
-
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -14,10 +13,13 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.SystemClock;
+import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
@@ -26,15 +28,19 @@ import android.widget.Toast;
 public class BattleActivity extends Activity {
 	Button[] attack = new Button[4];
 	TextView[] timers = new TextView[2];
-	
+	private static final int SWIPE_MIN_DISTANCE = 120;
+    private static final int SWIPE_MAX_OFF_PATH = 250;
+    private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+    private GestureDetector gestureDetector;
 	private NetworkService netServ = null;
+
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
                 changeName(msg);
         }
     };
-    
+    //XXX There is a comment block here
     /*class UpdateTimeTask extends TimerTask {
     	   public void run() {
     		   if(netServ.battle.isMyTimerTicking()) {
@@ -124,6 +130,17 @@ public class BattleActivity extends Activity {
         	attack[i].setOnClickListener(battleListener);
         
         handler.postDelayed(updateTimeTask, 100);
+        
+        // Set the touch listener for the whole screen to be our custom gesture listener
+        gestureDetector = new GestureDetector(new MyGestureDetector());
+        findViewById(R.id.battlelayout).setOnTouchListener(new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                if (gestureDetector.onTouchEvent(event)) {
+                    return true;
+                }
+                return false;
+            }
+        });
     }
     
     @Override
@@ -161,6 +178,41 @@ public class BattleActivity extends Activity {
     	}
     };
     
+    class MyGestureDetector extends SimpleOnGestureListener {
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+	    Intent intent = new Intent(BattleActivity.this.getBaseContext(), BattleActivity.class);
+ 
+            if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH) {
+                return false;
+            }
+ 
+            // right to left swipe
+            if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+    		startActivity(intent);
+    		BattleActivity.this.overridePendingTransition(
+			R.anim.slide_in_right,
+			R.anim.slide_out_left
+    		);
+    	    // right to left swipe
+            }  else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+    		startActivity(intent);
+    		BattleActivity.this.overridePendingTransition(
+			R.anim.slide_in_left, 
+			R.anim.slide_out_right
+    		);
+            }
+ 
+            return false;
+        }
+ 
+        // It is necessary to return true from onDown for the onFling event to register
+        @Override
+        public boolean onDown(MotionEvent e) {
+	        	return true;
+        }
+    }
+    
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
@@ -174,5 +226,4 @@ public class BattleActivity extends Activity {
         	Toast.makeText(this, "You pressed the icon in the battle!", Toast.LENGTH_LONG).show();
         return true;
     }
-    
 }
