@@ -1,5 +1,6 @@
 package com.pokebros.android.pokemononline;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.TimerTask;
 import android.app.Activity;
@@ -26,8 +27,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class BattleActivity extends Activity {
-	Button[] attack = new Button[4];
-	TextView[] timers = new TextView[2];
+	public Button[] attack = new Button[4];
+	public TextView[] timers = new TextView[2];
+	public TextView infoView;
+	TextView[] names = new TextView[2];
 	private static final int SWIPE_MIN_DISTANCE = 120;
     private static final int SWIPE_MAX_OFF_PATH = 250;
     private static final int SWIPE_THRESHOLD_VELOCITY = 200;
@@ -41,20 +44,6 @@ public class BattleActivity extends Activity {
         }
     };
     //XXX There is a comment block here
-    /*class UpdateTimeTask extends TimerTask {
-    	   public void run() {
-    		   if(netServ.battle.isMyTimerTicking()) {
-    			   long millis = System.currentTimeMillis() - 
-    			   		netServ.battle.myStartingTime();
-    			   int seconds = 300 - (int) (millis / 1000);
-    			   int minutes = seconds / 60;
-    			   seconds     = seconds % 60;
-
-    			   timerB.setText(String.format("%d:%02d", minutes, seconds));
-    		   }
-    	   }
-    	} */
-    
 	private Runnable updateTimeTask = new Runnable() {
 		public void run() {
 			for(int i = 0; i < 2; i++) {
@@ -62,10 +51,10 @@ public class BattleActivity extends Activity {
 				if (netServ.battle.ticking[i]) {
 					long millis = SystemClock.uptimeMillis()
 					- netServ.battle.startingTime[i];
-					seconds = netServ.battle.time[i] - (int) (millis / 1000);
+					seconds = netServ.battle.remainingTime[i] - (int) (millis / 1000);
 				}
 				else
-					seconds = netServ.battle.time[i];
+					seconds = netServ.battle.remainingTime[i];
 
 				if(seconds < 0) seconds = 0;
 				else if(seconds > 300) seconds = 300;
@@ -78,20 +67,46 @@ public class BattleActivity extends Activity {
 		}
 	};
     
+	public Runnable updateUITask = new Runnable() {
+		public void run() {
+			StringBuffer delta = netServ.battle.histDelta.getBuffer();
+			infoView.append(delta);
+			netServ.battle.hist.append(delta);
+			delta.setLength(0);
+			handler.postDelayed(this, 1000);
+		}
+	};
+	
+	public void appendInfoView(String s) {
+		infoView.append(s);
+	}
+	
+	
     private Messenger messenger = new Messenger(handler);
 	private ServiceConnection connection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			netServ =	((NetworkService.LocalBinder)service).getService();
 			netServ.herp();
+			netServ.battleActivity = BattleActivity.this;
 			Toast.makeText(BattleActivity.this, "Service connected",
                     Toast.LENGTH_SHORT).show();
 			
 	        ArrayList<String> moves = netServ.battle.myMoves(0);
 	        for(int i = 0; i < 4; i++)
 	        	attack[i].setText(moves.get(i));
-	        
 	        timers[netServ.battle.me] = (TextView)findViewById(R.id.timerB);
 	        timers[netServ.battle.opp] = (TextView)findViewById(R.id.timerA);
+	        names[netServ.battle.me] = (TextView)findViewById(R.id.nameB);
+	        names[netServ.battle.opp] = (TextView)findViewById(R.id.nameA);
+	        
+	        names[netServ.battle.me].setText(netServ.battle.myNick());
+	        names[netServ.battle.opp].setText(netServ.battle.oppNick());
+	        
+	        infoView.setText(netServ.battle.hist.getBuffer());
+
+	        handler.postDelayed(updateUITask, 50);
+	        handler.postDelayed(updateTimeTask, 100);
+	        //infoView.setText("SOENTHOENTHUONTEUHNOETHUNOTEHUNTOEHUNTOEHUNTOHEUN\nTHOEUNTHOESNHTUDOETNSHIDOENSHTIDOERICDERICDOEUHDOERNSCUHOENTCUHO\nEUHOENTUHONETUHOENIDHRCIDNSCOEHUROGUHO\nEIDNOESUHOEGDUHROEIDEONSIUHOERIDOESRIDOESNDOERIDORLSIDOIRELGCDOIELRCDIRLSGCIDRGIDRCOIDCOEUHRCOEUHRLCOEUHRCSOEUHROUHROEUHRSOEUHRNOEHNITOCHDEOIRCDOIERCDOIERLCSDHOEUNSTHOESNUTHOERHOEUSNCH");
 		}
 		
 		public void onServiceDisconnected(ComponentName className) {
@@ -115,7 +130,6 @@ public class BattleActivity extends Activity {
         setContentView(R.layout.battle);
 
         Intent intent = new Intent(BattleActivity.this, NetworkService.class);
-        intent.putExtra("Messenger", messenger);
         intent.putExtra("Type", "battle");
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
         //startService(intent);//new Intent(this, NetworkService.class));
@@ -125,11 +139,10 @@ public class BattleActivity extends Activity {
         attack[2] = (Button)findViewById(R.id.attack3);
         attack[3] = (Button)findViewById(R.id.attack4);
 
+        infoView = (TextView)findViewById(R.id.infoView);
         //Register the onCLick listener with the implementation above
         for(int i = 0; i < 4; i++)
         	attack[i].setOnClickListener(battleListener);
-        
-        handler.postDelayed(updateTimeTask, 100);
         
         // Set the touch listener for the whole screen to be our custom gesture listener
         gestureDetector = new GestureDetector(new MyGestureDetector());

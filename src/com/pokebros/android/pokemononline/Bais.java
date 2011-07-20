@@ -47,17 +47,17 @@ public class Bais extends ByteArrayInputStream {
 	}
 	
 	public int readInt() {
-		// I changed this because it wasn't working,
+		/*// I changed this because it wasn't working,
 		// please fix it if you want the faster version again
 		// -Lamperi
-		return read()*256*256*256 + read()*256*256 + read()*256 + read();
-		/*int i = 0;
+		return read()*256*256*256 + read()*256*256 + read()*256 + read();*/
+		int i = 0;
 		i |= (read() << 24);
 		i |= ((read() & 0xff0000)  << 16);
 		i |= ((read() & 0xff00) << 8);
 		i |= ((read() & 0xff));
 		
-		return i;*/
+		return i;
 	}
 	
 	public boolean readBool() {

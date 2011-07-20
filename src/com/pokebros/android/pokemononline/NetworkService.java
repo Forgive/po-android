@@ -29,6 +29,7 @@ public class NetworkService extends Service {
 	private int NOTIFICATION = 4356;
 	protected Messenger battleMsgr, chatMsgr;
 	
+	protected BattleActivity battleActivity = null;
 	Thread sThread, rThread;
 	PokeClientSocket socket = null;
 	

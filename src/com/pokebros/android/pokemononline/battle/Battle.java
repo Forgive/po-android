@@ -1,11 +1,13 @@
 package com.pokebros.android.pokemononline.battle;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 
 import android.os.SystemClock;
 
 import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
+import com.pokebros.android.pokemononline.BattleActivity;
 import com.pokebros.android.pokemononline.player.PlayerInfo;
 import com.pokebros.android.pokemononline.poke.OpponentPoke;
 import com.pokebros.android.pokemononline.poke.UniqueID;
@@ -18,7 +20,7 @@ public class Battle {
 	// 0 = you, 1 = opponent
 	PlayerInfo[] players = new PlayerInfo[2];
 	
-	public short[] time = new short[2];
+	public short[] remainingTime = new short[2];
 	public boolean[] ticking = new boolean[2];
 	public long[] startingTime = new long[2];
 	
@@ -31,6 +33,9 @@ public class Battle {
 	
 	OpponentPoke[][] pokes = new OpponentPoke[2][6];
 	ArrayList<Boolean> pokeAlive = new ArrayList<Boolean>();
+	
+	public StringWriter hist = new StringWriter();
+	public StringWriter histDelta = new StringWriter();
 	
 	public Battle(BattleConf conf, BattleTeam team, PlayerInfo p1, PlayerInfo p2, int meID, int bID) {
 		mode = conf.mode; // singles, doubles, triples
@@ -50,7 +55,7 @@ public class Battle {
 			opp = 0;
 		}
 		
-		time[0] = time[1] = 5*60;
+		remainingTime[0] = remainingTime[1] = 5*60;
 		ticking[0] = ticking[1] = false;
 	}
 	
@@ -66,11 +71,12 @@ public class Battle {
 	}
 	
 	public short myTime() {
-		return time[me];
+		return remainingTime[me];
+		
 	}
 	
 	public short oppTime() {
-		return time[opp];
+		return remainingTime[opp];
 	}
 	
 	// This is mainly for compatibility with doubles.
@@ -118,21 +124,22 @@ public class Battle {
 			byte fromSpot = msg.readByte();
 			if(msg.available() > 0) // this is the first time you've seen it
 				pokes[toSpot % 2][toSpot / 2] = new OpponentPoke(msg);
-			System.out.println(playerBySpot(toSpot).nick() + " sent out " + 
-					currentPokeBySpot(toSpot).nick() + "!");
+			histDelta.append((playerBySpot(toSpot).nick() + " sent out " + 
+					currentPokeBySpot(toSpot).nick() + "!\n"));
 			break;
 		case UseAttack:
 			short attack = msg.readShort();
-			System.out.println(playerBySpot(toSpot) + "'s " + 
+			histDelta.append(playerBySpot(toSpot) + "'s " + 
 					currentPokeBySpot(toSpot).nick() +
-					" used " + MoveName.values()[attack].toString() + "!");
+					" used " + MoveName.values()[attack].toString() + "!\n");
+			break;
 		case ClockStart:
-			time[toSpot % 2] = msg.readShort();
+			remainingTime[toSpot % 2] = msg.readShort();
 			startingTime[toSpot % 2] = SystemClock.uptimeMillis();
 			ticking[toSpot % 2] = true;
 			break;
 		case ClockStop:
-			time[toSpot % 2] = msg.readShort();
+			remainingTime[toSpot % 2] = msg.readShort();
 			ticking[toSpot % 2] = false;
 			break;
 		default:
