@@ -1,6 +1,8 @@
 package com.pokebros.android.pokemononline;
 
 import java.util.ArrayList;
+
+import de.marcreichelt.android.RealViewSwitcher;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -16,8 +18,10 @@ import android.text.SpannableStringBuilder;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -30,6 +34,7 @@ public class BattleActivity extends Activity {
 	public ScrollView infoScroll;
 	TextView[] names = new TextView[2];
 	private NetworkService netServ = null;
+	private RealViewSwitcher realViewSwitcher;
 	
     private Handler handler = new Handler() {
         @Override
@@ -130,7 +135,6 @@ public class BattleActivity extends Activity {
         Intent intent = new Intent(BattleActivity.this, NetworkService.class);
         intent.putExtra("Type", "battle");
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
-        //startService(intent);//new Intent(this, NetworkService.class));
         //Capture out button from layout
         attack[0] = (Button)findViewById(R.id.attack1);
         attack[1] = (Button)findViewById(R.id.attack2);
@@ -139,9 +143,11 @@ public class BattleActivity extends Activity {
 
         infoView = (TextView)findViewById(R.id.infoWindow);
         infoScroll = (ScrollView)findViewById(R.id.infoScroll);
+        realViewSwitcher = (RealViewSwitcher)findViewById(R.id.battlePokeSwitcher);
         //Register the onCLick listener with the implementation above
-        for(int i = 0; i < 4; i++)
+        for(int i = 0; i < 4; i++) {
         	attack[i].setOnClickListener(battleListener);
+        }
     }
     
     @Override
@@ -156,6 +162,13 @@ public class BattleActivity extends Activity {
     		myView.setText(msg.obj.toString());
     	}
     }
+    
+    @Override
+	public boolean dispatchTouchEvent(MotionEvent e) {
+		if(realViewSwitcher.onTouchEvent(e))
+			return true;
+		return super.dispatchTouchEvent(e);
+	}
     
     public OnClickListener battleListener = new OnClickListener() {
     	public void onClick(View v) {

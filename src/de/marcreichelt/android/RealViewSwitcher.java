@@ -222,7 +222,14 @@ public class RealViewSwitcher extends ViewGroup {
 			mTouchState = TOUCH_STATE_REST;
 		}
 
-		return true;
+		if(mTouchState == TOUCH_STATE_REST) {
+			System.out.println("REST!");
+			return false;
+		}
+		else {
+			System.out.println("SCROLLING!");
+			return true;
+		}
 	}
 
 	private void snapToDestination() {
