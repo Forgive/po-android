@@ -6,9 +6,11 @@
   android:layout_height="fill_parent" 
   android:id="@+id/battle_pokeviewerlayout">
   
-  <ViewFlipper android:layout_height="fill_parent" 
-  android:layout_width="fill_parent" 
-  android:id="@+id/battleflipper">
+<de.marcreichelt.android.RealViewSwitcher
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/battlePokeSwitcher">
    <!-- Begin Page 1 -->
     <LinearLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
@@ -361,5 +363,5 @@
     </TableLayout>
 </LinearLayout>
 <!-- END Page 2 -->
-</ViewFlipper>
+</de.marcreichelt.android.RealViewSwitcher>
 </LinearLayout>
