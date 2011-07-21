@@ -9,12 +9,13 @@ public class XMLDataSet {
 	byte subNum;
 	String pokenick;
 	short item, ability;
-	byte nature, gender;
+	byte nature, gender, pokeGen;
 	boolean shiny;
 	byte happiness, level;
-	int[] moves;
-	byte[] DVs;
-	byte[] EVs;
+	private String[][] myTeamPokes = new String[6][10];
+	private int[][] myMoves = new int[6][4];
+	private byte[][] myDVs = new byte[6][6];
+	private byte[][] myEVs = new byte[6][6];
 	
 	public String getNick() {return nick;}
 	public String getInfo() {return info;}
@@ -32,12 +33,14 @@ public class XMLDataSet {
 	public short getAbility() {return ability;}
 	public byte getNature() {return nature;}
 	public byte getGender() {return gender;}
+	public byte getPokeGen() {return pokeGen;}
 	public boolean getShiny() {return shiny;}
 	public byte getHappiness() {return happiness;}
 	public byte getLevel() {return level;}
-	public int[] getMoves() {return moves;}
-	public byte[] getDVs() {return DVs;}
-	public byte[] getEVs() {return EVs;}
+	public String getTeamPokes(int i, int j) {return myTeamPokes[i][j];}
+	public int getMoves(int i, int j) {return myMoves[i][j];}
+	public byte getDVs(int i, int j) {return myDVs[i][j];}
+	public byte getEVs(int i, int j) {return myEVs[i][j];}
 	
 	public void setNick(String s) {nick = s;}
 	public void setInfo(String s) {info = s;}
@@ -55,10 +58,20 @@ public class XMLDataSet {
 	public void setAbility(short s) {ability = s;}
 	public void setNature(byte b) {nature = b;}
 	public void setGender(byte b) {gender = b;}
+	public void setPokeGen(byte b) {pokeGen = b;}
 	public void setShiny(boolean b) {shiny = b;}
 	public void setHappiness(byte b) {happiness = b;}
 	public void setLevel(byte b) {level = b;}
-	public void setMoves(short[] s) {for (int i = 0; i < 4; ++i) {moves[i] = s[i];}}
-	public void setDVs(byte[] b) {for (int i = 0; i < 4; ++i) {DVs[i] = b[i];}}
-	public void setEVs(byte[] b) {for (int i = 0; i < 4; ++i) {EVs[i] = b[i];}}
+	public void setPokes(int i, int j, String s) {
+		myTeamPokes[i][j] = s;
+	}
+	public void setMoves(int i, int j, int m) {
+		myMoves[i][j] = m;
+	}	
+	public void setDVs(int i, int j, byte d) {
+		myDVs[i][j] = d;
+	}	
+	public void setEVs(int i, int j, byte e) {
+		myEVs[i][j] = e;
+	}
 }

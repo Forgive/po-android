@@ -2,12 +2,16 @@ package com.pokebros.android.pokemononline;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStreamReader;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -23,24 +27,49 @@ public class PokeParser extends DefaultHandler
 	PlayerTeam pt;
 	XMLDataSet parsedTeam;
 	
-	public PokeParser() throws Exception {
-		in = new FileInputStream("/sdcard/team.xml");
+	public PokeParser() {
+		try {
+			in = new FileInputStream("/sdcard/team.xml");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 		isr = new InputStreamReader(in);
 		 
 		inRd = new BufferedReader(isr);
-		/* Get a SAXParser from the SAXPArserFactory. */
 		SAXParserFactory spf = SAXParserFactory.newInstance();
-		SAXParser sp = spf.newSAXParser();
+		SAXParser sp = null;
+		try {
+			sp = spf.newSAXParser();
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		} catch (SAXException e) {
+			e.printStackTrace();
+		}
 
 		/* Get the XMLReader of the SAXParser we created. */
-		XMLReader xr = sp.getXMLReader();
+		XMLReader xr = null;
+		try {
+			xr = sp.getXMLReader();
+		} catch (SAXException e) {
+			e.printStackTrace();
+		}
 		/* Create a new ContentHandler and apply it to the XML-Reader */
 		XMLHandler myHandler = new XMLHandler();
 		xr.setContentHandler(myHandler);
 
-		FileInputStream in = new FileInputStream("/sdcard/team.xml");
-
-		xr.parse(new InputSource(in));
+		FileInputStream in = null;
+		try {
+			in = new FileInputStream("/sdcard/team.xml");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		try {
+			xr.parse(new InputSource(in));
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (SAXException e) {
+			e.printStackTrace();
+		}
 		parsedTeam = myHandler.getParsedData();
 	}
 
@@ -58,10 +87,12 @@ public class PokeParser extends DefaultHandler
 	public short getAbility() {return parsedTeam.getAbility();}
 	public byte getNature() {return parsedTeam.getNature();}
 	public byte getGender() {return parsedTeam.getGender();}
+	public byte getPokeGen() {return parsedTeam.getPokeGen();}
 	public boolean getShiny() {return parsedTeam.getShiny();}
 	public byte getHappiness() {return parsedTeam.getHappiness();}
 	public byte getLevel() {return parsedTeam.getLevel();}
-	public int[] getMoves() {return parsedTeam.getMoves();}
-	public byte[] getDVs() {return parsedTeam.getDVs();}
-	public byte[] getEVs() {return parsedTeam.getEVs();}
+	public String getTeamPokes(int i, int j) {return parsedTeam.getTeamPokes(i, j);}
+	public int getMoves(int i, int j) {return parsedTeam.getMoves(i, j);}
+	public byte getDVs(int i, int j) {return parsedTeam.getDVs(i, j);}
+	public byte getEVs(int i, int j) {return parsedTeam.getEVs(i, j);}
 }

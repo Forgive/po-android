@@ -1,5 +1,7 @@
 package com.pokebros.android.pokemononline.player;
 
+import java.io.File;
+
 import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
 import com.pokebros.android.pokemononline.PokeParser;
@@ -24,11 +26,12 @@ public class FullPlayerInfo extends SerializeBytes {
 	}
 	
 	public FullPlayerInfo() {
-		try {
+		File team = new File("/sdcard/team.xml");
+		if (team.exists()) {
 			p = new PokeParser();
 			playerTeam = new PlayerTeam(p);
 		}
-		catch (Exception e) {
+		else {	
 			//TODO: Warn Player that the default team has been loaded with a toast.
 			System.out.println("NO TEAM IMPORTED, SYSTEM LOADED DEFAULT TEAM");
 			playerTeam = new PlayerTeam();

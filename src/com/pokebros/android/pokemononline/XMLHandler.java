@@ -4,11 +4,8 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.pokebros.android.pokemononline.poke.TeamPoke;
-
 public class XMLHandler extends DefaultHandler {
 	private boolean inTrainer = false;
-	private boolean inPokemon = false;
 	private boolean inMove = false;
 	private boolean inDV = false;
 	private boolean inEV = false;
@@ -16,7 +13,6 @@ public class XMLHandler extends DefaultHandler {
 	private int numMove = 0;
 	private int numEV = 0;
 	private int numDV = 0;
-	private TeamPoke[] myTeam = new TeamPoke[6];
 	private XMLDataSet myParsedTeam = new XMLDataSet();
 
 	public XMLDataSet getParsedData() {
@@ -30,13 +26,8 @@ public class XMLHandler extends DefaultHandler {
 
 	@Override
 	public void endDocument() throws SAXException {
-		// Nothing to do
 	}
 
-	/**
-	 * Gets be called on opening tags like: <tag> Can provide attribute(s), when
-	 * xml was like: <tag attribute="attributeValue">
-	 */
 	@Override
 	public void startElement(String namespaceURI, String localName,
 			String qName, Attributes atts) throws SAXException {
@@ -60,19 +51,25 @@ public class XMLHandler extends DefaultHandler {
 			myParsedTeam.setInfo(infoMsg);
 		}
 		else if (localName.equals("Pokemon")) {
-			inPokemon = true;
-			String pokeNum = atts.getValue("Num");
-			short pn = (short)(Integer.parseInt(pokeNum));
-			myParsedTeam.setPokeNum(pn);
-			String subNum = atts.getValue("Forme");
-			byte sn = (byte)(Integer.parseInt(subNum));
-			myParsedTeam.setSubNum(sn);
+			myParsedTeam.setPokes(numPoke, 0, atts.getValue("Num"));
+			myParsedTeam.setPokes(numPoke, 1, atts.getValue("Forme"));
+			myParsedTeam.setPokes(numPoke, 2, atts.getValue("Nickname"));
+			myParsedTeam.setPokes(numPoke, 3, atts.getValue("Item"));
+			myParsedTeam.setPokes(numPoke, 4, atts.getValue("Ability"));
+			myParsedTeam.setPokes(numPoke, 5, atts.getValue("Nature"));
+			myParsedTeam.setPokes(numPoke, 6, atts.getValue("Gender"));
+			myParsedTeam.setPokes(numPoke, 7, atts.getValue("Shiny"));
+			myParsedTeam.setPokes(numPoke, 8, atts.getValue("Happiness"));
+			myParsedTeam.setPokes(numPoke, 9, atts.getValue("Lvl"));
 		}
+		else if (localName.equals("Move"))
+			inMove = true;
+		else if (localName.equals("DV"))
+			inDV = true;
+		else if (localName.equals("EV"))
+			inEV = true;
 	}
 
-	/**
-	 * Gets be called on closing tags like: </tag>
-	 */
 	@Override
 	public void endElement(String namespaceURI, String localName, String qName)
 			throws SAXException {
@@ -80,26 +77,38 @@ public class XMLHandler extends DefaultHandler {
 			inTrainer = false;
 		}
 		if (localName.equals("Pokemon")) {
-			inPokemon = false;
+			if (numPoke != 5) numPoke++;
 		}
 		if (localName.equals("Move")) {
-			inPokemon = false;
+			inMove = false;
+			if (numMove != 3) numMove++;
+			else {numMove = 0;}
 		}
 		if (localName.equals("DV")) {
-			inPokemon = false;
+			inDV = false;
+			if (numDV != 5) numDV++;
+			else {numDV = 0;}
 		}
 		if (localName.equals("EV")) {
-			inPokemon = false;
+			inEV = false;
+			if (numEV != 5) numEV++;
+			else {numEV = 0;}
 		}
 	}
 
-	/**
-	 * Gets be called on the following structure: <tag>characters</tag>
-	 */
 	@Override
 	public void characters(char ch[], int start, int length) {
 		if (inTrainer) {
 			myParsedTeam.setNick(new String(ch, start, length));
+		}
+		else if (inMove) {
+			myParsedTeam.setMoves(numPoke, numMove, Integer.parseInt(new String(ch, start, length)));
+		}
+		else if (inDV) {
+			myParsedTeam.setDVs(numPoke, numDV, (byte)(Integer.parseInt(new String(ch, start, length))));
+		}
+		else if (inEV) {
+			myParsedTeam.setEVs(numPoke, numEV, (byte)(Integer.parseInt(new String(ch, start, length))));
 		}
 	}
 }

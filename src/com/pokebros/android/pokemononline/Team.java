@@ -1,7 +1,6 @@
 package com.pokebros.android.pokemononline;
 
 import com.pokebros.android.pokemononline.poke.TeamPoke;
-import com.pokebros.android.pokemononline.poke.UniqueID;
 
 public class Team extends SerializeBytes {
 	protected byte gen = 5;
@@ -18,10 +17,54 @@ public class Team extends SerializeBytes {
 			pokes[i] = new TeamPoke();
 	}
 	
-	public Team(TeamPoke[] tp) {
+	public Team(PokeParser p) {
+		String[][] mTP = new String[6][10]; 
 		for (int i = 0; i < 6; i++) {
-			pokes[i] = tp[i];
+			for (int j = 0; j < 10; j++) {
+				mTP[i][j] = p.getTeamPokes(i, j);
+			}
 		}
+		int[][] mM = new int[6][4]; 
+		for (int i = 0; i < 6; i++) {
+			for (int j = 0; j < 4; j++) {
+				mM[i][j] = p.getMoves(i, j);
+			}
+		}
+		byte[][] mDV = new byte[6][6]; 
+		for (int i = 0; i < 6; i++) {
+			for (int j = 0; j < 6; j++) {
+				mDV[i][j] = p.getDVs(i, j);
+			}
+		}
+		byte[][] mEV = new byte[6][6];
+		for (int i = 0; i < 6; i++) {
+			for (int j = 0; j < 6; j++) {
+				mEV[i][j] = p.getEVs(i, j);
+			}
+		}
+		
+		for (int i = 0; i < 6; i++) {
+			for (int j = 0; j < 10; j++) {
+				System.out.println(mTP[i][j]);
+			}
+		}
+		for (int i = 0; i < 6; i++) {
+			for (int j = 0; j < 4; j++) {
+				System.out.println(mM[i][j]);
+			}
+		}
+		for (int i = 0; i < 6; i++) {
+			for (int j = 0; j < 6; j++) {
+				System.out.println(mDV[i][j]);
+			}
+		}
+		for (int i = 0; i < 6; i++) {
+			for (int j = 0; j < 6; j++) {
+				System.out.println(mEV[i][j]);
+			}
+		}
+		for(int i = 0; i < 6; i++)
+			pokes[i] = new TeamPoke(mTP, mM, mDV, mEV, i);
 	}
 	
 	public Baos serializeBytes() {

@@ -2,7 +2,6 @@ package com.pokebros.android.pokemononline.poke;
 
 import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
-import com.pokebros.android.pokemononline.PokeParser;
 import com.pokebros.android.pokemononline.SerializeBytes;
 
 // This class is how a poke is represented in the teambuilder.
@@ -13,6 +12,7 @@ public class TeamPoke extends SerializeBytes {
 	protected short ability;
 	protected byte nature;
 	protected byte gender;
+	protected byte gen;
 	protected boolean shiny;
 	protected byte happiness;
 	protected byte level;
@@ -27,6 +27,7 @@ public class TeamPoke extends SerializeBytes {
 		ability = msg.readShort();
 		nature = msg.readByte();
 		gender = msg.readByte();
+		//gen = msg.readByte();
 		shiny = msg.readBool();
 		happiness = msg.readByte();
 		level = msg.readByte();
@@ -46,6 +47,7 @@ public class TeamPoke extends SerializeBytes {
 		ability = 65;
 		nature = 0;
 		gender = 1;
+		gen = 5;
 		shiny = true;
 		happiness = 127;
 		level = 100;
@@ -57,8 +59,30 @@ public class TeamPoke extends SerializeBytes {
 		EVs[0] = EVs[1] = EVs[2] = EVs[3] = EVs[4] = EVs[5] = 10;
 	}
 
-	public TeamPoke (PokeParser p) {
-		
+	public TeamPoke (String[][] mTP, int[][] mM, byte[][] mDV, byte[][] mEV, int i) {
+		uID = new UniqueID((short)(Integer.parseInt(mTP[i][0])), (byte)(Integer.parseInt(mTP[i][1])));
+		nick = mTP[i][2];
+		item = (short)(Integer.parseInt(mTP[i][3]));
+		ability = (short)(Integer.parseInt(mTP[i][4]));
+		nature = (byte)(Integer.parseInt(mTP[i][5]));
+		gender = (byte)(Integer.parseInt(mTP[i][6]));
+		if (mTP[i][7].equals("0")) {
+			shiny = false;
+		}
+		else {
+			shiny = true;
+		}
+		happiness = (byte)(Integer.parseInt(mTP[i][8]));
+		level = (byte)(Integer.parseInt(mTP[i][9]));
+		for (int j = 0; j < 4; j++) {
+			moves[j] = mM[i][j];
+		}
+		for (int j = 0; j < 6; j++) {
+			DVs[j] = mDV[i][j];
+		}
+		for (int j = 0; j < 6; j++) {
+			EVs[j] = mEV[i][j];
+		}
 	}
 	
 	public Baos serializeBytes() {
@@ -69,6 +93,7 @@ public class TeamPoke extends SerializeBytes {
 		bytes.putShort(ability);
 		bytes.write(nature);
 		bytes.write(gender);
+		// bytes.write(gen); XXX Gen would go here 
 		bytes.putBool(shiny);
 		bytes.write(happiness);
 		bytes.write(level);
