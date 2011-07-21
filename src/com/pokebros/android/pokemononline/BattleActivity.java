@@ -36,7 +36,32 @@ public class BattleActivity extends Activity {
 	private NetworkService netServ = null;
 	private RealViewSwitcher realViewSwitcher;
 	
-    private Handler handler = new Handler() {
+	 /** Called when the activity is first created. */
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+    	System.out.println("BattleActivity Created");
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.battle_pokeviewer);
+
+        Intent intent = new Intent(BattleActivity.this, NetworkService.class);
+        intent.putExtra("Type", "battle");
+        bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        //Capture out button from layout
+        attack[0] = (Button)findViewById(R.id.attack1);
+        attack[1] = (Button)findViewById(R.id.attack2);
+        attack[2] = (Button)findViewById(R.id.attack3);
+        attack[3] = (Button)findViewById(R.id.attack4);
+
+        infoView = (TextView)findViewById(R.id.infoWindow);
+        infoScroll = (ScrollView)findViewById(R.id.infoScroll);
+        realViewSwitcher = (RealViewSwitcher)findViewById(R.id.battlePokeSwitcher);
+        //Register the onCLick listener with the implementation above
+        for(int i = 0; i < 4; i++) {
+        	attack[i].setOnClickListener(battleListener);
+        }
+    }
+	
+	private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
                 changeName(msg);
@@ -124,31 +149,6 @@ public class BattleActivity extends Activity {
 		super.onNewIntent(intent);
 		Toast.makeText(BattleActivity.this, "New Intent", Toast.LENGTH_SHORT);
 	}
-	
-    /** Called when the activity is first created. */
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-    	System.out.println("BattleActivity Created");
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.battle_pokeviewer);
-
-        Intent intent = new Intent(BattleActivity.this, NetworkService.class);
-        intent.putExtra("Type", "battle");
-        bindService(intent, connection, Context.BIND_AUTO_CREATE);
-        //Capture out button from layout
-        attack[0] = (Button)findViewById(R.id.attack1);
-        attack[1] = (Button)findViewById(R.id.attack2);
-        attack[2] = (Button)findViewById(R.id.attack3);
-        attack[3] = (Button)findViewById(R.id.attack4);
-
-        infoView = (TextView)findViewById(R.id.infoWindow);
-        infoScroll = (ScrollView)findViewById(R.id.infoScroll);
-        realViewSwitcher = (RealViewSwitcher)findViewById(R.id.battlePokeSwitcher);
-        //Register the onCLick listener with the implementation above
-        for(int i = 0; i < 4; i++) {
-        	attack[i].setOnClickListener(battleListener);
-        }
-    }
     
     @Override
     public void onDestroy() {
@@ -202,7 +202,19 @@ public class BattleActivity extends Activity {
     
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        	Toast.makeText(this, "You pressed the icon in the battle!", Toast.LENGTH_LONG).show();
+    	switch (item.getItemId())
+        {
+            case R.id.pokeviewer:
+                    //TODO: Switch to Pokeviewer
+            break;
+    case R.id.forfeit_yes:
+    	//TODO: implement forfeit
+    	break;
+    case R.id.forfeit_no:
+    	break;
+    case R.id.draw:
+    	break;
+        }
         return true;
     }
 }

@@ -9,4 +9,10 @@
     <string name="viewpokemon">View Pokémon</string>
     <string name="tobattlescreen">Back to Battle Screen</string>
     <string name="notinbattle">You are not currently in a battle!</string>
+    <string name="forfeit">Forfeit Current Battle</string>
+    <string name="ok">Okay</string>
+    <string name="cancel">Cancel</string>
+    <string name="no">No</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="suggest_draw">Suggest Draw</string>
 </resources>

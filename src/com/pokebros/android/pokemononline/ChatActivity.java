@@ -29,6 +29,7 @@ public class ChatActivity extends Activity {
 	private ScrollView chatScroll;
 	private TextView chatBox;
 	private EditText chatInput;
+	private boolean inBattle;
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -86,13 +87,7 @@ public class ChatActivity extends Activity {
                 return false;
             }
         });
-        
-        // Handle challenges
-        System.out.println("INTENT: "+getIntent().toString());
-        if (getIntent().hasExtra("opponent")) {
-        	showDialog(0);
-        }
-    }
+	}
 	
 	@Override
 	public void onNewIntent(Intent intent) {
@@ -136,17 +131,24 @@ public class ChatActivity extends Activity {
     
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-    	if(netServ.battle != null){
-		Intent in = new Intent(this, BattleActivity.class);
-		in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		startActivity(in);
-        return true;
+    	switch (item.getItemId()) {
+    	case R.id.backtobattle: 
+    		if(netServ.battle != null) {
+    			Intent in = new Intent(this, BattleActivity.class);
+    			in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    			startActivity(in);
+    			break;
+    		}
+    		else {
+    			Toast.makeText(ChatActivity.this, R.string.notinbattle,
+    					Toast.LENGTH_SHORT).show();
+    			break;	
+    		}
+		case R.id.chat_disconnect:
+    		finish();
+    		break;
     	}
-        else{
-        	Toast.makeText(ChatActivity.this, R.string.notinbattle,
-                    Toast.LENGTH_SHORT).show();
     	return true;
-        }
     }
 	
     @Override
