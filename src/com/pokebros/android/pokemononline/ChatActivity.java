@@ -1,8 +1,11 @@
 package com.pokebros.android.pokemononline;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -83,7 +86,45 @@ public class ChatActivity extends Activity {
                 return false;
             }
         });
+        
+        // Handle challenges
+        System.out.println("INTENT: "+getIntent().toString());
+        if (getIntent().hasExtra("opponent")) {
+        	showDialog(0);
+        }
     }
+	
+	@Override
+	public void onNewIntent(Intent intent) {
+        System.out.println("INTENT: "+intent.toString());
+        if (intent.hasExtra("opponent")) {
+        	showDialog(0, intent.getExtras());
+        	netServ.noteMan.cancel(netServ.NOTIFICATION+1);
+        }
+	}
+	
+	@Override
+	protected Dialog onCreateDialog(int id, final Bundle args) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		switch (id) {
+		case 0:
+			builder.setMessage("Accept challenge?") // TODO add challenge info
+			.setCancelable(false)
+			.setPositiveButton("Accept", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					// Accept challenge
+					Baos b = new Baos();
+					b.write(1);
+					b.putInt(args.getInt("opponent"));
+					b.putInt(args.getInt("clauses"));
+					b.write(args.getByte("mode"));
+			        netServ.socket.sendMessage(b, Command.ChallengeStuff);
+				}
+			})
+			.setNegativeButton("Decline", null);
+		}
+		return builder.create();
+	}
 	
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
