@@ -27,9 +27,7 @@ import android.widget.Toast;
 public class NetworkService extends Service {
 	private final IBinder binder = new LocalBinder();
 	private int NOTIFICATION = 4356;
-	protected Messenger battleMsgr, chatMsgr;
 	
-	protected BattleActivity battleActivity = null;
 	Thread sThread, rThread;
 	PokeClientSocket socket = null;
 	
@@ -50,42 +48,16 @@ public class NetworkService extends Service {
 	}
 	
 	@Override
-	// This is called every time someone binds to us
+	// This is *NOT* called every time someone binds to us, I don't really know why
+	// but onServiceConnected is correctly called in the activity sooo....
 	public IBinder onBind(Intent intent) {
-		setMessengers(intent);
 		return binder;
-	}
-	
-	@Override
-	public void onRebind(Intent intent) {
-		setMessengers(intent);
-	}
-	
-	private void setMessengers(Intent intent) {
-		String type = intent.getExtras().getString("Type"); // XXX is there a better way to determine intent source?
-		if (type.equals("battle")) {
-			battleMsgr = (Messenger) intent.getExtras().get("Messenger");
-			showNotification(BattleActivity.class);
-		} else if (type.equals("chat")) {
-			chatMsgr = (Messenger) intent.getExtras().get("Messenger");
-			showNotification(ChatActivity.class);
-		}		
-	}
-	
-	@Override
-	public boolean onUnbind(Intent intent) {
-		String type = intent.getExtras().getString("Type"); // XXX is there a better way to determine intent source?
-		if (type.equals("battle")) {
-			battleMsgr = null;
-		} else if (type.equals("chat")) {
-			chatMsgr = null;
-		}
-		return true; // So that onRebind will be called
 	}
 	
 	@Override
 	// This is called once
 	public void onCreate() {
+		showNotification(ChatActivity.class, "Chat");
 		super.onCreate();
 	}
 	
@@ -138,9 +110,7 @@ public class NetworkService extends Service {
 		return START_STICKY;
 	}
 	
-    private void showNotification(Class<?> toStart) {
-        CharSequence text = "Service Started!"; // XXX should probably be in R.String
-
+    protected void showNotification(Class<?> toStart, String text) {
         Notification notification = new Notification(R.drawable.icon, text,
                 System.currentTimeMillis());
         
@@ -148,8 +118,7 @@ public class NetworkService extends Service {
         PendingIntent notificationIntent = PendingIntent.getActivity(this, 0,
                 new Intent(this, toStart), Intent.FLAG_ACTIVITY_NEW_TASK);
         
-        notification.setLatestEventInfo(this, "POAndroid", "Text", notificationIntent);
-        
+        notification.setLatestEventInfo(this, "POAndroid", text, notificationIntent);
         this.startForeground(NOTIFICATION, notification);
     }
 
@@ -163,17 +132,6 @@ public class NetworkService extends Service {
 			case ChannelMessage:
 				String line = msg.readQString();
 				ch.printLine(line);
-				if (chatMsgr != null) {
-					Message mess = Message.obtain();
-					Bundle bund = new Bundle();
-					bund.putString(c.toString(), line);
-					mess.setData(bund);
-					try {
-						chatMsgr.send(mess);
-					} catch (RemoteException e) {
-						e.printStackTrace();
-					}
-				}
 				break;
 			case HtmlChannel:
 				String htmlChannel = msg.readQString();

@@ -57,6 +57,9 @@ public class Battle {
 		
 		remainingTime[0] = remainingTime[1] = 5*60;
 		ticking[0] = ticking[1] = false;
+		
+		histDelta.append("The battle between " + players[me].nick() + 
+						" and " + players[opp].nick() + " has begun!");
 	}
 	
 	public Boolean isMyTimerTicking() {
@@ -124,14 +127,14 @@ public class Battle {
 			byte fromSpot = msg.readByte();
 			if(msg.available() > 0) // this is the first time you've seen it
 				pokes[toSpot % 2][toSpot / 2] = new OpponentPoke(msg);
-			histDelta.append((playerBySpot(toSpot).nick() + " sent out " + 
-					currentPokeBySpot(toSpot).nick() + "!\n"));
+			histDelta.append("\n" + (playerBySpot(toSpot).nick() + " sent out " + 
+					currentPokeBySpot(toSpot).nick() + "!"));
 			break;
 		case UseAttack:
 			short attack = msg.readShort();
-			histDelta.append(playerBySpot(toSpot) + "'s " + 
+			histDelta.append("\n" + playerBySpot(toSpot) + "'s " + 
 					currentPokeBySpot(toSpot).nick() +
-					" used " + MoveName.values()[attack].toString() + "!\n");
+					" used " + MoveName.values()[attack].toString() + "!");
 			break;
 		case ClockStart:
 			remainingTime[toSpot % 2] = msg.readShort();

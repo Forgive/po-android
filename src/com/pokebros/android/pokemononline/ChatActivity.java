@@ -33,7 +33,7 @@ public class ChatActivity extends Activity {
         		chatBox.append(msg.getData().getString("ChannelMessage") + "\n");
             	chatScroll.post(new Runnable() {
             		public void run() {
-            			chatScroll.fullScroll(View.FOCUS_DOWN);
+		    			chatScroll.smoothScrollTo(0, chatBox.getMeasuredHeight());
             		}
             	});
         	}
@@ -46,6 +46,8 @@ public class ChatActivity extends Activity {
 			Toast.makeText(ChatActivity.this, "Service connected",
                     Toast.LENGTH_SHORT).show();
 			netServ.herp();
+			if (netServ.battle == null)
+				netServ.showNotification(ChatActivity.class, "Chat");
 		}
 		
 		public void onServiceDisconnected(ComponentName className) {
@@ -62,8 +64,6 @@ public class ChatActivity extends Activity {
     	chatBox = (TextView)findViewById(R.id.chatBox);
         
         Intent intent = new Intent(ChatActivity.this, NetworkService.class);
-        intent.putExtra("Messenger", messenger);
-        intent.putExtra("Type", "chat");
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
 //        startService(intent);//new Intent(this, NetworkService.class));
         chatInput = (EditText) findViewById(R.id.chatInput);

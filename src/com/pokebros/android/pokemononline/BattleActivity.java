@@ -25,6 +25,7 @@ import android.view.View.OnClickListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
@@ -33,6 +34,7 @@ public class BattleActivity extends Activity {
 	public Button[] attack = new Button[4];
 	public TextView[] timers = new TextView[2];
 	public TextView infoView;
+	public ScrollView infoScroll;
 	TextView[] names = new TextView[2];
 	private static final int SWIPE_MIN_DISTANCE = 120;
     private static final int SWIPE_MAX_OFF_PATH = 250;
@@ -79,23 +81,25 @@ public class BattleActivity extends Activity {
 		public void run() {
 			StringBuffer delta = netServ.battle.histDelta.getBuffer();
 			infoView.append(delta);
-			netServ.battle.hist.append(delta);
+			if (delta.length() != 0) {
+		    	infoScroll.post(new Runnable() {
+		    		public void run() {
+		    			infoScroll.smoothScrollTo(0, infoView.getMeasuredHeight());
+		    		}
+		    	});
+			}
+	    	netServ.battle.hist.append(delta);
 			delta.setLength(0);
 			handler.postDelayed(this, 1000);
 		}
 	};
-	
-	public void appendInfoView(String s) {
-		infoView.append(s);
-	}
-	
-	
+
     private Messenger messenger = new Messenger(handler);
 	private ServiceConnection connection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			netServ =	((NetworkService.LocalBinder)service).getService();
 			netServ.herp();
-			netServ.battleActivity = BattleActivity.this;
+			netServ.showNotification(BattleActivity.class, "Battle");
 			Toast.makeText(BattleActivity.this, "Service connected",
                     Toast.LENGTH_SHORT).show();
 			
@@ -111,7 +115,11 @@ public class BattleActivity extends Activity {
 	        names[netServ.battle.opp].setText(netServ.battle.oppNick());
 	        
 	        infoView.setText(netServ.battle.hist.getBuffer());
-
+	    	infoScroll.post(new Runnable() {
+	    		public void run() {
+	    			infoScroll.smoothScrollTo(0, infoView.getMeasuredHeight());
+	    		}
+	    	});
 	        handler.postDelayed(updateUITask, 50);
 	        handler.postDelayed(updateTimeTask, 100);
 		}
@@ -147,6 +155,7 @@ public class BattleActivity extends Activity {
         attack[3] = (Button)findViewById(R.id.attack4);
 
         infoView = (TextView)findViewById(R.id.infoWindow);
+        infoScroll = (ScrollView)findViewById(R.id.infoScroll);
         //Register the onCLick listener with the implementation above
         for(int i = 0; i < 4; i++)
         	attack[i].setOnClickListener(battleListener);

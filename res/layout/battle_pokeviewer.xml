@@ -100,20 +100,19 @@
 	
 	<!-- START Info Window -->
 	<ScrollView android:layout_width="match_parent" 
-	android:id="@+id/scrollView1" 
+	android:id="@+id/infoScroll" 
 	android:padding="5dp" 
 	android:background="@drawable/battle_border" 
 	android:layout_marginLeft="4dp" 
 	android:layout_marginRight="4dp" 
 	android:layout_marginTop="1dp" 
-	android:layout_weight="40" 
+	android:layout_weight="40"
 	android:layout_height="0dp">
 		<TextView android:layout_width="fill_parent" 
 		android:id="@+id/infoWindow" 
 		android:textColor="#000000" 
 		android:text="Info Box" 
-		android:layout_marginBottom="8dp"
-		android:layout_height="match_parent">
+		android:layout_height="wrap_content">
 		</TextView>
 	</ScrollView>
 	<!-- END Info Window -->
