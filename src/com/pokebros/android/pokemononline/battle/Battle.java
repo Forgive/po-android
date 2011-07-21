@@ -4,6 +4,8 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 
 import android.os.SystemClock;
+import android.text.Html;
+import android.text.SpannableStringBuilder;
 
 import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
@@ -34,8 +36,8 @@ public class Battle {
 	OpponentPoke[][] pokes = new OpponentPoke[2][6];
 	ArrayList<Boolean> pokeAlive = new ArrayList<Boolean>();
 	
-	public StringWriter hist = new StringWriter();
-	public StringWriter histDelta = new StringWriter();
+	public SpannableStringBuilder hist = new SpannableStringBuilder();
+	public SpannableStringBuilder histDelta = new SpannableStringBuilder();
 	
 	public Battle(BattleConf conf, BattleTeam team, PlayerInfo p1, PlayerInfo p2, int meID, int bID) {
 		mode = conf.mode; // singles, doubles, triples
@@ -130,11 +132,20 @@ public class Battle {
 			histDelta.append("\n" + (playerBySpot(toSpot).nick() + " sent out " + 
 					currentPokeBySpot(toSpot).nick() + "!"));
 			break;
+		case SendBack:
+			histDelta.append("\n" + (playerBySpot(toSpot).nick() + " called " + 
+					currentPokeBySpot(toSpot).nick() + " back!"));
+			break;
 		case UseAttack:
 			short attack = msg.readShort();
 			histDelta.append("\n" + playerBySpot(toSpot) + "'s " + 
 					currentPokeBySpot(toSpot).nick() +
 					" used " + MoveName.values()[attack].toString() + "!");
+			break;
+		case BeginTurn:
+			int turn = msg.readInt();
+			histDelta.append(Html.fromHtml("<br><font color=#0000ff> Start of turn " +
+					turn + "</font color>"));
 			break;
 		case ClockStart:
 			remainingTime[toSpot % 2] = msg.readShort();

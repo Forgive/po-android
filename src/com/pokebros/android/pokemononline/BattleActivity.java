@@ -11,6 +11,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.SystemClock;
+import android.text.Html;
+import android.text.SpannableStringBuilder;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -61,7 +63,7 @@ public class BattleActivity extends Activity {
     
 	public Runnable updateUITask = new Runnable() {
 		public void run() {
-			StringBuffer delta = netServ.battle.histDelta.getBuffer();
+			SpannableStringBuilder delta = netServ.battle.histDelta;
 			infoView.append(delta);
 			if (delta.length() != 0) {
 		    	infoScroll.post(new Runnable() {
@@ -71,7 +73,7 @@ public class BattleActivity extends Activity {
 		    	});
 			}
 	    	netServ.battle.hist.append(delta);
-			delta.setLength(0);
+			delta.clear();
 			handler.postDelayed(this, 1000);
 		}
 	};
@@ -95,7 +97,7 @@ public class BattleActivity extends Activity {
 	        names[netServ.battle.me].setText(netServ.battle.myNick());
 	        names[netServ.battle.opp].setText(netServ.battle.oppNick());
 	        
-	        infoView.setText(netServ.battle.hist.getBuffer());
+	        infoView.setText(netServ.battle.hist);
 	    	infoScroll.post(new Runnable() {
 	    		public void run() {
 	    			infoScroll.smoothScrollTo(0, infoView.getMeasuredHeight());
