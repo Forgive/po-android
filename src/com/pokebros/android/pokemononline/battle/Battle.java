@@ -10,6 +10,7 @@ import android.text.SpannableStringBuilder;
 import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
 import com.pokebros.android.pokemononline.BattleActivity;
+import com.pokebros.android.pokemononline.QtColor;
 import com.pokebros.android.pokemononline.player.PlayerInfo;
 import com.pokebros.android.pokemononline.poke.OpponentPoke;
 import com.pokebros.android.pokemononline.poke.UniqueID;
@@ -144,8 +145,8 @@ public class Battle {
 			break;
 		case BeginTurn:
 			int turn = msg.readInt();
-			histDelta.append(Html.fromHtml("<br><font color=#0000ff> Start of turn " +
-					turn + "</font color>"));
+			histDelta.append(Html.fromHtml("<br><b><font color=#" + QtColor.Blue + 
+					">Start of turn " + turn + "</font color></b>"));
 			break;
 		case ClockStart:
 			remainingTime[toSpot % 2] = msg.readShort();

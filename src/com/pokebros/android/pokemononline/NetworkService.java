@@ -192,12 +192,6 @@ public class NetworkService extends Service {
 	        note.setLatestEventInfo(this, "POAndroid", "You've been challenged!", PendingIntent.getActivity(this, 0,
 	                intent, Intent.FLAG_ACTIVITY_NEW_TASK));
 			noteMan.notify(NOTIFICATION+1, note);
-/*			Baos b = new Baos();
-			b.write(1);
-			b.putInt(opponent);
-			b.putInt(clauses);
-			b.write(mode);
-	        socket.sendMessage(b, Command.ChallengeStuff);*/
 			break;
 		case ChannelsList:
 			int numChannels = msg.readInt();

@@ -87,6 +87,11 @@ public class ChatActivity extends Activity {
                 return false;
             }
         });
+        // Handle challenges
+        System.out.println("INTENT: "+getIntent().toString());
+        if (getIntent().hasExtra("opponent")) {
+                showDialog(0);
+        }
 	}
 	
 	@Override
