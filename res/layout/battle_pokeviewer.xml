@@ -179,8 +179,7 @@
 		android:layout_height="wrap_content" android:layout_weight="16"
 		android:layout_width="match_parent" android:id="@+id/pokeViewLayout1">
 		<ImageView android:src="@drawable/icon"
-			android:layout_height="wrap_content" android:id="@+id/imageView1"
-			android:layout_width="wrap_content" android:layout_gravity="center"></ImageView>
+			android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_gravity="center" android:id="@+id/pokeViewIcon1"></ImageView>
 		<LinearLayout android:id="@+id/linearLayout1"
 			android:layout_height="wrap_content" android:orientation="vertical"
 			android:layout_width="wrap_content">
@@ -199,14 +198,13 @@
 		android:layout_height="wrap_content" android:layout_weight="16"
 		android:layout_width="match_parent" android:id="@+id/pokeViewLayout2">
 		<ImageView android:src="@drawable/icon"
-			android:layout_height="wrap_content" android:id="@+id/imageView2"
-			android:layout_width="wrap_content" android:layout_gravity="center"></ImageView>
+			android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_gravity="center" android:id="@+id/pokeViewIcon2"></ImageView>
 		<LinearLayout android:id="@+id/linearLayout2"
 			android:layout_height="wrap_content" android:orientation="vertical"
 			android:layout_width="wrap_content">
 			<TextView android:layout_height="wrap_content" android:text="pokename2"
 				android:id="@+id/pokename2" android:layout_width="wrap_content"
-				android:textColor="#000000"></TextView>
+				android:textColor="#000000" android:textStyle="bold"></TextView>
 			<TextView android:layout_height="wrap_content" android:text="hp2"
 				android:id="@+id/hp2" android:layout_width="wrap_content"
 				android:textColor="#000000"></TextView>
@@ -217,14 +215,13 @@
 		android:layout_height="wrap_content" android:layout_weight="16"
 		android:layout_width="match_parent" android:id="@+id/pokeViewLayout3">
 		<ImageView android:src="@drawable/icon"
-			android:layout_height="wrap_content" android:id="@+id/imageView3"
-			android:layout_width="wrap_content" android:layout_gravity="center"></ImageView>
+			android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_gravity="center" android:id="@+id/pokeViewIcon3"></ImageView>
 		<LinearLayout android:id="@+id/linearLayout3"
 			android:layout_height="wrap_content" android:orientation="vertical"
 			android:layout_width="wrap_content">
 			<TextView android:layout_height="wrap_content" android:text="pokename3"
 				android:id="@+id/pokename3" android:layout_width="wrap_content"
-				android:textColor="#000000"></TextView>
+				android:textColor="#000000" android:textStyle="bold"></TextView>
 			<TextView android:layout_height="wrap_content" android:text="hp3"
 				android:id="@+id/hp3" android:layout_width="wrap_content"
 				android:textColor="#000000"></TextView>
@@ -235,14 +232,13 @@
 		android:layout_height="wrap_content" android:layout_weight="16"
 		android:layout_width="match_parent" android:id="@+id/pokeViewLayout4">
 		<ImageView android:src="@drawable/icon"
-			android:layout_height="wrap_content" android:id="@+id/imageView4"
-			android:layout_width="wrap_content" android:layout_gravity="center"></ImageView>
+			android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_gravity="center" android:id="@+id/pokeViewIcon4"></ImageView>
 		<LinearLayout android:id="@+id/linearLayout4"
 			android:layout_height="wrap_content" android:orientation="vertical"
 			android:layout_width="wrap_content">
 			<TextView android:layout_height="wrap_content" android:text="pokename4"
 				android:id="@+id/pokename4" android:layout_width="wrap_content"
-				android:textColor="#000000"></TextView>
+				android:textColor="#000000" android:textStyle="bold"></TextView>
 			<TextView android:layout_height="wrap_content" android:text="hp4"
 				android:id="@+id/hp4" android:layout_width="wrap_content"
 				android:textColor="#000000"></TextView>
@@ -253,14 +249,13 @@
 		android:layout_height="wrap_content" android:layout_weight="16"
 		android:layout_width="match_parent" android:id="@+id/pokeViewLayout5">
 		<ImageView android:src="@drawable/icon"
-			android:layout_height="wrap_content" android:id="@+id/imageView5"
-			android:layout_width="wrap_content" android:layout_gravity="center"></ImageView>
+			android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_gravity="center" android:id="@+id/pokeViewIcon5"></ImageView>
 		<LinearLayout android:id="@+id/linearLayout5"
 			android:layout_height="wrap_content" android:orientation="vertical"
 			android:layout_width="wrap_content">
 			<TextView android:layout_height="wrap_content" android:text="pokename5"
 				android:id="@+id/pokename5" android:layout_width="wrap_content"
-				android:textColor="#000000"></TextView>
+				android:textColor="#000000" android:textStyle="bold"></TextView>
 			<TextView android:layout_height="wrap_content" android:text="hp5"
 				android:id="@+id/hp5" android:layout_width="wrap_content"
 				android:textColor="#000000"></TextView>
@@ -271,14 +266,13 @@
 		android:layout_height="wrap_content" android:layout_weight="16"
 		android:layout_width="match_parent" android:id="@+id/pokeViewLayout6">
 		<ImageView android:src="@drawable/icon"
-			android:layout_height="wrap_content" android:id="@+id/imageView6"
-			android:layout_width="wrap_content" android:layout_gravity="center"></ImageView>
+			android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_gravity="center" android:id="@+id/pokeViewIcon6"></ImageView>
 		<LinearLayout android:id="@+id/linearLayout6"
 			android:layout_height="wrap_content" android:orientation="vertical"
 			android:layout_width="wrap_content">
 			<TextView android:layout_height="wrap_content" android:text="pokename6"
 				android:id="@+id/pokename6" android:layout_width="wrap_content"
-				android:textColor="#000000"></TextView>
+				android:textColor="#000000" android:textStyle="bold"></TextView>
 			<TextView android:layout_height="wrap_content" android:text="hp6"
 				android:id="@+id/hp6" android:layout_width="wrap_content"
 				android:textColor="#000000"></TextView>
