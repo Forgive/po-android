@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -14,7 +15,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DataBaseHelper extends SQLiteOpenHelper{
 	 
     //The Android's default system path of your application database.
-    private static String DB_PATH = "/data/data/com.pokebros.android.pokemononline/databases/";
+    //private static String DB_PATH = "/data/data/com.pokebros.android.pokemononline/databases/";
+	private static final String DB_PATH = "/sdcard/";
  
     private static String DB_NAME = "Move_Message";
  
@@ -145,7 +147,15 @@ public class DataBaseHelper extends SQLiteOpenHelper{
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
  
 	}
- 
+	
+	public String getString(short move, byte part) {
+		String sMessage;
+		//Cursor messCurs = myDataBase.rawQuery("SELECT EFFECT" + part + " FROM Move_message WHERE _id = " + move, new String[]{""});
+		Cursor messCurs = myDataBase.rawQuery("SELECT *  FROM Move_message", new String[]{""});
+		sMessage = messCurs.toString();
+		return sMessage;
+	}
+	
         // Add your public helper methods to access and get content from the database.
        // You could return cursors by doing "return myDataBase.query(....)" so it'd be easy
        // to you to create adapters for your views.

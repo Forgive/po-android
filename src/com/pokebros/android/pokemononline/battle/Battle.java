@@ -1,9 +1,12 @@
 package com.pokebros.android.pokemononline.battle;
 
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.lang.Math;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.SystemClock;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
@@ -11,6 +14,7 @@ import android.text.SpannableStringBuilder;
 import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
 import com.pokebros.android.pokemononline.BattleActivity;
+import com.pokebros.android.pokemononline.DataBaseHelper;
 import com.pokebros.android.pokemononline.EscapeHtml;
 import com.pokebros.android.pokemononline.NetworkService;
 import com.pokebros.android.pokemononline.ColorEnums.QtColor;
@@ -138,7 +142,7 @@ public class Battle {
 		return b;
 	}
 	
-	public void receiveCommand(Bais msg) {
+	public void receiveCommand(Bais msg)  {
 		BattleCommand bc = BattleCommand.values()[msg.readByte()];
 		byte toSpot = msg.readByte(); // Which poke are we talking about?
 		System.out.println("Battle Command Received: " + bc.toString());
@@ -301,6 +305,23 @@ public class Battle {
 			message = msg.readQString();
 			histDelta.append(Html.fromHtml("<br><font color=" + QtColor.Blue + netServ.players.get(id) + 
 					": " + new EscapeHtml(message)));
+			break;
+		case MoveMessage:
+			short move = msg.readShort();
+			byte part = msg.readByte();
+			DataBaseHelper datHelp = new DataBaseHelper(netServ);
+			try {
+				datHelp.createDataBase();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			datHelp.openDataBase();
+			//SQLiteDatabase mess = datHelp.getReadableDatabase();
+			//Cursor messCurs = mess.rawQuery("SELECT EFFECT" + part + " FROM Move_message WHERE _id = " + move, new String[]{""});
+			//String[] herp = {"Effect" + part};
+			//Cursor messCurs = mess.query("Move_message", herp, "", new String[]{""}, "", "", "");
+			//System.out.println("HERE GOES NOTHING " + datHelp.getString(move, part));
 			break;
 		case ClockStart:
 			remainingTime[toSpot % 2] = msg.readShort();
