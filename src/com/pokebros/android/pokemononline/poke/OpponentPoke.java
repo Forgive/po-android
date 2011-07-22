@@ -6,7 +6,7 @@ import com.pokebros.android.pokemononline.SerializeBytes;
 
 // This class represents the Opponent's poke during a battle.
 public class OpponentPoke extends SerializeBytes {
-	String nick = "";
+	String rnick, nick = "";
 	int fullStatus = 0;
 	UniqueID uID = new UniqueID();
 	boolean shiny = false;
@@ -15,9 +15,12 @@ public class OpponentPoke extends SerializeBytes {
 	byte level = 0;
 	
 	public String nick() { return nick; }
-	public OpponentPoke(Bais msg) {
+	public String rnick() { return rnick; }
+	public OpponentPoke(Bais msg, int player) {
 		uID = new UniqueID(msg);
-		nick = msg.readQString();
+		rnick = nick = msg.readQString();
+		if (player == 0)
+			nick = "The foe's " + nick;
 		lifePercent = msg.readByte();
 		fullStatus = msg.readInt();
 		gender = msg.readByte();

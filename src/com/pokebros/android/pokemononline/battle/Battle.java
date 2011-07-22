@@ -10,6 +10,7 @@ import android.text.SpannableStringBuilder;
 import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
 import com.pokebros.android.pokemononline.BattleActivity;
+import com.pokebros.android.pokemononline.EscapeHtml;
 import com.pokebros.android.pokemononline.QtColor;
 import com.pokebros.android.pokemononline.player.PlayerInfo;
 import com.pokebros.android.pokemononline.poke.OpponentPoke;
@@ -129,24 +130,51 @@ public class Battle {
 			boolean isSilent = msg.readBool();
 			byte fromSpot = msg.readByte();
 			if(msg.available() > 0) // this is the first time you've seen it
-				pokes[toSpot % 2][toSpot / 2] = new OpponentPoke(msg);
+				pokes[toSpot % 2][toSpot / 2] = new OpponentPoke(msg, toSpot%2);
 			histDelta.append("\n" + (playerBySpot(toSpot).nick() + " sent out " + 
-					currentPokeBySpot(toSpot).nick() + "!"));
+					currentPokeBySpot(toSpot).rnick() + "!"));
 			break;
 		case SendBack:
 			histDelta.append("\n" + (playerBySpot(toSpot).nick() + " called " + 
-					currentPokeBySpot(toSpot).nick() + " back!"));
+					currentPokeBySpot(toSpot).rnick() + " back!"));
 			break;
 		case UseAttack:
 			short attack = msg.readShort();
-			histDelta.append("\n" + playerBySpot(toSpot) + "'s " + 
-					currentPokeBySpot(toSpot).nick() +
+			histDelta.append("\n" + 	currentPokeBySpot(toSpot).nick() +
 					" used " + MoveName.values()[attack].toString() + "!");
 			break;
 		case BeginTurn:
 			int turn = msg.readInt();
-			histDelta.append(Html.fromHtml("<br><b><font color=#" + QtColor.Blue + 
-					">Start of turn " + turn + "</font color></b>"));
+			histDelta.append(Html.fromHtml("<br><b><font color=" + QtColor.Blue + 
+					"Start of turn " + turn + "</font color></b>"));
+			break;
+		case Ko:
+			histDelta.append(Html.fromHtml("<br><b>" + new EscapeHtml(currentPokeBySpot(toSpot).nick()) +
+					" fainted!</b>"));
+			break;
+		case Hit:
+			byte number = msg.readByte();
+			histDelta.append("\nHit " + number + " times");
+		case Effective:
+			byte eff = msg.readByte();
+			switch (eff) {
+			case 0:
+				histDelta.append("\nIt had no effect!");
+				break;
+			case 1:
+			case 2:
+				histDelta.append(Html.fromHtml("<br><font color=" + QtColor.Gray +
+						"It's not very effective...</font color>"));
+				break;
+			case 8:
+			case 16:
+				histDelta.append(Html.fromHtml("<br><font color=" + QtColor.Blue +
+						"It's super effective!</fontColor>"));
+				break;
+			}
+			break;
+		case CriticalHit:
+			histDelta.append(Html.fromHtml("<br><font color=#6b0000>A critical hit!</font color>"));
 			break;
 		case ClockStart:
 			remainingTime[toSpot % 2] = msg.readShort();
