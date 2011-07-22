@@ -11,10 +11,12 @@ import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
 import com.pokebros.android.pokemononline.BattleActivity;
 import com.pokebros.android.pokemononline.EscapeHtml;
-import com.pokebros.android.pokemononline.QtColor;
+import com.pokebros.android.pokemononline.ColorEnums.QtColor;
+import com.pokebros.android.pokemononline.ColorEnums.StatusColor;
 import com.pokebros.android.pokemononline.player.PlayerInfo;
 import com.pokebros.android.pokemononline.poke.OpponentPoke;
 import com.pokebros.android.pokemononline.poke.UniqueID;
+import com.pokebros.android.pokemononline.poke.PokeEnums.Status;
 
 public class Battle {
 	ArrayList<Boolean> sub = new ArrayList<Boolean>();
@@ -154,7 +156,8 @@ public class Battle {
 			break;
 		case Hit:
 			byte number = msg.readByte();
-			histDelta.append("\nHit " + number + " times");
+			histDelta.append("\nHit " + number + " time" + ((number > 1) ? "s!" : "!"));
+			break;
 		case Effective:
 			byte eff = msg.readByte();
 			switch (eff) {
@@ -175,6 +178,30 @@ public class Battle {
 			break;
 		case CriticalHit:
 			histDelta.append(Html.fromHtml("<br><font color=#6b0000>A critical hit!</font color>"));
+			break;
+		case Miss:
+			histDelta.append("\nThe attack of " + currentPokeBySpot(toSpot).nick() + " missed!");
+			break;
+		case Avoid:
+			histDelta.append("\n" + currentPokeBySpot(toSpot).nick() + " avoided the attack!");
+			break;
+		case StatusChange:
+			final String[] statusChangeMessages = {
+					" is paralyzed! It may be unable to move!",
+					" fell asleep!",
+					" was frozen solid!",
+					" was burned!",
+					" was poisoned!",
+					" was badly poisoned!",
+					" became confused!"
+			};
+			byte status = msg.readByte();
+			boolean multipleTurns = msg.readBool();
+			if (status > Status.Fine.ordinal() && status <= Status.Confused.ordinal()) {
+				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(status) + 
+						currentPokeBySpot(toSpot).nick() + statusChangeMessages[status-1 +
+                        ((status == Status.Poisoned.ordinal() && multipleTurns) ? 1 : 0)] + "</font color>"));
+			}
 			break;
 		case ClockStart:
 			remainingTime[toSpot % 2] = msg.readShort();
