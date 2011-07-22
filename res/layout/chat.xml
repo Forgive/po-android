@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Container -->
+<de.marcreichelt.android.ChatRealViewSwitcher
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/chatPokeSwitcher">
+<!-- Begin Page 1 -->
+   <LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+    <TextView android:layout_height="wrap_content" android:textSize="15sp" android:layout_gravity="right" android:id="@+id/playerlisttitle" android:text="@string/player_list" android:layout_width="wrap_content" android:textStyle="bold"></TextView>
+    <ListView android:layout_height="wrap_content" android:id="@+id/listView1" android:layout_width="match_parent"></ListView>
+    
+</LinearLayout>
+   <!-- End Page 1 -->
+   <!-- Begin Page2 -->
 <LinearLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical"
@@ -33,3 +49,15 @@
 		>
 		</EditText>
 </LinearLayout>
+<!-- End Page 2 -->
+<!-- Begin Page 3 -->
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+    <TextView android:layout_height="wrap_content" android:textSize="15sp" android:layout_width="wrap_content" android:layout_gravity="left" android:id="@+id/channellisttitle" android:text="@string/channel_list" android:textStyle="bold"></TextView>
+    <ListView android:layout_height="wrap_content" android:layout_width="match_parent" android:layout_gravity="left" android:id="@+id/channellist"></ListView>
+</LinearLayout>
+<!-- End Page 3 -->
+</de.marcreichelt.android.ChatRealViewSwitcher>

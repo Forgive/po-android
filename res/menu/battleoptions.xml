@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu
   xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/pokeviewer" android:title="@string/viewpokemon"></item>
     <item android:title="@string/forfeit" android:id="@+id/forfeit">
         <menu>
             <item android:id="@+id/forfeit_yes" android:title="@string/ok" android:titleCondensed="@string/ok"></item>

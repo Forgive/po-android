@@ -1,5 +1,7 @@
 package com.pokebros.android.pokemononline;
 
+import de.marcreichelt.android.ChatRealViewSwitcher;
+import de.marcreichelt.android.RealViewSwitcher;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -16,6 +18,7 @@ import android.os.Messenger;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnKeyListener;
 import android.widget.ScrollView;
@@ -29,8 +32,9 @@ public class ChatActivity extends Activity {
 	private ScrollView chatScroll;
 	private TextView chatBox;
 	private EditText chatInput;
-	private boolean inBattle;
-    private Handler handler = new Handler() {
+	private ChatRealViewSwitcher chatViewSwitcher;
+
+	private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
         	if (msg.getData().containsKey("ChannelMessage")) {
@@ -43,6 +47,7 @@ public class ChatActivity extends Activity {
         	}
         }
     };
+    
     private Messenger messenger = new Messenger(handler);
 	private ServiceConnection connection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
@@ -66,10 +71,11 @@ public class ChatActivity extends Activity {
         setContentView(R.layout.chat);
         chatScroll = (ScrollView) findViewById(R.id.chatScroll);
     	chatBox = (TextView)findViewById(R.id.chatBox);
-        
+    	chatViewSwitcher = (ChatRealViewSwitcher)findViewById(R.id.chatPokeSwitcher);
+    	chatViewSwitcher.setCurrentScreen(1);
         Intent intent = new Intent(ChatActivity.this, NetworkService.class);
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
-//        startService(intent);//new Intent(this, NetworkService.class));
+        //startService(intent);//new Intent(this, NetworkService.class));
         chatInput = (EditText) findViewById(R.id.chatInput);
         chatInput.setOnKeyListener(new OnKeyListener() {
             public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -156,6 +162,13 @@ public class ChatActivity extends Activity {
     	}
     	return true;
     }
+    
+    @Override
+	public boolean dispatchTouchEvent(MotionEvent e) {
+		if(chatViewSwitcher.onTouchEvent(e))
+			return true;
+		return super.dispatchTouchEvent(e);
+	}
 	
     @Override
     public void onDestroy() {
@@ -163,3 +176,5 @@ public class ChatActivity extends Activity {
     	super.onDestroy();
     }
 }
+
+

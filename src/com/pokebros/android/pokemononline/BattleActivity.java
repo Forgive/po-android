@@ -204,9 +204,6 @@ public class BattleActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
     	switch (item.getItemId())
         {
-            case R.id.pokeviewer:
-                    //TODO: Switch to Pokeviewer
-            break;
     case R.id.forfeit_yes:
     	//TODO: implement forfeit
     	break;

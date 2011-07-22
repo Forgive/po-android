@@ -1,11 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- <LinearLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:orientation="vertical"
-  android:layout_width="fill_parent"
-  android:layout_height="fill_parent" 
-  android:id="@+id/battle_pokeviewerlayout">-->
-  
 <de.marcreichelt.android.RealViewSwitcher
   android:layout_width="fill_parent"
   android:layout_height="fill_parent"
@@ -184,7 +177,7 @@
 			android:layout_height="wrap_content" android:orientation="vertical"
 			android:layout_width="wrap_content">
 			<TextView android:layout_height="wrap_content" android:text="pokename1"
-				android:id="@+id/pokename1" android:textColor="#000000"
+				android:id="@+id/pokename1" android:textColor="#000000" android:textSize="15sp"
 				android:layout_width="wrap_content" android:textStyle="bold"></TextView>
 			<TextView android:layout_height="wrap_content" android:text="hp1"
 				android:id="@+id/hp1" android:textColor="#000000"
@@ -203,7 +196,7 @@
 			android:layout_height="wrap_content" android:orientation="vertical"
 			android:layout_width="wrap_content">
 			<TextView android:layout_height="wrap_content" android:text="pokename2"
-				android:id="@+id/pokename2" android:layout_width="wrap_content"
+				android:id="@+id/pokename2" android:layout_width="wrap_content" android:textSize="15sp"
 				android:textColor="#000000" android:textStyle="bold"></TextView>
 			<TextView android:layout_height="wrap_content" android:text="hp2"
 				android:id="@+id/hp2" android:layout_width="wrap_content"
@@ -219,7 +212,7 @@
 		<LinearLayout android:id="@+id/linearLayout3"
 			android:layout_height="wrap_content" android:orientation="vertical"
 			android:layout_width="wrap_content">
-			<TextView android:layout_height="wrap_content" android:text="pokename3"
+			<TextView android:layout_height="wrap_content" android:text="pokename3" android:textSize="15sp"
 				android:id="@+id/pokename3" android:layout_width="wrap_content"
 				android:textColor="#000000" android:textStyle="bold"></TextView>
 			<TextView android:layout_height="wrap_content" android:text="hp3"
@@ -236,7 +229,7 @@
 		<LinearLayout android:id="@+id/linearLayout4"
 			android:layout_height="wrap_content" android:orientation="vertical"
 			android:layout_width="wrap_content">
-			<TextView android:layout_height="wrap_content" android:text="pokename4"
+			<TextView android:layout_height="wrap_content" android:text="pokename4" android:textSize="15sp"
 				android:id="@+id/pokename4" android:layout_width="wrap_content"
 				android:textColor="#000000" android:textStyle="bold"></TextView>
 			<TextView android:layout_height="wrap_content" android:text="hp4"
@@ -253,7 +246,7 @@
 		<LinearLayout android:id="@+id/linearLayout5"
 			android:layout_height="wrap_content" android:orientation="vertical"
 			android:layout_width="wrap_content">
-			<TextView android:layout_height="wrap_content" android:text="pokename5"
+			<TextView android:layout_height="wrap_content" android:text="pokename5" android:textSize="15sp"
 				android:id="@+id/pokename5" android:layout_width="wrap_content"
 				android:textColor="#000000" android:textStyle="bold"></TextView>
 			<TextView android:layout_height="wrap_content" android:text="hp5"
@@ -270,7 +263,7 @@
 		<LinearLayout android:id="@+id/linearLayout6"
 			android:layout_height="wrap_content" android:orientation="vertical"
 			android:layout_width="wrap_content">
-			<TextView android:layout_height="wrap_content" android:text="pokename6"
+			<TextView android:layout_height="wrap_content" android:text="pokename6" android:textSize="15sp"
 				android:id="@+id/pokename6" android:layout_width="wrap_content"
 				android:textColor="#000000" android:textStyle="bold"></TextView>
 			<TextView android:layout_height="wrap_content" android:text="hp6"

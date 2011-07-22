@@ -36,7 +36,7 @@ import android.widget.Scroller;
  * @author Marc Reichelt, <a href="http://www.marcreichelt.de/">http://www.marcreichelt.de/</a>
  * @version 0.1.0
  */
-public class RealViewSwitcher extends ViewGroup {
+public class ChatRealViewSwitcher extends ViewGroup {
 
 	// TODO: This class does the basic stuff right now, but it would be cool to have certain things implemented,
 	// e.g. using an adapter for getting views instead of setting them directly, memory management and the
@@ -71,19 +71,19 @@ public class RealViewSwitcher extends ViewGroup {
 	protected float mLastMotionX;
 	protected int mTouchSlop;
 	protected int mMaximumVelocity;
-	protected int mCurrentScreen;
+	protected int mCurrentScreen = 1;
 	protected int mNextScreen = INVALID_SCREEN;
 
 	protected boolean mFirstLayout = true;
 
 	protected OnScreenSwitchListener mOnScreenSwitchListener;
 
-	public RealViewSwitcher(Context context) {
+	public ChatRealViewSwitcher(Context context) {
 		super(context);
 		init();
 	}
 
-	public RealViewSwitcher(Context context, AttributeSet attrs) {
+	public ChatRealViewSwitcher(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init();
 	}
@@ -199,7 +199,7 @@ public class RealViewSwitcher extends ViewGroup {
 				velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
 				int velocityX = (int) velocityTracker.getXVelocity();
 
-				if (velocityX > SNAP_VELOCITY && mCurrentScreen > 0) {
+				if (velocityX > SNAP_VELOCITY && mCurrentScreen > 0) { //XXX
 					// Fling hard enough to move left
 					snapToScreen(mCurrentScreen - 1);
 				} else if (velocityX < -SNAP_VELOCITY && mCurrentScreen < getChildCount() - 1) {
@@ -245,7 +245,7 @@ public class RealViewSwitcher extends ViewGroup {
 
 		mNextScreen = whichScreen;
 
-		final int newX = whichScreen * getWidth();
+		final int newX = whichScreen * getWidth() / 2 + getWidth()/2; //XXX
 		final int delta = newX - getScrollX();
 		mScroller.startScroll(getScrollX(), 0, delta, 0, Math.abs(delta) * 2);
 		invalidate();
