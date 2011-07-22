@@ -53,9 +53,9 @@ public class Bais extends ByteArrayInputStream {
 		return read()*256*256*256 + read()*256*256 + read()*256 + read();*/
 		int i = 0;
 		i |= (read() << 24);
-		i |= ((read() & 0xff0000)  << 16);
-		i |= ((read() & 0xff00) << 8);
-		i |= ((read() & 0xff));
+		i |= (read() << 16);
+		i |= (read() << 8);
+		i |=  read();
 		
 		return i;
 	}
