@@ -150,7 +150,8 @@ public class ChatActivity extends Activity {
     			break;	
     		}
 		case R.id.chat_disconnect:
-    		finish();
+    		netServ.disconnect();
+			finish();
     		break;
     	}
     	return true;

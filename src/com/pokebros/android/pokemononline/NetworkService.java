@@ -298,4 +298,10 @@ public class NetworkService extends Service {
 	protected void herp() {
 		System.out.println("HERP");
 	}
+	
+    public void disconnect() {
+    	//TODO: Send logout message and disconnect socket
+    	this.stopForeground(true);
+    }
+	
 }
