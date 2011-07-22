@@ -60,7 +60,7 @@ public class ColorEnums {
 		
 	public static class StatusColor {
 		private final String color;
-		public StatusColor(byte status) {
+		public StatusColor(int status) {
 			switch (Status.values()[status]) {
 			case Koed: color = "#171ba>"; break;
 			case Fine: color = TypeColor.Normal.toString(); break;

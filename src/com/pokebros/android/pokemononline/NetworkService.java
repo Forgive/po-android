@@ -38,8 +38,8 @@ public class NetworkService extends Service {
 	private PlayerInfo mePlayer = new PlayerInfo();
 	protected Battle battle;// = new Battle();
 	
-	private Hashtable<Integer, Channel> channels = new Hashtable<Integer, Channel>();
-	private Hashtable<Integer, PlayerInfo> players = new Hashtable<Integer, PlayerInfo>();
+	protected Hashtable<Integer, Channel> channels = new Hashtable<Integer, Channel>();
+	public Hashtable<Integer, PlayerInfo> players = new Hashtable<Integer, PlayerInfo>();
 	
 	int bID = -1;
 	public class LocalBinder extends Binder {
@@ -278,7 +278,7 @@ public class NetworkService extends Service {
 				// Start the battle
 				if(pID1 == 0) { // This is us!
 					battle = new Battle(conf, team, players.get(conf.id(0)),
-						players.get(conf.id(1)), mePlayer.id(), bID);
+						players.get(conf.id(1)), mePlayer.id(), bID, this);
 					System.out.println("The battle between " + mePlayer.nick() + 
 						" and " + players.get(pID2).nick() + " has begun!");
 					Intent in = new Intent(this, BattleActivity.class);

@@ -2,6 +2,7 @@ package com.pokebros.android.pokemononline.battle;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.lang.Math;
 
 import android.os.SystemClock;
 import android.text.Html;
@@ -11,12 +12,16 @@ import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
 import com.pokebros.android.pokemononline.BattleActivity;
 import com.pokebros.android.pokemononline.EscapeHtml;
+import com.pokebros.android.pokemononline.NetworkService;
 import com.pokebros.android.pokemononline.ColorEnums.QtColor;
 import com.pokebros.android.pokemononline.ColorEnums.StatusColor;
+import com.pokebros.android.pokemononline.ColorEnums.TypeColor;
 import com.pokebros.android.pokemononline.player.PlayerInfo;
 import com.pokebros.android.pokemononline.poke.OpponentPoke;
 import com.pokebros.android.pokemononline.poke.UniqueID;
 import com.pokebros.android.pokemononline.poke.PokeEnums.Status;
+import com.pokebros.android.pokemononline.poke.PokeEnums.StatusFeeling;
+import com.pokebros.android.pokemononline.poke.PokeEnums.Stat;
 
 public class Battle {
 	ArrayList<Boolean> sub = new ArrayList<Boolean>();
@@ -34,6 +39,7 @@ public class Battle {
 	public byte me = 0, opp = 1;
 	int gen = 0;
 	int bID = 0;
+	private NetworkService netServ;
 	
 	BattleTeam myTeam;
 	
@@ -43,7 +49,8 @@ public class Battle {
 	public SpannableStringBuilder hist = new SpannableStringBuilder();
 	public SpannableStringBuilder histDelta = new SpannableStringBuilder();
 	
-	public Battle(BattleConf conf, BattleTeam team, PlayerInfo p1, PlayerInfo p2, int meID, int bID) {
+	public Battle(BattleConf conf, BattleTeam team, PlayerInfo p1, PlayerInfo p2, int meID, int bID, NetworkService ns) {
+		netServ = ns;
 		mode = conf.mode; // singles, doubles, triples
 		this.bID = bID;
 		myTeam = team;
@@ -185,6 +192,12 @@ public class Battle {
 		case Avoid:
 			histDelta.append("\n" + currentPokeBySpot(toSpot).nick() + " avoided the attack!");
 			break;
+		case StatChange:
+			byte stat = msg.readByte(), boost=msg.readByte();
+			histDelta.append("\n" + currentPokeBySpot(toSpot).nick() + "'s " +
+					netServ.getString(Stat.values()[stat].string) + (Math.abs(boost) > 1 ? " sharply" : "")
+					+ (boost > 0 ? " rose!" : " fell!"));
+			break;
 		case StatusChange:
 			final String[] statusChangeMessages = {
 					" is paralyzed! It may be unable to move!",
@@ -200,8 +213,86 @@ public class Battle {
 			if (status > Status.Fine.ordinal() && status <= Status.Confused.ordinal()) {
 				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(status) + 
 						currentPokeBySpot(toSpot).nick() + statusChangeMessages[status-1 +
-                        ((status == Status.Poisoned.ordinal() && multipleTurns) ? 1 : 0)] + "</font color>"));
+                        (status == Status.Poisoned.ordinal() && multipleTurns ? 1 : 0)] + "</font color>"));
 			}
+			break;
+		case AbsStatusChange:
+			// TODO
+			break;
+		case AlreadyStatusMessage:
+			status = msg.readByte();
+			histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(status) +
+					currentPokeBySpot(toSpot).nick() + " is already " + Status.values()[status] +
+					".</font color>"));
+			break;
+		case StatusMessage:
+			status = msg.readByte();
+			switch (StatusFeeling.values()[status]) {
+			case FeelConfusion:
+				histDelta.append(Html.fromHtml("<br><font color=" + TypeColor.Ghost +
+						currentPokeBySpot(toSpot).nick() + " is confused!</font color>"));
+				break;
+			case HurtConfusion:
+				histDelta.append(Html.fromHtml("<br><font color=" + TypeColor.Ghost +
+						"It hurt itself in its confusion!</font color>"));
+				break;
+			case FreeConfusion:
+				histDelta.append(Html.fromHtml("<br><font color=" + TypeColor.Dark +
+						currentPokeBySpot(toSpot).nick() + " snapped out of its confusion!</font color>"));
+				break;
+			case PrevParalysed:
+				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Paralysed.ordinal())+
+						currentPokeBySpot(toSpot).nick() + " is paralyzed! It can't move!</font color>"));
+				break;
+			case FeelAsleep:
+				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Asleep.ordinal()) +
+						currentPokeBySpot(toSpot).nick() + " is fast asleep!</font color>"));
+				break;
+			case FreeAsleep:
+				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Asleep.ordinal()) +
+						currentPokeBySpot(toSpot).nick() + " woke up!</font color>"));
+				break;
+			case HurtBurn:
+				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Burnt.ordinal()) +
+						currentPokeBySpot(toSpot).nick() + " is hurt by its burn!</font color>"));
+				break;
+			case HurtPoison:
+				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Poisoned.ordinal()) +
+						currentPokeBySpot(toSpot).nick() + " is hurt by poison!</font color>"));
+				break;
+			case PrevFrozen:
+				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Frozen.ordinal())+
+						currentPokeBySpot(toSpot).nick() + " is frozen solid!</font color>"));
+				break;
+			case FreeFrozen:
+				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Frozen.ordinal()) +
+						currentPokeBySpot(toSpot).nick() + " thawed out!</font color>"));
+				break;
+			}
+			break;
+		case Failed:
+			histDelta.append("\nBut it failed!");
+			break;
+		case BattleChat:
+		case EndMessage:
+			String message = msg.readQString();
+			if (message.equals(""))
+				break;
+			histDelta.append(Html.fromHtml("<br><font color=" + (toSpot !=0 ? "#5811b1>" : QtColor.Green) +
+					"<b>" + new EscapeHtml(playerBySpot(toSpot).nick()) + ": </b></font color>" +
+					new EscapeHtml(message)));
+			break;
+		case Spectating:
+			boolean come = msg.readBool();
+			int id = msg.readInt();
+			// TODO addSpectator(come, id);
+			break;
+		case SpectatorChat:
+			// TODO if (ignoreSpecs) break;
+			id = msg.readInt();
+			message = msg.readQString();
+			histDelta.append(Html.fromHtml("<br><font color=" + QtColor.Blue + netServ.players.get(id) + 
+					": " + new EscapeHtml(message)));
 			break;
 		case ClockStart:
 			remainingTime[toSpot % 2] = msg.readShort();
