@@ -8,9 +8,9 @@ import com.pokebros.android.pokemononline.battle.BattleMove;
 // This class represents your poke during a battle.
 public class BattlePoke extends SerializeBytes {
 	UniqueID uID = new UniqueID();
-	String nick = "";
-	short currentHP = 0;
-	short totalHP = 0;
+	public String nick = "";
+	public short currentHP = 0;
+	public short totalHP = 0;
 	short item = 0;
 	short ability = 0;
 	int fullStatus = 0;

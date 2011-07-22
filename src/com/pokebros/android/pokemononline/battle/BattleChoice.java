@@ -50,6 +50,10 @@ class AttackChoice extends Choice {
 class SwitchChoice extends Choice {
 	byte pokeSlot = 0;
 	
+	public SwitchChoice(byte slot) {
+		pokeSlot = slot;
+	}
+	
 	public SwitchChoice(Bais msg) {
 		pokeSlot = msg.readByte();
 	}

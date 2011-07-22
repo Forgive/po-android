@@ -23,13 +23,19 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class BattleActivity extends Activity {
+	public final static int SWIPE_TIME_THRESHOLD = 100;
+	
 	public Button[] attack = new Button[4];
 	public TextView[] timers = new TextView[2];
+	TextView[] pokeListNames = new TextView[6];
+	TextView[] pokeListHPs = new TextView[6];
+	LinearLayout[] pokeListButtons = new LinearLayout[6];
 	public TextView infoView;
 	public ScrollView infoScroll;
 	TextView[] names = new TextView[2];
@@ -51,7 +57,28 @@ public class BattleActivity extends Activity {
         attack[1] = (Button)findViewById(R.id.attack2);
         attack[2] = (Button)findViewById(R.id.attack3);
         attack[3] = (Button)findViewById(R.id.attack4);
+        
+        pokeListNames[0] = (TextView)findViewById(R.id.pokename1);
+        pokeListNames[1] = (TextView)findViewById(R.id.pokename2);
+        pokeListNames[2] = (TextView)findViewById(R.id.pokename3);
+        pokeListNames[3] = (TextView)findViewById(R.id.pokename4);
+        pokeListNames[4] = (TextView)findViewById(R.id.pokename5);
+        pokeListNames[5] = (TextView)findViewById(R.id.pokename6);
 
+        pokeListHPs[0] = (TextView)findViewById(R.id.hp1);
+        pokeListHPs[1] = (TextView)findViewById(R.id.hp2);
+        pokeListHPs[2] = (TextView)findViewById(R.id.hp3);
+        pokeListHPs[3] = (TextView)findViewById(R.id.hp4);
+        pokeListHPs[4] = (TextView)findViewById(R.id.hp5);
+        pokeListHPs[5] = (TextView)findViewById(R.id.hp6);
+        
+        pokeListButtons[0] = (LinearLayout)findViewById(R.id.pokeViewLayout1);
+        pokeListButtons[1] = (LinearLayout)findViewById(R.id.pokeViewLayout2);
+        pokeListButtons[2] = (LinearLayout)findViewById(R.id.pokeViewLayout3);
+        pokeListButtons[3] = (LinearLayout)findViewById(R.id.pokeViewLayout4);
+        pokeListButtons[4] = (LinearLayout)findViewById(R.id.pokeViewLayout5);
+        pokeListButtons[5] = (LinearLayout)findViewById(R.id.pokeViewLayout6);
+        
         infoView = (TextView)findViewById(R.id.infoWindow);
         infoScroll = (ScrollView)findViewById(R.id.infoScroll);
         realViewSwitcher = (RealViewSwitcher)findViewById(R.id.battlePokeSwitcher);
@@ -59,6 +86,8 @@ public class BattleActivity extends Activity {
         for(int i = 0; i < 4; i++) {
         	attack[i].setOnClickListener(battleListener);
         }
+        for(int i = 0; i < 6; i++)
+        	pokeListButtons[i].setOnClickListener(battleListener);
     }
 	
 	private Handler handler = new Handler() {
@@ -116,9 +145,14 @@ public class BattleActivity extends Activity {
 			Toast.makeText(BattleActivity.this, "Service connected",
                     Toast.LENGTH_SHORT).show();
 			
+			// Set the UI to display the correct info
+			// Load correct moveset
 	        ArrayList<String> moves = netServ.battle.myMoves(0);
 	        for(int i = 0; i < 4; i++)
 	        	attack[i].setText(moves.get(i));
+	        
+	        // We don't know which timer is which until the battle starts,
+	        // so set them here.
 	        timers[netServ.battle.me] = (TextView)findViewById(R.id.timerB);
 	        timers[netServ.battle.opp] = (TextView)findViewById(R.id.timerA);
 	        names[netServ.battle.me] = (TextView)findViewById(R.id.nameB);
@@ -127,12 +161,24 @@ public class BattleActivity extends Activity {
 	        names[netServ.battle.me].setText(netServ.battle.myNick());
 	        names[netServ.battle.opp].setText(netServ.battle.oppNick());
 	        
+	        // Load scrollback
 	        infoView.setText(netServ.battle.hist);
 	    	infoScroll.post(new Runnable() {
 	    		public void run() {
 	    			infoScroll.smoothScrollTo(0, infoView.getMeasuredHeight());
 	    		}
 	    	});
+	    	
+	    	// Load your pokes into the poke list
+	    	for(int i = 0; i < 6; i++) {
+	    		// XXX just do nick for now, should actually look up
+	    		// poke once we get the database stuff going
+	    		pokeListNames[i].setText(netServ.battle.myTeam.pokes[i].nick);
+	    		pokeListHPs[i].setText(netServ.battle.myTeam.pokes[i].currentHP +
+	    				"/" + netServ.battle.myTeam.pokes[i].totalHP);
+	    	}
+	    	
+	    	// Set up the UI polling and timer updating
 	        handler.postDelayed(updateUITask, 50);
 	        handler.postDelayed(updateTimeTask, 100);
 		}
@@ -162,32 +208,26 @@ public class BattleActivity extends Activity {
     		myView.setText(msg.obj.toString());
     	}
     }
-    
+    /*
     @Override
 	public boolean dispatchTouchEvent(MotionEvent e) {
 		if(realViewSwitcher.onTouchEvent(e))
 			return true;
 		return super.dispatchTouchEvent(e);
-	}
+	} */
     
     public OnClickListener battleListener = new OnClickListener() {
     	public void onClick(View v) {
-    		//attack!!
-    		if(v == findViewById(R.id.attack1)){
-    			System.out.println("Attack 1 pressed");
-    			netServ.socket.sendMessage(netServ.battle.constructAttack((byte)0), Command.BattleMessage);
-    		}
-    		else if(v == findViewById(R.id.attack2)){
-    			System.out.println("Attack 2 pressed");
-    			netServ.socket.sendMessage(netServ.battle.constructAttack((byte)1), Command.BattleMessage);
-    		}
-    		else if(v == findViewById(R.id.attack3)){
-    			System.out.println("Attack 3 pressed");
-    			netServ.socket.sendMessage(netServ.battle.constructAttack((byte)2), Command.BattleMessage);
-    		}
-    		else if(v == findViewById(R.id.attack4)){
-    			System.out.println("Attack 4 pressed");
-    			netServ.socket.sendMessage(netServ.battle.constructAttack((byte)3), Command.BattleMessage);
+    		int id = v.getId();
+    		// Check for attacks
+    		for(int i = 0; i < 4; i++)
+    			if(id == attack[i].getId())
+    				netServ.socket.sendMessage(netServ.battle.constructAttack((byte)i), Command.BattleMessage);
+    		for(int i = 0; i < 6; i++) {
+    			if(id == pokeListButtons[i].getId()) {
+    				//System.out.println("TOUCHED");
+    				netServ.socket.sendMessage(netServ.battle.constructSwitch((byte)i), Command.BattleMessage);
+    			}
     		}
     	}
     };

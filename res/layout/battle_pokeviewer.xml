@@ -3,7 +3,8 @@
   android:layout_width="fill_parent"
   android:layout_height="fill_parent"
   xmlns:android="http://schemas.android.com/apk/res/android"
-  android:id="@+id/battlePokeSwitcher">
+  android:id="@+id/battlePokeSwitcher"
+  android:clickable="true">
    <!-- Begin Page 1 -->
     <LinearLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
@@ -11,7 +12,8 @@
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent"
 	android:background="#FFFFFF"
-	android:id="@+id/battlelayout">
+	android:id="@+id/battlelayout"
+	android:clickable="true">
 	
 	<!-- START Player A Title -->
 	<LinearLayout
@@ -168,7 +170,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical" android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
-	<LinearLayout android:background="@drawable/battle_border"
+	<LinearLayout android:background="@drawable/battle_border_button"
 		android:layout_height="wrap_content" android:layout_weight="16"
 		android:layout_width="match_parent" android:id="@+id/pokeViewLayout1">
 		<ImageView android:src="@drawable/icon"
@@ -187,7 +189,7 @@
 				android:layout_width="wrap_content"></TextView>
 		</LinearLayout>
 	</LinearLayout>
-	<LinearLayout android:background="@drawable/battle_border"
+	<LinearLayout android:background="@drawable/battle_border_button"
 		android:layout_height="wrap_content" android:layout_weight="16"
 		android:layout_width="match_parent" android:id="@+id/pokeViewLayout2">
 		<ImageView android:src="@drawable/icon"
@@ -204,7 +206,7 @@
 			<TextView android:layout_height="wrap_content" android:text="TextView" android:textColor="#000000" android:layout_width="wrap_content" android:id="@+id/ability2"></TextView>
 		</LinearLayout>
 	</LinearLayout>
-	<LinearLayout android:background="@drawable/battle_border"
+	<LinearLayout android:background="@drawable/battle_border_button"
 		android:layout_height="wrap_content" android:layout_weight="16"
 		android:layout_width="match_parent" android:id="@+id/pokeViewLayout3">
 		<ImageView android:src="@drawable/icon"
@@ -221,7 +223,7 @@
 			<TextView android:layout_height="wrap_content" android:text="TextView" android:textColor="#000000" android:layout_width="wrap_content" android:id="@+id/ability3"></TextView>
 		</LinearLayout>
 	</LinearLayout>
-	<LinearLayout android:background="@drawable/battle_border"
+	<LinearLayout android:background="@drawable/battle_border_button"
 		android:layout_height="wrap_content" android:layout_weight="16"
 		android:layout_width="match_parent" android:id="@+id/pokeViewLayout4">
 		<ImageView android:src="@drawable/icon"
@@ -238,7 +240,7 @@
 			<TextView android:layout_height="wrap_content" android:text="TextView" android:textColor="#000000" android:layout_width="wrap_content" android:id="@+id/ability4"></TextView>
 		</LinearLayout>
 	</LinearLayout>
-	<LinearLayout android:background="@drawable/battle_border"
+	<LinearLayout android:background="@drawable/battle_border_button"
 		android:layout_height="wrap_content" android:layout_weight="16"
 		android:layout_width="match_parent" android:id="@+id/pokeViewLayout5">
 		<ImageView android:src="@drawable/icon"
@@ -255,7 +257,7 @@
 			<TextView android:layout_height="wrap_content" android:text="TextView" android:textColor="#000000" android:layout_width="wrap_content" android:id="@+id/ability5"></TextView>
 		</LinearLayout>
 	</LinearLayout>
-	<LinearLayout android:background="@drawable/battle_border"
+	<LinearLayout android:background="@drawable/battle_border_button"
 		android:layout_height="wrap_content" android:layout_weight="16"
 		android:layout_width="match_parent" android:id="@+id/pokeViewLayout6">
 		<ImageView android:src="@drawable/icon"

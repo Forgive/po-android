@@ -57,26 +57,26 @@ public class RealViewSwitcher extends ViewGroup {
 
 	}
 
-	protected static final int SNAP_VELOCITY = 1000;
-	protected static final int INVALID_SCREEN = -1;
+	private static final int SNAP_VELOCITY = 1000;
+	private static final int INVALID_SCREEN = -1;
 
-	protected Scroller mScroller;
-	protected VelocityTracker mVelocityTracker;
+	private Scroller mScroller;
+	private VelocityTracker mVelocityTracker;
 
-	protected final static int TOUCH_STATE_REST = 0;
-	protected final static int TOUCH_STATE_SCROLLING = 1;
+	private final static int TOUCH_STATE_REST = 0;
+	private final static int TOUCH_STATE_SCROLLING = 1;
 
-	protected int mTouchState = TOUCH_STATE_REST;
+	private int mTouchState = TOUCH_STATE_REST;
 
-	protected float mLastMotionX;
-	protected int mTouchSlop;
-	protected int mMaximumVelocity;
-	protected int mCurrentScreen;
-	protected int mNextScreen = INVALID_SCREEN;
+	private float mLastMotionX;
+	private int mTouchSlop;
+	private int mMaximumVelocity;
+	private int mCurrentScreen;
+	private int mNextScreen = INVALID_SCREEN;
 
-	protected boolean mFirstLayout = true;
+	private boolean mFirstLayout = true;
 
-	protected OnScreenSwitchListener mOnScreenSwitchListener;
+	private OnScreenSwitchListener mOnScreenSwitchListener;
 
 	public RealViewSwitcher(Context context) {
 		super(context);
@@ -88,7 +88,7 @@ public class RealViewSwitcher extends ViewGroup {
 		init();
 	}
 
-	protected void init() {
+	private void init() {
 		mScroller = new Scroller(getContext());
 
 		final ViewConfiguration configuration = ViewConfiguration.get(getContext());
@@ -123,6 +123,122 @@ public class RealViewSwitcher extends ViewGroup {
 		}
 	}
 
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        /*
+         * This method JUST determines whether we want to intercept the motion.
+         * If we return true, onTouchEvent will be called and we do the actual
+         * scrolling there.
+         */
+
+        /*
+         * Shortcut the most recurring case: the user is in the dragging
+         * state and he is moving his finger.  We want to intercept this
+         * motion.
+         */
+        final int action = ev.getAction();
+        if ((action == MotionEvent.ACTION_MOVE) && (mTouchState != TOUCH_STATE_REST)) {
+            return true;
+        }
+
+        final float x = ev.getX();
+
+        switch (action) {
+            case MotionEvent.ACTION_MOVE:
+                /*
+                 * mIsBeingDragged == false, otherwise the shortcut would have caught it. Check
+                 * whether the user has moved far enough from his original down touch.
+                 */
+
+                /*
+                 * Locally do absolute value. mLastMotionX is set to the y value
+                 * of the down event.
+                 */
+                final int xDiff = (int) Math.abs(x - mLastMotionX);
+                //final int yDiff = (int) Math.abs(y - mLastMotionY);
+
+                final int touchSlop = mTouchSlop;
+                boolean xMoved = xDiff > touchSlop;
+                //boolean yMoved = yDiff > touchSlop;
+                if (xMoved) {// || yMoved) {
+                    // If xDiff > yDiff means the finger path pitch is smaller than 45deg so we assume the user want to scroll X axis
+                   // if (xDiff > yDiff) {
+                        // Scroll if the user moved far enough along the X axis
+                        mTouchState = TOUCH_STATE_SCROLLING;
+                        //enableChildrenCache(mCurrentScreen - 1, mCurrentScreen + 1);
+
+                   /* }
+                    // If yDiff > xDiff means the finger path pitch is bigger than 45deg so we assume the user want to either scroll Y or Y-axis gesture
+                    else if (getOpenFolder()==null)
+                    {
+                        // As x scrolling is left untouched (more or less untouched;)), every gesture should start by dragging in Y axis. In fact I only consider useful, swipe up and down.
+                        // Guess if the first Pointer where the user click belongs to where a scrollable widget is.
+                                mTouchedScrollableWidget = isWidgetAtLocationScrollable((int)mLastMotionX,(int)mLastMotionY);
+                        if (!mTouchedScrollableWidget)
+                        {
+                                // Only y axis movement. So may be a Swipe down or up gesture
+                                if ((y - mLastMotionY) > 0){
+                                        if(Math.abs(y-mLastMotionY)>(touchSlop*2))mTouchState = TOUCH_SWIPE_DOWN_GESTURE;
+                                }else{
+                                        if(Math.abs(y-mLastMotionY)>(touchSlop*2))mTouchState = TOUCH_SWIPE_UP_GESTURE;
+                                }
+                        }
+                    }*/
+                    // Either way, cancel any pending longpress
+                    /*if (mAllowLongPress) {
+                        mAllowLongPress = false;
+                        // Try canceling the long press. It could also have been scheduled
+                        // by a distant descendant, so use the mAllowLongPress flag to block
+                        // everything
+                        final View currentScreen = getChildAt(mCurrentScreen);
+                        currentScreen.cancelLongPress();
+                    }*/
+                }
+                break;
+
+            case MotionEvent.ACTION_DOWN:
+                // Remember location of down touch
+                mLastMotionX = x;
+                //mLastMotionY = y;
+                //mAllowLongPress = true;
+
+                /*
+                 * If being flinged and user touches the screen, initiate drag;
+                 * otherwise don't.  mScroller.isFinished should be false when
+                 * being flinged.
+                 */
+                mTouchState = mScroller.isFinished() ? TOUCH_STATE_REST : TOUCH_STATE_SCROLLING;
+                break;
+
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+
+                /*if (mTouchState != TOUCH_STATE_SCROLLING)// && mTouchState != TOUCH_SWIPE_DOWN_GESTURE && mTouchState != TOUCH_SWIPE_UP_GESTURE) {
+                    //final CellLayout currentScreen = (CellLayout) getChildAt(mCurrentScreen);
+                    if (!currentScreen.lastDownOnOccupiedCell()) {
+                        getLocationOnScreen(mTempCell);
+                        // Send a tap to the wallpaper if the last down was on empty space
+                        if(lwpSupport)
+                        mWallpaperManager.sendWallpaperCommand(getWindowToken(),
+                                "android.wallpaper.tap",
+                                mTempCell[0] + (int) ev.getX(),
+                                mTempCell[1] + (int) ev.getY(), 0, null);
+                    }
+                }*/
+                // Release the drag
+                //clearChildrenCache();
+                mTouchState = TOUCH_STATE_REST;
+                //mAllowLongPress = false;
+                break;
+        }
+
+        /*
+         * The only time we want to intercept motion events is if we are in the
+         * drag mode.
+         */
+        return mTouchState != TOUCH_STATE_REST;
+    }
+    
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		int childLeft = 0;
@@ -139,7 +255,7 @@ public class RealViewSwitcher extends ViewGroup {
 	}
 
 	@Override
-	public boolean onTouchEvent(MotionEvent ev) {		
+	public boolean onTouchEvent(MotionEvent ev) {
 		if (mVelocityTracker == null) {
 			mVelocityTracker = VelocityTracker.obtain();
 		}
@@ -223,21 +339,23 @@ public class RealViewSwitcher extends ViewGroup {
 		}
 
 		if(mTouchState == TOUCH_STATE_REST) {
+			System.out.println("REST!");
 			return false;
 		}
 		else {
+			System.out.println("SCROLLING!");
 			return true;
 		}
 	}
 
-	protected void snapToDestination() {
+	private void snapToDestination() {
 		final int screenWidth = getWidth();
 		final int whichScreen = (getScrollX() + (screenWidth / 2)) / screenWidth;
 
 		snapToScreen(whichScreen);
 	}
 
-	protected void snapToScreen(int whichScreen) {
+	private void snapToScreen(int whichScreen) {
 		if (!mScroller.isFinished())
 			return;
 

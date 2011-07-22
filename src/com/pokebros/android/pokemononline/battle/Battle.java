@@ -41,7 +41,7 @@ public class Battle {
 	int bID = 0;
 	private NetworkService netServ;
 	
-	BattleTeam myTeam;
+	public BattleTeam myTeam;
 	
 	OpponentPoke[][] pokes = new OpponentPoke[2][6];
 	ArrayList<Boolean> pokeAlive = new ArrayList<Boolean>();
@@ -127,6 +127,14 @@ public class Battle {
 		b.putInt(bID);
 		AttackChoice ac = new AttackChoice(attack, opp);
 		b.putBaos(new BattleChoice(me, ac, ChoiceType.AttackType));
+		return b;
+	}
+	
+	public Baos constructSwitch(byte toSpot) {
+		Baos b = new Baos();
+		b.putInt(bID);
+		SwitchChoice sc = new SwitchChoice(toSpot);
+		b.putBaos(new BattleChoice(me, sc, ChoiceType.SwitchType));
 		return b;
 	}
 	

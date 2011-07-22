@@ -10,7 +10,7 @@ public class BattleTeam extends SerializeBytes {
 	String info = "";
 	int gen = 0;
 	
-	BattlePoke[] pokes = new BattlePoke[6];
+	public BattlePoke[] pokes = new BattlePoke[6];
 	int[] indexes = new int[6];
 	
 	public BattleTeam(Bais msg) {
