@@ -123,32 +123,6 @@ public class NetworkService extends Service {
         notification.setLatestEventInfo(this, "POAndroid", text, notificationIntent);
         this.startForeground(NOTIFICATION, notification);
     }
-
-	public void handleChannelMsg(Command c) {
-		Channel ch = channels.get(msg.readInt());
-		if(ch != null) {
-			switch(c) {
-			case JoinChannel:
-				ch.addPlayer(new PlayerInfo(msg));
-				break;
-			case ChannelMessage:
-				String line = msg.readQString();
-				ch.printLine(line);
-				break;
-			case HtmlChannel:
-				String htmlChannel = msg.readQString();
-				System.out.println("Html Channel: " + htmlChannel);
-				break;
-			case LeaveChannel:
-				ch.removePlayer(msg.readInt());
-				break;
-			default:
-				break;
-			}
-		}
-		else
-			System.out.println("Received message for nonexistant channel");
-	}
 	
 	public void handleMsg() {
 		/* Completely obvious way to "convert"
@@ -163,9 +137,14 @@ public class NetworkService extends Service {
 		case LeaveChannel:
 		case ChannelBattle:
 		case ChannelMessage:
-		case HtmlChannel:
-			handleChannelMsg(c);
+		case HtmlChannel: {
+			Channel ch = channels.get(msg.readInt());
+			if(ch != null)
+				ch.handleChannelMsg(c, msg);
+			else
+				System.out.println("Received message for nonexistant channel");
 			break;
+		}
 		case TierSelection:
 			msg.readInt();
 			ArrayList<String> list = new ArrayList<String>();
@@ -197,22 +176,23 @@ public class NetworkService extends Service {
 			int numChannels = msg.readInt();
 			for(int k = 0; k < numChannels; k++) {
 				int chanID = msg.readInt();
-				channels.put(chanID, new Channel(chanID, msg.readQString()));
+				channels.put(chanID, new Channel(chanID, msg.readQString(), this));
 			}
 			System.out.println(channels.toString());
 			break;
-		case ChannelPlayers:
+		case ChannelPlayers: {
 			Channel ch = channels.get(msg.readInt());
 			int numPlayers = msg.readInt();
 			if(ch != null) {
 				for(int k = 0; k < numPlayers; k++) {
 					int id = msg.readInt();
-					ch.addPlayer(players.get(id));
+					ch.players.put(id, players.get(id));
 				}
 			}
 			else
 				System.out.println("Received message for nonexistant channel");
 			break;
+		}
 		case HtmlMessage:
 			String htmlMessage = msg.readQString();
 			System.out.println("Html Message: " + htmlMessage);
