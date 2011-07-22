@@ -15,6 +15,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.text.Html;
+import android.text.SpannableStringBuilder;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -33,37 +35,8 @@ public class ChatActivity extends Activity {
 	private TextView chatBox;
 	private EditText chatInput;
 	private ChatRealViewSwitcher chatViewSwitcher;
-
-	private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-        	if (msg.getData().containsKey("ChannelMessage")) {
-        		chatBox.append(msg.getData().getString("ChannelMessage") + "\n");
-            	chatScroll.post(new Runnable() {
-            		public void run() {
-		    			chatScroll.smoothScrollTo(0, chatBox.getMeasuredHeight());
-            		}
-            	});
-        	}
-        }
-    };
-    
-    private Messenger messenger = new Messenger(handler);
-	private ServiceConnection connection = new ServiceConnection() {
-		public void onServiceConnected(ComponentName className, IBinder service) {
-			netServ =	((NetworkService.LocalBinder)service).getService();
-			Toast.makeText(ChatActivity.this, "Service connected",
-                    Toast.LENGTH_SHORT).show();
-			netServ.herp();
-			if (netServ.battle == null)
-				netServ.showNotification(ChatActivity.class, "Chat");
-		}
-		
-		public void onServiceDisconnected(ComponentName className) {
-			netServ = null;
-		}
-	};
 	
+	/** Called when the activity is first created. */
 	@Override
     public void onCreate(Bundle savedInstanceState) {
 		System.out.println("CREATED CHAT ACTIVITY");
@@ -99,6 +72,61 @@ public class ChatActivity extends Activity {
                 showDialog(0);
         }
 	}
+
+	private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+        	if (msg.getData().containsKey("ChannelMessage")) {
+        		chatBox.append(msg.getData().getString("ChannelMessage") + "\n");
+            	chatScroll.post(new Runnable() {
+            		public void run() {
+		    			chatScroll.smoothScrollTo(0, chatBox.getMeasuredHeight());
+            		}
+            	});
+        	}
+        }
+    };
+    
+    private Messenger messenger = new Messenger(handler);
+	private ServiceConnection connection = new ServiceConnection() {
+		public void onServiceConnected(ComponentName className, IBinder service) {
+			netServ =	((NetworkService.LocalBinder)service).getService();
+			Toast.makeText(ChatActivity.this, "Service connected",
+                    Toast.LENGTH_SHORT).show();
+			if (netServ.battle == null)
+				netServ.showNotification(ChatActivity.class, "Chat");
+			
+	        // Load scrollback //XXX
+	        chatBox.setText(netServ.currentChannel.hist);
+	    	chatScroll.post(new Runnable() {
+	    		public void run() {
+	    			chatScroll.smoothScrollTo(0, chatBox.getMeasuredHeight());
+	    		}
+	    	});
+	    	handler.postDelayed(updateUIChatTask, 50);
+		}
+		
+		public void onServiceDisconnected(ComponentName className) {
+			netServ = null;
+		}
+	};
+	
+	public Runnable updateUIChatTask = new Runnable() {
+		public void run() {
+			SpannableStringBuilder delta = netServ.currentChannel.histDelta;
+			chatBox.append(delta);
+			if (delta.length() != 0) {
+		    	chatScroll.post(new Runnable() {
+		    		public void run() {
+		    			chatScroll.smoothScrollTo(0, chatBox.getMeasuredHeight());
+		    		}
+		    	});
+			}
+	    	netServ.currentChannel.hist.append(delta);
+			delta.clear();
+			handler.postDelayed(this, 1000);
+		}
+	};
 	
 	@Override
 	public void onNewIntent(Intent intent) {
@@ -114,9 +142,9 @@ public class ChatActivity extends Activity {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		switch (id) {
 		case 0:
-			builder.setMessage("Accept challenge?") // TODO add challenge info
+			builder.setMessage(this.getString(R.string.accept_challenge)) // TODO add challenge info
 			.setCancelable(false)
-			.setPositiveButton("Accept", new DialogInterface.OnClickListener() {
+			.setPositiveButton(this.getString(R.string.accept), new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
 					// Accept challenge
 					Baos b = new Baos();
@@ -127,7 +155,7 @@ public class ChatActivity extends Activity {
 			        netServ.socket.sendMessage(b, Command.ChallengeStuff);
 				}
 			})
-			.setNegativeButton("Decline", null);
+			.setNegativeButton(this.getString(R.string.decline), null);
 		}
 		return builder.create();
 	}

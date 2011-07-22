@@ -52,7 +52,7 @@ public class BattleActivity extends Activity {
         Intent intent = new Intent(BattleActivity.this, NetworkService.class);
         intent.putExtra("Type", "battle");
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
-        //Capture out button from layout
+        //Capture button from layout
         attack[0] = (Button)findViewById(R.id.attack1);
         attack[1] = (Button)findViewById(R.id.attack2);
         attack[2] = (Button)findViewById(R.id.attack3);
@@ -82,7 +82,7 @@ public class BattleActivity extends Activity {
         infoView = (TextView)findViewById(R.id.infoWindow);
         infoScroll = (ScrollView)findViewById(R.id.infoScroll);
         realViewSwitcher = (RealViewSwitcher)findViewById(R.id.battlePokeSwitcher);
-        //Register the onCLick listener with the implementation above
+        //Register the onCLick listener with the buttons
         for(int i = 0; i < 4; i++) {
         	attack[i].setOnClickListener(battleListener);
         }
@@ -139,8 +139,7 @@ public class BattleActivity extends Activity {
 
 	private ServiceConnection connection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
-			netServ =	((NetworkService.LocalBinder)service).getService();
-			netServ.herp();
+			netServ = ((NetworkService.LocalBinder)service).getService();
 			netServ.showNotification(BattleActivity.class, "Battle");
 			Toast.makeText(BattleActivity.this, "Service connected",
                     Toast.LENGTH_SHORT).show();
@@ -208,13 +207,6 @@ public class BattleActivity extends Activity {
     		myView.setText(msg.obj.toString());
     	}
     }
-    /*
-    @Override
-	public boolean dispatchTouchEvent(MotionEvent e) {
-		if(realViewSwitcher.onTouchEvent(e))
-			return true;
-		return super.dispatchTouchEvent(e);
-	} */
     
     public OnClickListener battleListener = new OnClickListener() {
     	public void onClick(View v) {
@@ -250,6 +242,7 @@ public class BattleActivity extends Activity {
     case R.id.forfeit_no:
     	break;
     case R.id.draw:
+    	//TODO: implement draw
     	break;
         }
         return true;

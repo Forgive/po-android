@@ -28,7 +28,7 @@ public class NetworkService extends Service {
 	private final IBinder binder = new LocalBinder();
 	protected int NOTIFICATION = 4356;
 	protected NotificationManager noteMan;
-	
+	public Channel currentChannel;
 	Thread sThread, rThread;
 	PokeClientSocket socket = null;
 	
@@ -179,6 +179,7 @@ public class NetworkService extends Service {
 				channels.put(chanID, new Channel(chanID, msg.readQString(), this));
 			}
 			System.out.println(channels.toString());
+			currentChannel = channels.get(0);
 			break;
 		case ChannelPlayers: {
 			Channel ch = channels.get(msg.readInt());

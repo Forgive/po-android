@@ -25,4 +25,7 @@
 	<string name="evasion">Evasion</string>
 	<string name="player_list">Player List</string>
     <string name="channel_list">Channel List</string>
+    <string name="accept">Accept</string>
+    <string name="decline">Decline</string>
+    <string name="accept_challenge">Accept Challenge?</string>
 </resources>

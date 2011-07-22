@@ -28,6 +28,7 @@ public class Channel {
 		id = i;
 		name = n;
 		netServ = net;
+		hist.append(Html.fromHtml("<i>Joined channel: <b>" + name + "</b></i>"));
 	}
 
 	public void handleChannelMsg(Command c, Bais msg) {
@@ -42,7 +43,10 @@ public class Channel {
 				break;
 			}
 			case ChannelMessage:
-				histDelta.append(msg.readQString());
+				//makes name bold since first occurence of : marks end of name in msg.
+				 String message = "<br><b>" + msg.readQString();
+				 message = message.replaceFirst(":", ":</b>");
+				 histDelta.append(Html.fromHtml(message));
 				break;
 			case HtmlChannel:
 				histDelta.append(Html.fromHtml(msg.readQString()));
