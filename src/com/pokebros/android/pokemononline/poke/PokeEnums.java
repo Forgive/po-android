@@ -127,13 +127,19 @@ public class PokeEnums {
 		public abstract int rstring();
 	}
 	
-	// XXX This should probably go in something like BattleEnums, but I'm not sure
-	//           what else would go in it. Putting it here for now.
+	// XXX These should probably go in something like BattleEnums, but I'm not sure
+	//           what else would go in it. Putting them here for now.
 	public enum Weather {
 		NormalWeather,
 		Hail,
 		Rain,
 		SandStorm,
 		Sunny
+	}
+	
+	public enum WeatherState {
+		ContinueWeather,
+		EndWeather,
+		HurtWeather
 	}
 }

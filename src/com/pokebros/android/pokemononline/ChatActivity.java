@@ -115,17 +115,19 @@ public class ChatActivity extends Activity {
 	
 	public Runnable updateUIChatTask = new Runnable() {
 		public void run() {
-			SpannableStringBuilder delta = netServ.currentChannel.histDelta;
-			chatBox.append(delta);
-			if (delta.length() != 0) {
-		    	chatScroll.post(new Runnable() {
-		    		public void run() {
-		    			chatScroll.smoothScrollTo(0, chatBox.getMeasuredHeight());
-		    		}
-		    	});
+			if (netServ.currentChannel != null) {
+				SpannableStringBuilder delta = netServ.currentChannel.histDelta;
+				chatBox.append(delta);
+				if (delta.length() != 0) {
+			    	chatScroll.post(new Runnable() {
+			    		public void run() {
+			    			chatScroll.smoothScrollTo(0, chatBox.getMeasuredHeight());
+			    		}
+			    	});
+				}
+		    	netServ.currentChannel.hist.append(delta);
+				delta.clear();
 			}
-	    	netServ.currentChannel.hist.append(delta);
-			delta.clear();
 			handler.postDelayed(this, 1000);
 		}
 	};

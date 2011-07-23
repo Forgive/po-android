@@ -1,6 +1,7 @@
 package com.pokebros.android.pokemononline;
 
 import com.pokebros.android.pokemononline.poke.PokeEnums.Status;
+import com.pokebros.android.pokemononline.poke.PokeEnums.Weather;
 
 public class ColorEnums {
 	public enum QtColor {
@@ -57,6 +58,22 @@ public class ColorEnums {
 			case Poisoned: color = TypeColor.Poison.toString(); break;
 			case Confused: color = TypeColor.Ghost.toString(); break;
 			default: color = ">";
+			}
+		}
+		public String toString() {
+			return color;
+		}
+	}
+	
+	public static class TypeForWeatherColor {
+		private static String color;
+		public TypeForWeatherColor(int weather) {
+			switch (Weather.values()[weather]) {
+			case Hail: color = TypeColor.Ice.toString(); break;
+			case Rain: color = TypeColor.Water.toString(); break;
+			case SandStorm: color = TypeColor.Rock.toString(); break;
+			case Sunny: color = TypeColor.Fire.toString(); break;
+			default: color = TypeColor.Normal.toString(); break;
 			}
 		}
 		public String toString() {

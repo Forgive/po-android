@@ -16,9 +16,7 @@ import com.pokebros.android.pokemononline.Baos;
 import com.pokebros.android.pokemononline.DataBaseHelper;
 import com.pokebros.android.pokemononline.EscapeHtml;
 import com.pokebros.android.pokemononline.NetworkService;
-import com.pokebros.android.pokemononline.ColorEnums.QtColor;
-import com.pokebros.android.pokemononline.ColorEnums.StatusColor;
-import com.pokebros.android.pokemononline.ColorEnums.TypeColor;
+import com.pokebros.android.pokemononline.ColorEnums.*;
 import com.pokebros.android.pokemononline.player.PlayerInfo;
 import com.pokebros.android.pokemononline.poke.BattlePoke;
 import com.pokebros.android.pokemononline.poke.ShallowBattlePoke;
@@ -342,12 +340,55 @@ public class Battle {
 			if (damaging)
 				histDelta.append("\n" + currentPoke(player).nick() + " is hit with recoil!");
 			else
-				histDelta.append("\n" + currentPoke(player).nick() + "had its energy drained!");
+				histDelta.append("\n" + currentPoke(player).nick() + " had its energy drained!");
 			break;
 		case WeatherMessage:
 			byte wstatus = msg.readByte(), weather = msg.readByte();
 			if (weather == Weather.NormalWeather.ordinal())
 				break;
+			
+			String color = new TypeForWeatherColor(weather).toString();
+			switch (WeatherState.values()[wstatus]) {
+			case EndWeather:
+				switch (Weather.values()[weather]) {
+				case Hail: message = "The hail subsided!"; break;
+				case SandStorm: message = "The sandstorm subsided!"; break;
+				case Sunny: message = "The sunlight faded!"; break;
+				case Rain: message = "The rain stopped!"; break;
+				default: message = "";
+				}
+				histDelta.append(Html.fromHtml("<br><font color=" + color + message + "</font color"));
+				break;
+			case HurtWeather:
+				switch (Weather.values()[weather]) {
+				case Hail: message = " is buffeted by the hail!"; break;
+				case SandStorm: message = " is buffeted by the sandstorm!"; break;
+				default: message = "";
+				}
+				histDelta.append(Html.fromHtml("<br><font color=" + color +
+						currentPoke(player).nick() + message + "</font color>"));
+				break;
+			case ContinueWeather:
+				switch (Weather.values()[weather]) {
+				case Hail: message = "Hail continues to fall!"; break;
+				case SandStorm: message = "The sandstorm rages!"; break;
+				case Sunny: message = "The sunlight is strong!"; break;
+				case Rain: message = "Rain continues to fall!"; break;
+				default: message = "";
+				}
+				histDelta.append(Html.fromHtml("<br><font color=" + color + message + "</font color"));
+				break;
+			}
+			break;
+		case StraightDamage:
+			short damage = msg.readShort();
+			if(player == me) {
+				histDelta.append("\n" + currentPoke(player).nick() + " lost " + damage + 
+						" HP! (" + (damage * 100 / myTeam.pokes[0].totalHP) + "% of its health)");
+			}
+			else
+				histDelta.append("\n" + currentPoke(player).nick() + " lost " + damage + "% of its health!");
+			break;
 		case ClockStart:
 			remainingTime[player % 2] = msg.readShort();
 			startingTime[player % 2] = SystemClock.uptimeMillis();
@@ -365,15 +406,6 @@ public class Battle {
 			}
 			else
 				currentPoke(player).lifePercent = (byte)newHP;
-			break;
-		case StraightDamage:
-			short damage = msg.readShort();
-			if(player == me) {
-				histDelta.append("\n" + currentPoke(player).rnick() + " lost " + damage + 
-						" HP! (" + (damage * 100 / myTeam.pokes[0].totalHP) + "% of its health)");
-			}
-			else
-				histDelta.append("\n" + currentPoke(player).rnick() + " lost " + damage + "% of its health!");
 			break;
 		default:
 			System.out.println("Battle command unimplemented");
