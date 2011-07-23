@@ -560,5 +560,12 @@ public enum MoveName {
 	IciclePolish,
 	V_Generate,
 	CrossFlame,
-	CrossThunder
+	CrossThunder;
+	
+	public String toString() {
+		String s = super.toString();
+		s = s.replaceAll("_", "-");
+		s = s.replaceAll("([A-Z])", " $1");
+		return s;
+	}
 };

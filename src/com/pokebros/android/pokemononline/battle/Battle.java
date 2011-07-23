@@ -1,7 +1,6 @@
 package com.pokebros.android.pokemononline.battle;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.lang.Math;
 
@@ -13,7 +12,6 @@ import android.text.SpannableStringBuilder;
 
 import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
-import com.pokebros.android.pokemononline.BattleActivity;
 import com.pokebros.android.pokemononline.DataBaseHelper;
 import com.pokebros.android.pokemononline.EscapeHtml;
 import com.pokebros.android.pokemononline.NetworkService;
@@ -21,7 +19,8 @@ import com.pokebros.android.pokemononline.ColorEnums.QtColor;
 import com.pokebros.android.pokemononline.ColorEnums.StatusColor;
 import com.pokebros.android.pokemononline.ColorEnums.TypeColor;
 import com.pokebros.android.pokemononline.player.PlayerInfo;
-import com.pokebros.android.pokemononline.poke.OpponentPoke;
+import com.pokebros.android.pokemononline.poke.BattlePoke;
+import com.pokebros.android.pokemononline.poke.ShallowBattlePoke;
 import com.pokebros.android.pokemononline.poke.UniqueID;
 import com.pokebros.android.pokemononline.poke.PokeEnums.Status;
 import com.pokebros.android.pokemononline.poke.PokeEnums.StatusFeeling;
@@ -33,7 +32,7 @@ public class Battle {
 	ArrayList<UniqueID> lastSeenSpecialSprite = new ArrayList<UniqueID>();
 	
 	// 0 = you, 1 = opponent
-	PlayerInfo[] players = new PlayerInfo[2];
+	public PlayerInfo[] players = new PlayerInfo[2];
 	
 	public short[] remainingTime = new short[2];
 	public boolean[] ticking = new boolean[2];
@@ -44,10 +43,11 @@ public class Battle {
 	int gen = 0;
 	int bID = 0;
 	private NetworkService netServ;
+	public boolean pokeChanged = false;
 	
 	public BattleTeam myTeam;
 	
-	OpponentPoke[][] pokes = new OpponentPoke[2][6];
+	ShallowBattlePoke[][] pokes = new ShallowBattlePoke[2][6];
 	ArrayList<Boolean> pokeAlive = new ArrayList<Boolean>();
 	
 	public SpannableStringBuilder hist = new SpannableStringBuilder();
@@ -99,31 +99,8 @@ public class Battle {
 		return remainingTime[opp];
 	}
 	
-	// This is mainly for compatibility with doubles.
-	private PlayerInfo playerBySpot(int spot) {
-		return players[spot % 2];
-	}
-	
-	private OpponentPoke currentPokeBySpot(int spot) {
-		return pokes[spot % 2][spot / 2];
-	}
-	
-	public ArrayList<String> myMoves(int n) {
-		ArrayList<String> moves = new ArrayList<String>();
-		for(int i = 0; i < 4; i++) {
-			short moveNum = myTeam.pokes[n].moves[i].num;
-			String moveName = MoveName.values()[moveNum].toString();
-			moves.add(moveName.replaceAll("([A-Z])", " $1"));
-		}
-		return moves;
-	}
-	
-	public String myNick() {
-		return players[me].nick();
-	}
-	
-	public String oppNick() {
-		return players[opp].nick();
+	public ShallowBattlePoke currentPoke(int player) {
+		return pokes[player][0];
 	}
 	
 	public Baos constructAttack(byte attack) {
@@ -144,24 +121,39 @@ public class Battle {
 	
 	public void receiveCommand(Bais msg)  {
 		BattleCommand bc = BattleCommand.values()[msg.readByte()];
-		byte toSpot = msg.readByte(); // Which poke are we talking about?
+		byte player = msg.readByte();
 		System.out.println("Battle Command Received: " + bc.toString());
 		switch(bc) {
 		case SendOut:
-			boolean isSilent = msg.readBool();
+			//boolean isSilent = msg.readBool();
+			byte toSpot = msg.readByte();
 			byte fromSpot = msg.readByte();
+			
+			if(player == me) {
+				BattlePoke temp = myTeam.pokes[toSpot];
+				myTeam.pokes[toSpot] = myTeam.pokes[fromSpot];
+				myTeam.pokes[fromSpot] = temp;
+			}
+			
+			ShallowBattlePoke tempPoke = pokes[player][toSpot];
+			pokes[player][toSpot] = pokes[player][fromSpot];
+			pokes[player][fromSpot] = tempPoke;
+			
 			if(msg.available() > 0) // this is the first time you've seen it
-				pokes[toSpot % 2][toSpot / 2] = new OpponentPoke(msg, toSpot%2);
-			histDelta.append("\n" + (playerBySpot(toSpot).nick() + " sent out " + 
-					currentPokeBySpot(toSpot).rnick() + "!"));
+				pokes[player][toSpot] = new ShallowBattlePoke(msg, player);
+			
+			histDelta.append("\n" + (players[player].nick() + " sent out " + 
+					currentPoke(player).rnick() + "!"));
+			if(player % 2 == me)
+				pokeChanged = true;
 			break;
 		case SendBack:
-			histDelta.append("\n" + (playerBySpot(toSpot).nick() + " called " + 
-					currentPokeBySpot(toSpot).rnick() + " back!"));
+			histDelta.append("\n" + (players[player].nick() + " called " + 
+					currentPoke(player).rnick() + " back!"));
 			break;
 		case UseAttack:
 			short attack = msg.readShort();
-			histDelta.append("\n" + 	currentPokeBySpot(toSpot).nick() +
+			histDelta.append("\n" + currentPoke(player).nick() +
 					" used " + MoveName.values()[attack].toString() + "!");
 			break;
 		case BeginTurn:
@@ -170,7 +162,7 @@ public class Battle {
 					"Start of turn " + turn + "</font color></b>"));
 			break;
 		case Ko:
-			histDelta.append(Html.fromHtml("<br><b>" + new EscapeHtml(currentPokeBySpot(toSpot).nick()) +
+			histDelta.append(Html.fromHtml("<br><b>" + new EscapeHtml(currentPoke(player).nick()) +
 					" fainted!</b>"));
 			break;
 		case Hit:
@@ -199,14 +191,14 @@ public class Battle {
 			histDelta.append(Html.fromHtml("<br><font color=#6b0000>A critical hit!</font color>"));
 			break;
 		case Miss:
-			histDelta.append("\nThe attack of " + currentPokeBySpot(toSpot).nick() + " missed!");
+			histDelta.append("\nThe attack of " + currentPoke(player).nick() + " missed!");
 			break;
 		case Avoid:
-			histDelta.append("\n" + currentPokeBySpot(toSpot).nick() + " avoided the attack!");
+			histDelta.append("\n" + currentPoke(player).nick() + " avoided the attack!");
 			break;
 		case StatChange:
 			byte stat = msg.readByte(), boost=msg.readByte();
-			histDelta.append("\n" + currentPokeBySpot(toSpot).nick() + "'s " +
+			histDelta.append("\n" + currentPoke(player).nick() + "'s " +
 					netServ.getString(Stat.values()[stat].string) + (Math.abs(boost) > 1 ? " sharply" : "")
 					+ (boost > 0 ? " rose!" : " fell!"));
 			break;
@@ -224,7 +216,7 @@ public class Battle {
 			boolean multipleTurns = msg.readBool();
 			if (status > Status.Fine.ordinal() && status <= Status.Confused.ordinal()) {
 				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(status) + 
-						currentPokeBySpot(toSpot).nick() + statusChangeMessages[status-1 +
+						currentPoke(player).nick() + statusChangeMessages[status-1 +
                         (status == Status.Poisoned.ordinal() && multipleTurns ? 1 : 0)] + "</font color>"));
 			}
 			break;
@@ -234,7 +226,7 @@ public class Battle {
 		case AlreadyStatusMessage:
 			status = msg.readByte();
 			histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(status) +
-					currentPokeBySpot(toSpot).nick() + " is already " + Status.values()[status] +
+					currentPoke(player).nick() + " is already " + Status.values()[status] +
 					".</font color>"));
 			break;
 		case StatusMessage:
@@ -242,7 +234,7 @@ public class Battle {
 			switch (StatusFeeling.values()[status]) {
 			case FeelConfusion:
 				histDelta.append(Html.fromHtml("<br><font color=" + TypeColor.Ghost +
-						currentPokeBySpot(toSpot).nick() + " is confused!</font color>"));
+						currentPoke(player).nick() + " is confused!</font color>"));
 				break;
 			case HurtConfusion:
 				histDelta.append(Html.fromHtml("<br><font color=" + TypeColor.Ghost +
@@ -250,35 +242,35 @@ public class Battle {
 				break;
 			case FreeConfusion:
 				histDelta.append(Html.fromHtml("<br><font color=" + TypeColor.Dark +
-						currentPokeBySpot(toSpot).nick() + " snapped out of its confusion!</font color>"));
+						currentPoke(player).nick() + " snapped out of its confusion!</font color>"));
 				break;
 			case PrevParalysed:
 				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Paralysed.ordinal())+
-						currentPokeBySpot(toSpot).nick() + " is paralyzed! It can't move!</font color>"));
+						currentPoke(player).nick() + " is paralyzed! It can't move!</font color>"));
 				break;
 			case FeelAsleep:
 				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Asleep.ordinal()) +
-						currentPokeBySpot(toSpot).nick() + " is fast asleep!</font color>"));
+						currentPoke(player).nick() + " is fast asleep!</font color>"));
 				break;
 			case FreeAsleep:
 				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Asleep.ordinal()) +
-						currentPokeBySpot(toSpot).nick() + " woke up!</font color>"));
+						currentPoke(player).nick() + " woke up!</font color>"));
 				break;
 			case HurtBurn:
 				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Burnt.ordinal()) +
-						currentPokeBySpot(toSpot).nick() + " is hurt by its burn!</font color>"));
+						currentPoke(player).nick() + " is hurt by its burn!</font color>"));
 				break;
 			case HurtPoison:
 				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Poisoned.ordinal()) +
-						currentPokeBySpot(toSpot).nick() + " is hurt by poison!</font color>"));
+						currentPoke(player).nick() + " is hurt by poison!</font color>"));
 				break;
 			case PrevFrozen:
 				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Frozen.ordinal())+
-						currentPokeBySpot(toSpot).nick() + " is frozen solid!</font color>"));
+						currentPoke(player).nick() + " is frozen solid!</font color>"));
 				break;
 			case FreeFrozen:
 				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Frozen.ordinal()) +
-						currentPokeBySpot(toSpot).nick() + " thawed out!</font color>"));
+						currentPoke(player).nick() + " thawed out!</font color>"));
 				break;
 			}
 			break;
@@ -290,8 +282,8 @@ public class Battle {
 			String message = msg.readQString();
 			if (message.equals(""))
 				break;
-			histDelta.append(Html.fromHtml("<br><font color=" + (toSpot !=0 ? "#5811b1>" : QtColor.Green) +
-					"<b>" + new EscapeHtml(playerBySpot(toSpot).nick()) + ": </b></font color>" +
+			histDelta.append(Html.fromHtml("<br><font color=" + (player !=0 ? "#5811b1>" : QtColor.Green) +
+					"<b>" + new EscapeHtml(players[player].nick()) + ": </b></font color>" +
 					new EscapeHtml(message)));
 			break;
 		case Spectating:
@@ -324,13 +316,13 @@ public class Battle {
 			//System.out.println("HERE GOES NOTHING " + datHelp.getString(move, part));
 			break;
 		case ClockStart:
-			remainingTime[toSpot % 2] = msg.readShort();
-			startingTime[toSpot % 2] = SystemClock.uptimeMillis();
-			ticking[toSpot % 2] = true;
+			remainingTime[player % 2] = msg.readShort();
+			startingTime[player % 2] = SystemClock.uptimeMillis();
+			ticking[player % 2] = true;
 			break;
 		case ClockStop:
-			remainingTime[toSpot % 2] = msg.readShort();
-			ticking[toSpot % 2] = false;
+			remainingTime[player % 2] = msg.readShort();
+			ticking[player % 2] = false;
 			break;
 		default:
 			System.out.println("Battle command unimplemented");

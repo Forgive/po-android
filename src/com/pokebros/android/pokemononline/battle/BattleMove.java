@@ -9,6 +9,10 @@ public class BattleMove extends SerializeBytes {
 	byte totalPP = 0;
 	short num = 0;
 	
+	public String toString() {
+		return MoveName.values()[num].toString();
+	}
+	
 	public BattleMove(Bais msg) {
 		num = msg.readShort();
 		currentPP = msg.readByte();

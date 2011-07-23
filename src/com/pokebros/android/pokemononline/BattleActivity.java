@@ -1,7 +1,5 @@
 package com.pokebros.android.pokemononline;
 
-import java.util.ArrayList;
-
 import de.marcreichelt.android.RealViewSwitcher;
 import android.app.Activity;
 import android.content.ComponentName;
@@ -13,15 +11,12 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.SystemClock;
-import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -31,6 +26,7 @@ import android.widget.Toast;
 public class BattleActivity extends Activity {
 	public final static int SWIPE_TIME_THRESHOLD = 100;
 	
+	RealViewSwitcher realViewSwitcher;
 	public Button[] attack = new Button[4];
 	public TextView[] timers = new TextView[2];
 	TextView[] pokeListNames = new TextView[6];
@@ -40,7 +36,6 @@ public class BattleActivity extends Activity {
 	public ScrollView infoScroll;
 	TextView[] names = new TextView[2];
 	private NetworkService netServ = null;
-	private RealViewSwitcher realViewSwitcher;
 	
 	 /** Called when the activity is first created. */
     @Override
@@ -52,7 +47,9 @@ public class BattleActivity extends Activity {
         Intent intent = new Intent(BattleActivity.this, NetworkService.class);
         intent.putExtra("Type", "battle");
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
-        //Capture button from layout
+        
+        realViewSwitcher = (RealViewSwitcher)findViewById(R.id.battlePokeSwitcher);
+        //Capture out button from layout
         attack[0] = (Button)findViewById(R.id.attack1);
         attack[1] = (Button)findViewById(R.id.attack2);
         attack[2] = (Button)findViewById(R.id.attack3);
@@ -81,8 +78,7 @@ public class BattleActivity extends Activity {
         
         infoView = (TextView)findViewById(R.id.infoWindow);
         infoScroll = (ScrollView)findViewById(R.id.infoScroll);
-        realViewSwitcher = (RealViewSwitcher)findViewById(R.id.battlePokeSwitcher);
-        //Register the onCLick listener with the buttons
+        //Register the onCLick listener with the implementation above
         for(int i = 0; i < 4; i++) {
         	attack[i].setOnClickListener(battleListener);
         }
@@ -131,6 +127,13 @@ public class BattleActivity extends Activity {
 		    		}
 		    	});
 			}
+			
+			if(netServ.battle.pokeChanged) {
+				// Load correct moveset
+		        for(int i = 0; i < 4; i++) {
+		        	attack[i].setText(netServ.battle.myTeam.pokes[0].moves[i].toString());
+		        }
+			}
 	    	netServ.battle.hist.append(delta);
 			delta.clear();
 			handler.postDelayed(this, 1000);
@@ -139,16 +142,13 @@ public class BattleActivity extends Activity {
 
 	private ServiceConnection connection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
-			netServ = ((NetworkService.LocalBinder)service).getService();
+			netServ =	((NetworkService.LocalBinder)service).getService();
+			netServ.herp();
 			netServ.showNotification(BattleActivity.class, "Battle");
 			Toast.makeText(BattleActivity.this, "Service connected",
                     Toast.LENGTH_SHORT).show();
 			
 			// Set the UI to display the correct info
-			// Load correct moveset
-	        ArrayList<String> moves = netServ.battle.myMoves(0);
-	        for(int i = 0; i < 4; i++)
-	        	attack[i].setText(moves.get(i));
 	        
 	        // We don't know which timer is which until the battle starts,
 	        // so set them here.
@@ -157,8 +157,8 @@ public class BattleActivity extends Activity {
 	        names[netServ.battle.me] = (TextView)findViewById(R.id.nameB);
 	        names[netServ.battle.opp] = (TextView)findViewById(R.id.nameA);
 	        
-	        names[netServ.battle.me].setText(netServ.battle.myNick());
-	        names[netServ.battle.opp].setText(netServ.battle.oppNick());
+	        names[netServ.battle.me].setText(netServ.battle.players[netServ.battle.me].nick);
+	        names[netServ.battle.opp].setText(netServ.battle.players[netServ.battle.opp].nick);
 	        
 	        // Load scrollback
 	        infoView.setText(netServ.battle.hist);
@@ -217,8 +217,8 @@ public class BattleActivity extends Activity {
     				netServ.socket.sendMessage(netServ.battle.constructAttack((byte)i), Command.BattleMessage);
     		for(int i = 0; i < 6; i++) {
     			if(id == pokeListButtons[i].getId()) {
-    				//System.out.println("TOUCHED");
     				netServ.socket.sendMessage(netServ.battle.constructSwitch((byte)i), Command.BattleMessage);
+    				realViewSwitcher.snapToScreen(0);
     			}
     		}
     	}
@@ -242,7 +242,6 @@ public class BattleActivity extends Activity {
     case R.id.forfeit_no:
     	break;
     case R.id.draw:
-    	//TODO: implement draw
     	break;
         }
         return true;

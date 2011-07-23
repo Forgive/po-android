@@ -355,7 +355,7 @@ public class RealViewSwitcher extends ViewGroup {
 		snapToScreen(whichScreen);
 	}
 
-	private void snapToScreen(int whichScreen) {
+	public void snapToScreen(int whichScreen) {
 		if (!mScroller.isFinished())
 			return;
 
