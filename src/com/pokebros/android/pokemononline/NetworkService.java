@@ -115,7 +115,6 @@ public class NetworkService extends Service {
     protected void showNotification(Class<?> toStart, String text) {
         Notification notification = new Notification(R.drawable.icon, text,
                 System.currentTimeMillis());
-        
         // The PendingIntent to launch our activity if the user selects this notification
         PendingIntent notificationIntent = PendingIntent.getActivity(this, 0,
                 new Intent(this, toStart), Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -162,7 +161,7 @@ public class NetworkService extends Service {
 			clauses = msg.readInt();
 			mode = msg.readByte();
 			System.out.println("Desc: " + desc + " Opponent: " + opponent + " Clauses: " + clauses + " Mode: " + mode);
-			Notification note = new Notification(R.drawable.icon, "You've been challenged!", System.currentTimeMillis());
+			/*Notification note = new Notification(R.drawable.icon, "You've been challenged!", System.currentTimeMillis());
 			Intent intent = new Intent(this, ChatActivity.class);
 			intent.putExtra("desc", desc);
 			intent.putExtra("opponent", opponent);
@@ -170,7 +169,14 @@ public class NetworkService extends Service {
 			intent.putExtra("mode", mode);
 	        note.setLatestEventInfo(this, "POAndroid", "You've been challenged!", PendingIntent.getActivity(this, 0,
 	                intent, Intent.FLAG_ACTIVITY_NEW_TASK));
-			noteMan.notify(NOTIFICATION+1, note);
+			noteMan.notify(NOTIFICATION+1, note);*/
+			// Accept challenge for my sanity
+			Baos b = new Baos();
+			b.write(1);
+			b.putInt(opponent);
+			b.putInt(clauses);
+			b.write(mode);
+	        socket.sendMessage(b, Command.ChallengeStuff);
 			break;
 		case ChannelsList:
 			int numChannels = msg.readInt();

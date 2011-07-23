@@ -16,13 +16,6 @@
     <string name="no">No</string>
     <string name="disconnect">Disconnect</string>
     <string name="suggest_draw">Suggest Draw</string>
-    <string name="attack">Attack</string>
-	<string name="defense">Defense</string>
-	<string name="spAttack">Sp. Att</string>
-	<string name="spDefense">Sp. Def</string>
-	<string name="speed">Speed</string>
-	<string name="accuracy">Accuracy</string>
-	<string name="evasion">Evasion</string>
 	<string name="player_list">Player List</string>
     <string name="channel_list">Channel List</string>
     <string name="accept">Accept</string>

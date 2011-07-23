@@ -565,7 +565,11 @@ public enum MoveName {
 	public String toString() {
 		String s = super.toString();
 		s = s.replaceAll("_", "-");
-		s = s.replaceAll("([A-Z])", " $1");
+		s = s.replaceAll("([a-z])([A-Z])", "$1 $2");
+		
+		// Special cases
+		if(s.equals("Dynamic Punch")) s = "DynamicPunch";
+		
 		return s;
 	}
 };

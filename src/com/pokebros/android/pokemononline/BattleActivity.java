@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,6 +28,7 @@ public class BattleActivity extends Activity {
 	public final static int SWIPE_TIME_THRESHOLD = 100;
 	
 	RealViewSwitcher realViewSwitcher;
+	ProgressBar[] hpBars = new ProgressBar[2];
 	public Button[] attack = new Button[4];
 	public TextView[] timers = new TextView[2];
 	TextView[] pokeListNames = new TextView[6];
@@ -75,6 +77,12 @@ public class BattleActivity extends Activity {
         pokeListButtons[3] = (LinearLayout)findViewById(R.id.pokeViewLayout4);
         pokeListButtons[4] = (LinearLayout)findViewById(R.id.pokeViewLayout5);
         pokeListButtons[5] = (LinearLayout)findViewById(R.id.pokeViewLayout6);
+        
+        hpBars[0] = (ProgressBar)findViewById(R.id.hpBarA);
+        hpBars[0].setProgress(100);
+        
+        hpBars[1] = (ProgressBar)findViewById(R.id.hpBarB);
+        hpBars[1].setProgress(100);
         
         infoView = (TextView)findViewById(R.id.infoWindow);
         infoScroll = (ScrollView)findViewById(R.id.infoScroll);
@@ -134,6 +142,12 @@ public class BattleActivity extends Activity {
 		        	attack[i].setText(netServ.battle.myTeam.pokes[0].moves[i].toString());
 		        }
 			}
+			
+			for(int i = 0; i < 6; i++) {
+	    		pokeListHPs[i].setText(netServ.battle.myTeam.pokes[i].currentHP +
+	    				"/" + netServ.battle.myTeam.pokes[i].totalHP);
+			}
+			
 	    	netServ.battle.hist.append(delta);
 			delta.clear();
 			handler.postDelayed(this, 1000);
@@ -173,8 +187,6 @@ public class BattleActivity extends Activity {
 	    		// XXX just do nick for now, should actually look up
 	    		// poke once we get the database stuff going
 	    		pokeListNames[i].setText(netServ.battle.myTeam.pokes[i].nick);
-	    		pokeListHPs[i].setText(netServ.battle.myTeam.pokes[i].currentHP +
-	    				"/" + netServ.battle.myTeam.pokes[i].totalHP);
 	    	}
 	    	
 	    	// Set up the UI polling and timer updating

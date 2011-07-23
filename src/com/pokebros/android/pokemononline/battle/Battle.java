@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.lang.Math;
 
+
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.SystemClock;
@@ -199,7 +200,7 @@ public class Battle {
 		case StatChange:
 			byte stat = msg.readByte(), boost=msg.readByte();
 			histDelta.append("\n" + currentPoke(player).nick() + "'s " +
-					netServ.getString(Stat.values()[stat].string) + (Math.abs(boost) > 1 ? " sharply" : "")
+					Stat.values()[stat].toString() + (Math.abs(boost) > 1 ? " sharply" : "")
 					+ (boost > 0 ? " rose!" : " fell!"));
 			break;
 		case StatusChange:
@@ -210,14 +211,21 @@ public class Battle {
 					" was burned!",
 					" was poisoned!",
 					" was badly poisoned!",
-					" became confused!"
 			};
 			byte status = msg.readByte();
 			boolean multipleTurns = msg.readBool();
-			if (status > Status.Fine.ordinal() && status <= Status.Confused.ordinal()) {
+			if (status > Status.Fine.ordinal() && status < Status.Confused.ordinal()) {
 				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(status) + 
 						currentPoke(player).nick() + statusChangeMessages[status-1 +
                         (status == Status.Poisoned.ordinal() && multipleTurns ? 1 : 0)] + "</font color>"));
+			}
+			else if(status == Status.Confused.ordinal()){
+				/* The reason we need to handle confusion separately is because 
+				 * poisoned and badly poisoned are not separate values in the Status
+				 * enum, so confusion does not correspond to the same value in the above
+				 * string array as its enum value. */
+				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(status) + 
+						currentPoke(player).nick() + " became confused!" + "</font color>"));
 			}
 			break;
 		case AbsStatusChange:
@@ -298,8 +306,8 @@ public class Battle {
 			histDelta.append(Html.fromHtml("<br><font color=" + QtColor.Blue + netServ.players.get(id) + 
 					": " + new EscapeHtml(message)));
 			break;
-		case MoveMessage:
-			short move = msg.readShort();
+//		case MoveMessage:
+/*			short move = msg.readShort();
 			byte part = msg.readByte();
 			DataBaseHelper datHelp = new DataBaseHelper(netServ);
 			try {
@@ -313,8 +321,9 @@ public class Battle {
 			//Cursor messCurs = mess.rawQuery("SELECT EFFECT" + part + " FROM Move_message WHERE _id = " + move, new String[]{""});
 			//String[] herp = {"Effect" + part};
 			//Cursor messCurs = mess.query("Move_message", herp, "", new String[]{""}, "", "", "");
-			//System.out.println("HERE GOES NOTHING " + datHelp.getString(move, part));
-			break;
+			//System.out.println("HERE GOES NOTHING " + datHelp.getString(move, part));*/
+			
+//			break;
 		case ClockStart:
 			remainingTime[player % 2] = msg.readShort();
 			startingTime[player % 2] = SystemClock.uptimeMillis();
@@ -324,8 +333,13 @@ public class Battle {
 			remainingTime[player % 2] = msg.readShort();
 			ticking[player % 2] = false;
 			break;
+		case ChangeHp:
+			
+			break;
 		default:
 			System.out.println("Battle command unimplemented");
+			break;
+			
 		}
 	}
 }
