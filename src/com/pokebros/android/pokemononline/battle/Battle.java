@@ -23,9 +23,7 @@ import com.pokebros.android.pokemononline.player.PlayerInfo;
 import com.pokebros.android.pokemononline.poke.BattlePoke;
 import com.pokebros.android.pokemononline.poke.ShallowBattlePoke;
 import com.pokebros.android.pokemononline.poke.UniqueID;
-import com.pokebros.android.pokemononline.poke.PokeEnums.Status;
-import com.pokebros.android.pokemononline.poke.PokeEnums.StatusFeeling;
-import com.pokebros.android.pokemononline.poke.PokeEnums.Stat;
+import com.pokebros.android.pokemononline.poke.PokeEnums.*;
 
 public class Battle {
 	ArrayList<Boolean> sub = new ArrayList<Boolean>();
@@ -315,6 +313,7 @@ public class Battle {
 					": " + new EscapeHtml(message)));
 			break;
 		case MoveMessage:
+			// TODO
 /*			short move = msg.readShort();
 			byte part = msg.readByte();
 			DataBaseHelper datHelp = new DataBaseHelper(netServ);
@@ -332,6 +331,26 @@ public class Battle {
 			//System.out.println("HERE GOES NOTHING " + datHelp.getString(move, part));*/
 			
 			break;
+		case NoOpponent:
+			histDelta.append("\nBut there was no target...");
+			break;
+		case ItemMessage:
+			// TODO
+			break;
+		case Flinch:
+			histDelta.append("\n" + currentPoke(player).nick() + " flinched!");
+			break;
+		case Recoil:
+			boolean damaging = msg.readBool();
+			if (damaging)
+				histDelta.append("\n" + currentPoke(player).nick() + " is hit with recoil!");
+			else
+				histDelta.append("\n" + currentPoke(player).nick() + "had its energy drained!");
+			break;
+		case WeatherMessage:
+			byte wstatus = msg.readByte(), weather = msg.readByte();
+			if (weather == Weather.NormalWeather.ordinal())
+				break;
 		case ClockStart:
 			remainingTime[player % 2] = msg.readShort();
 			startingTime[player % 2] = SystemClock.uptimeMillis();
