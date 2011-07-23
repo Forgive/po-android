@@ -11,7 +11,6 @@ public class BattlePoke extends SerializeBytes {
 	public String nick = "";
 	public short currentHP = 0;
 	public short totalHP = 0;
-	public byte teamNum;
 	short item = 0;
 	short ability = 0;
 	int fullStatus = 0;

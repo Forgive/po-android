@@ -1,5 +1,7 @@
 package com.pokebros.android.pokemononline;
 
+import com.pokebros.android.pokemononline.poke.BattlePoke;
+
 import de.marcreichelt.android.RealViewSwitcher;
 import android.app.Activity;
 import android.content.ComponentName;
@@ -168,9 +170,10 @@ public class BattleActivity extends Activity {
 			}
 			
 			for(int i = 0; i < 6; i++) {
-				byte teamNum = netServ.battle.myTeam.pokes[i].teamNum;
-	    		pokeListHPs[teamNum].setText(netServ.battle.myTeam.pokes[i].currentHP +
-	    				"/" + netServ.battle.myTeam.pokes[i].totalHP);
+				BattlePoke poke = netServ.battle.myTeam.pokes[i];
+				pokeListNames[i].setText(poke.nick);
+	    		pokeListHPs[i].setText(poke.currentHP +
+	    				"/" + poke.totalHP);
 			}
 	    	netServ.battle.hist.append(delta);
 			delta.clear();
@@ -212,14 +215,6 @@ public class BattleActivity extends Activity {
 	    			infoScroll.smoothScrollTo(0, infoView.getMeasuredHeight());
 	    		}
 	    	});
-	    	
-	    	// Load your pokes into the poke list
-	    	for(int i = 0; i < 6; i++) {
-	    		// XXX just do nick for now, should actually look up
-	    		// poke once we get the database stuff going
-	    		byte teamNum = netServ.battle.myTeam.pokes[i].teamNum;
-	    		pokeListNames[teamNum].setText(netServ.battle.myTeam.pokes[i].nick);
-	    	}
 	    	
 	    	// Prompt a UI update of the pokemon
 	        netServ.battle.pokeChanged = netServ.battle.oppPokeChanged = true;

@@ -58,9 +58,6 @@ public class Battle {
 		this.bID = bID;
 		myTeam = team;
 		
-		// Keep track of each poke's initial condition, used for updating poke view later
-		for(int i = 0; i < 6; i++)
-			team.pokes[i].teamNum = (byte)i;
 		// Only supporting singles for now
 		numberOfSlots = 2;
 		players[0] = p1;
@@ -372,8 +369,11 @@ public class Battle {
 		case StraightDamage:
 			short damage = msg.readShort();
 			if(player == me) {
-				
+				histDelta.append("\n" + currentPoke(player).rnick() + " lost " + damage + 
+						" HP! (" + (damage * 100 / myTeam.pokes[0].totalHP) + "% of its health)");
 			}
+			else
+				histDelta.append("\n" + currentPoke(player).rnick() + " lost " + damage + "% of its health!");
 			break;
 		default:
 			System.out.println("Battle command unimplemented");
