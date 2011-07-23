@@ -28,7 +28,7 @@ public class NetworkService extends Service {
 	private final IBinder binder = new LocalBinder();
 	protected int NOTIFICATION = 4356;
 	protected NotificationManager noteMan;
-	public Channel currentChannel;
+	public Channel currentChannel = null;
 	Thread sThread, rThread;
 	PokeClientSocket socket = null;
 	

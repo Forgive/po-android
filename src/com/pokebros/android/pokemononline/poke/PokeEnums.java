@@ -1,5 +1,7 @@
 package com.pokebros.android.pokemononline.poke;
 
+import com.pokebros.android.pokemononline.R;
+
 public class PokeEnums {
 	public enum Gender {
 		Neutral,
@@ -113,14 +115,15 @@ public class PokeEnums {
 	}
 	
 	public enum Stat {
-		HP,
-		Attack,
-		Defense,
-		SpAttack  { public String toString() { return "Sp. Att"; } },
-		SpDefense { public String toString() { return "Sp. Def"; } },
-		Speed,
-		Accuracy,
-		Evasion,
-		AllStats;
+		HP { public final int rstring() { return R.string.empty; } },
+		Attack { public final int rstring() { return R.string.stat_attack; } },
+		Defense { public final int rstring() { return R.string.stat_defense; } },
+		SpAttack  { public final int rstring() { return R.string.stat_spAttack; } },
+		SpDefense { public final int rstring() { return R.string.stat_spDefense; } },
+		Speed { public final int rstring() { return R.string.stat_speed; } },
+		Accuracy { public final int rstring() { return R.string.stat_accuracy; } },
+		Evasion { public final int rstring() { return R.string.stat_evasion; } },
+		AllStats { public final int rstring() { return R.string.empty; } };
+		public abstract int rstring();
 	}
 }

@@ -208,8 +208,8 @@ public class Battle {
 		case StatChange:
 			byte stat = msg.readByte(), boost=msg.readByte();
 			histDelta.append("\n" + currentPoke(player).nick() + "'s " +
-					Stat.values()[stat].toString() + (Math.abs(boost) > 1 ? " sharply" : "")
-					+ (boost > 0 ? " rose!" : " fell!"));
+					netServ.getString(Stat.values()[stat].rstring()) +
+					(Math.abs(boost) > 1 ? " sharply" : "") + (boost > 0 ? " rose!" : " fell!"));
 			break;
 		case StatusChange:
 			final String[] statusChangeMessages = {
@@ -233,7 +233,7 @@ public class Battle {
 				 * enum, so confusion does not correspond to the same value in the above
 				 * string array as its enum value. */
 				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(status) + 
-						currentPoke(player).nick() + " became confused!" + "</font color>"));
+						currentPoke(player).nick() + " became confused!</font color>"));
 			}
 			break;
 		case AbsStatusChange:

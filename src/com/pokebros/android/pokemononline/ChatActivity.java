@@ -97,12 +97,14 @@ public class ChatActivity extends Activity {
 				netServ.showNotification(ChatActivity.class, "Chat");
 			
 	        // Load scrollback //XXX
-	        chatBox.setText(netServ.currentChannel.hist);
-	    	chatScroll.post(new Runnable() {
-	    		public void run() {
-	    			chatScroll.smoothScrollTo(0, chatBox.getMeasuredHeight());
-	    		}
-	    	});
+			if (netServ.currentChannel != null) {
+		        chatBox.setText(netServ.currentChannel.hist);
+		    	chatScroll.post(new Runnable() {
+		    		public void run() {
+		    			chatScroll.smoothScrollTo(0, chatBox.getMeasuredHeight());
+		    		}
+		    	});
+			}
 	    	handler.postDelayed(updateUIChatTask, 50);
 		}
 		
