@@ -45,7 +45,7 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
          
 		ip = (EditText)RegistryActivity.this.findViewById(R.id.ipedit);
 		port = (EditText)RegistryActivity.this.findViewById(R.id.portedit);
-		ip.setText("141.212.112.54");
+		ip.setText("76.10.13.190");
 		port.setText("5080");
 		
 		//Capture out button from layout

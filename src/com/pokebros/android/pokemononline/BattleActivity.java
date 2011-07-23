@@ -29,6 +29,7 @@ public class BattleActivity extends Activity {
 	
 	RealViewSwitcher realViewSwitcher;
 	ProgressBar[] hpBars = new ProgressBar[2];
+	TextView[] currentPokeNames = new TextView[2];
 	public Button[] attack = new Button[4];
 	public TextView[] timers = new TextView[2];
 	TextView[] pokeListNames = new TextView[6];
@@ -78,12 +79,6 @@ public class BattleActivity extends Activity {
         pokeListButtons[4] = (LinearLayout)findViewById(R.id.pokeViewLayout5);
         pokeListButtons[5] = (LinearLayout)findViewById(R.id.pokeViewLayout6);
         
-        hpBars[0] = (ProgressBar)findViewById(R.id.hpBarA);
-        hpBars[0].setProgress(100);
-        
-        hpBars[1] = (ProgressBar)findViewById(R.id.hpBarB);
-        hpBars[1].setProgress(100);
-        
         infoView = (TextView)findViewById(R.id.infoWindow);
         infoScroll = (ScrollView)findViewById(R.id.infoScroll);
         //Register the onCLick listener with the implementation above
@@ -124,6 +119,26 @@ public class BattleActivity extends Activity {
 		}
 	};
     
+	public Runnable animateHPBars = new Runnable() {
+		public void run() {
+			for(int i = 0; i < 2; i++) {
+				if(hpBars[i].getProgress() > netServ.battle.currentPoke(i).lifePercent)
+					hpBars[i].incrementProgressBy(-1);
+				//if(hpBars[i].getSecondaryProgress() > netServ.battle.currentPoke(i).lifePercent)
+				//	hpBars[i].incrementSecondaryProgressBy(-1);
+				if(hpBars[i].getProgress() < netServ.battle.currentPoke(i).lifePercent)
+					hpBars[i].incrementProgressBy(1);
+				//if(hpBars[i].getSecondaryProgress() < netServ.battle.currentPoke(i).lifePercent)
+				//	hpBars[i].incrementSecondaryProgressBy(3);
+			}
+			for(int i = 0; i < 2; i++) {
+				if(hpBars[i].getProgress() != netServ.battle.currentPoke(i).lifePercent)// ||
+						//hpBars[i].getSecondaryProgress() != netServ.battle.currentPoke(i).lifePercent)
+					handler.postDelayed(this, 20);
+			}
+		}
+	};
+	
 	public Runnable updateUITask = new Runnable() {
 		public void run() {
 			SpannableStringBuilder delta = netServ.battle.histDelta;
@@ -135,21 +150,31 @@ public class BattleActivity extends Activity {
 		    		}
 		    	});
 			}
+			infoScroll.invalidate();
 			
 			if(netServ.battle.pokeChanged) {
-				// Load correct moveset
+				// Load correct moveset and name
+				currentPokeNames[netServ.battle.me].setText(netServ.battle.currentPoke(netServ.battle.me).rnick());
+				hpBars[netServ.battle.me].setProgress(netServ.battle.currentPoke(netServ.battle.me).lifePercent);
 		        for(int i = 0; i < 4; i++) {
 		        	attack[i].setText(netServ.battle.myTeam.pokes[0].moves[i].toString());
 		        }
+		        netServ.battle.pokeChanged = false;
+			}
+			if(netServ.battle.oppPokeChanged) {
+				currentPokeNames[netServ.battle.opp].setText(netServ.battle.currentPoke(netServ.battle.opp).rnick());
+				hpBars[netServ.battle.opp].setProgress(netServ.battle.currentPoke(netServ.battle.opp).lifePercent);
+				netServ.battle.oppPokeChanged = false;
 			}
 			
 			for(int i = 0; i < 6; i++) {
-	    		pokeListHPs[i].setText(netServ.battle.myTeam.pokes[i].currentHP +
+				byte teamNum = netServ.battle.myTeam.pokes[i].teamNum;
+	    		pokeListHPs[teamNum].setText(netServ.battle.myTeam.pokes[i].currentHP +
 	    				"/" + netServ.battle.myTeam.pokes[i].totalHP);
 			}
-			
 	    	netServ.battle.hist.append(delta);
 			delta.clear();
+			handler.postDelayed(animateHPBars, 50);
 			handler.postDelayed(this, 1000);
 		}
 	};
@@ -174,6 +199,12 @@ public class BattleActivity extends Activity {
 	        names[netServ.battle.me].setText(netServ.battle.players[netServ.battle.me].nick);
 	        names[netServ.battle.opp].setText(netServ.battle.players[netServ.battle.opp].nick);
 	        
+	        hpBars[netServ.battle.me] = (ProgressBar)findViewById(R.id.hpBarB);
+	        hpBars[netServ.battle.opp] = (ProgressBar)findViewById(R.id.hpBarA);
+	        
+	        currentPokeNames[netServ.battle.me] = (TextView)findViewById(R.id.currentPokeNameB);
+	        currentPokeNames[netServ.battle.opp] = (TextView)findViewById(R.id.currentPokeNameA);
+	        
 	        // Load scrollback
 	        infoView.setText(netServ.battle.hist);
 	    	infoScroll.post(new Runnable() {
@@ -186,9 +217,12 @@ public class BattleActivity extends Activity {
 	    	for(int i = 0; i < 6; i++) {
 	    		// XXX just do nick for now, should actually look up
 	    		// poke once we get the database stuff going
-	    		pokeListNames[i].setText(netServ.battle.myTeam.pokes[i].nick);
+	    		byte teamNum = netServ.battle.myTeam.pokes[i].teamNum;
+	    		pokeListNames[teamNum].setText(netServ.battle.myTeam.pokes[i].nick);
 	    	}
 	    	
+	    	// Prompt a UI update of the pokemon
+	        netServ.battle.pokeChanged = netServ.battle.oppPokeChanged = true;
 	    	// Set up the UI polling and timer updating
 	        handler.postDelayed(updateUITask, 50);
 	        handler.postDelayed(updateTimeTask, 100);

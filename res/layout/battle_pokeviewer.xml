@@ -77,13 +77,13 @@
 				android:indeterminateDrawable="@android:drawable/progress_indeterminate_horizontal"
 				android:layout_height="10dp" 
 				android:layout_width="fill_parent"
-				android:id="@+id/hpBarB"
+				android:id="@+id/hpBarA"
 				android:gravity="left|center_vertical"
 				android:layout_weight="1"/>
 			<TextView
-				android:text="FUUUCK!"
 				android:layout_width="fill_parent"
 				android:textColor="#000000"
+				android:id="@+id/currentPokeNameA"
 				android:layout_height="wrap_content"
 				android:gravity="right|center_vertical"
 				android:layout_weight="2"/>
@@ -100,11 +100,11 @@
 			android:gravity="bottom" 
 			android:layout_weight="1">
 			<TextView
-				android:text="SHIT!"
 				android:textColor="#000000"
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
 				android:gravity="left|center_vertical"
+				android:id="@+id/currentPokeNameB"
 				android:layout_weight="2"/>
 			<ProgressBar
 				android:indeterminateOnly="false"
@@ -112,7 +112,7 @@
 				android:indeterminateDrawable="@android:drawable/progress_indeterminate_horizontal"
 				android:layout_height="10dp" 
 				android:layout_width="fill_parent"
-				android:id="@+id/hpBarA"
+				android:id="@+id/hpBarB"
 				android:gravity="right|center_vertical"
 				android:layout_weight="1"
 				android:layout_marginBottom="4dp"

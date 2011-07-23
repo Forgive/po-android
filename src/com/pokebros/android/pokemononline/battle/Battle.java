@@ -45,7 +45,7 @@ public class Battle {
 	int bID = 0;
 	private NetworkService netServ;
 	public boolean pokeChanged = false;
-	
+	public boolean oppPokeChanged = false;
 	public BattleTeam myTeam;
 	
 	ShallowBattlePoke[][] pokes = new ShallowBattlePoke[2][6];
@@ -59,6 +59,10 @@ public class Battle {
 		mode = conf.mode; // singles, doubles, triples
 		this.bID = bID;
 		myTeam = team;
+		
+		// Keep track of each poke's initial condition, used for updating poke view later
+		for(int i = 0; i < 6; i++)
+			team.pokes[i].teamNum = (byte)i;
 		// Only supporting singles for now
 		numberOfSlots = 2;
 		players[0] = p1;
@@ -130,11 +134,17 @@ public class Battle {
 			byte toSpot = msg.readByte();
 			byte fromSpot = msg.readByte();
 			
+			// Switching actually changes the order
+			// of the pokes in the array, so we need
+			// to keep track of the original order
+			// so UI updates will still work.
 			if(player == me) {
 				BattlePoke temp = myTeam.pokes[toSpot];
 				myTeam.pokes[toSpot] = myTeam.pokes[fromSpot];
 				myTeam.pokes[fromSpot] = temp;
+				pokeChanged = true;
 			}
+			else oppPokeChanged = true;
 			
 			ShallowBattlePoke tempPoke = pokes[player][toSpot];
 			pokes[player][toSpot] = pokes[player][fromSpot];
@@ -145,8 +155,6 @@ public class Battle {
 			
 			histDelta.append("\n" + (players[player].nick() + " sent out " + 
 					currentPoke(player).rnick() + "!"));
-			if(player % 2 == me)
-				pokeChanged = true;
 			break;
 		case SendBack:
 			histDelta.append("\n" + (players[player].nick() + " called " + 
@@ -306,7 +314,7 @@ public class Battle {
 			histDelta.append(Html.fromHtml("<br><font color=" + QtColor.Blue + netServ.players.get(id) + 
 					": " + new EscapeHtml(message)));
 			break;
-//		case MoveMessage:
+		case MoveMessage:
 /*			short move = msg.readShort();
 			byte part = msg.readByte();
 			DataBaseHelper datHelp = new DataBaseHelper(netServ);
@@ -323,7 +331,7 @@ public class Battle {
 			//Cursor messCurs = mess.query("Move_message", herp, "", new String[]{""}, "", "", "");
 			//System.out.println("HERE GOES NOTHING " + datHelp.getString(move, part));*/
 			
-//			break;
+			break;
 		case ClockStart:
 			remainingTime[player % 2] = msg.readShort();
 			startingTime[player % 2] = SystemClock.uptimeMillis();
@@ -334,7 +342,19 @@ public class Battle {
 			ticking[player % 2] = false;
 			break;
 		case ChangeHp:
-			
+			short newHP = msg.readShort();
+			if(player == me) {
+				myTeam.pokes[0].currentHP = newHP;
+				currentPoke(me).lifePercent = (byte)(newHP * 100 / myTeam.pokes[0].totalHP);
+			}
+			else
+				currentPoke(player).lifePercent = (byte)newHP;
+			break;
+		case StraightDamage:
+			short damage = msg.readShort();
+			if(player == me) {
+				
+			}
 			break;
 		default:
 			System.out.println("Battle command unimplemented");
