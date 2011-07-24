@@ -312,14 +312,12 @@ public class Battle {
 					": " + new EscapeHtml(message)));
 			break;
 		case MoveMessage:
-			// TODO
 			short move = msg.readShort();
 			byte part = msg.readByte();
 			DataBaseHelper datHelp = new DataBaseHelper(netServ);
 			try {
 				datHelp.createDatabase();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			datHelp.open();
