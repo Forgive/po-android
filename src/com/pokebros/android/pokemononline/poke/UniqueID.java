@@ -5,8 +5,8 @@ import com.pokebros.android.pokemononline.Baos;
 import com.pokebros.android.pokemononline.SerializeBytes;
 
 public class UniqueID extends SerializeBytes {
-	protected short pokeNum;
-	protected byte subNum;
+	public short pokeNum;
+	public byte subNum;
 	
 	public UniqueID(Bais msg) {
 		pokeNum = msg.readShort();

@@ -1,6 +1,7 @@
 package com.pokebros.android.pokemononline;
 
 import com.pokebros.android.pokemononline.poke.BattlePoke;
+import com.pokebros.android.pokemononline.poke.ShallowBattlePoke;
 
 import de.marcreichelt.android.RealViewSwitcher;
 import android.app.Activity;
@@ -8,6 +9,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -20,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
@@ -30,7 +36,8 @@ public class BattleActivity extends Activity {
 	public final static int SWIPE_TIME_THRESHOLD = 100;
 	
 	RealViewSwitcher realViewSwitcher;
-	ProgressBar[] hpBars = new ProgressBar[2];
+	TextProgressBar[] hpBars = new TextProgressBar[2];
+	int[] lastHPs = new int[2];
 	TextView[] currentPokeNames = new TextView[2];
 	public Button[] attack = new Button[4];
 	public TextView[] timers = new TextView[2];
@@ -40,7 +47,9 @@ public class BattleActivity extends Activity {
 	public TextView infoView;
 	public ScrollView infoScroll;
 	TextView[] names = new TextView[2];
+	ImageView[] pokeSprites = new ImageView[2];
 	private NetworkService netServ = null;
+	int me, opp;
 	
 	 /** Called when the activity is first created. */
     @Override
@@ -121,22 +130,52 @@ public class BattleActivity extends Activity {
 		}
 	};
     
+	void hpUpdateHack(int i) {
+		hpBars[i].incrementProgressBy(1);
+		hpBars[i].incrementProgressBy(-1);
+	}
+	
 	public Runnable animateHPBars = new Runnable() {
 		public void run() {
 			for(int i = 0; i < 2; i++) {
-				if(hpBars[i].getProgress() > netServ.battle.currentPoke(i).lifePercent)
-					hpBars[i].incrementProgressBy(-1);
-				//if(hpBars[i].getSecondaryProgress() > netServ.battle.currentPoke(i).lifePercent)
-				//	hpBars[i].incrementSecondaryProgressBy(-1);
-				if(hpBars[i].getProgress() < netServ.battle.currentPoke(i).lifePercent)
-					hpBars[i].incrementProgressBy(1);
-				//if(hpBars[i].getSecondaryProgress() < netServ.battle.currentPoke(i).lifePercent)
-				//	hpBars[i].incrementSecondaryProgressBy(3);
+				ShallowBattlePoke poke = netServ.battle.currentPoke(i);
+				if(poke != null) {
+					// Update the bars to reflect the current life percentage
+					if(hpBars[i].getProgress() > poke.lifePercent)
+						hpBars[i].incrementProgressBy(-1);
+					else if(hpBars[i].getProgress() < poke.lifePercent) {
+						hpBars[i].incrementProgressBy(1);
+					}
+					int progress = hpBars[i].getProgress();
+					
+					// Check to see if the bars need to change color, and do it
+					Rect bounds = hpBars[i].getProgressDrawable().getBounds();
+					if(progress > 50 && (lastHPs[i] <= 50)) {
+						hpBars[i].setProgressDrawable(getResources().getDrawable(R.drawable.green_progress));
+						hpUpdateHack(i);
+					}
+					else if((progress <= 50 && progress > 20) && (lastHPs[i] <= 20 || lastHPs[i] > 50)) {
+						hpBars[i].setProgressDrawable(getResources().getDrawable(R.drawable.yellow_progress));
+						hpUpdateHack(i);
+					}
+					else if((progress <= 20) && (lastHPs[i] > 20)) {
+						hpBars[i].setProgressDrawable(getResources().getDrawable(R.drawable.red_progress));
+						hpUpdateHack(i);
+					}
+					hpBars[i].getProgressDrawable().setBounds(bounds);
+					
+					// Update the percentage display on the hp bar
+					hpBars[i].setText(progress + "%");
+					lastHPs[i] = progress;
+				}
 			}
+			// See if the animation has finished yet
 			for(int i = 0; i < 2; i++) {
-				if(hpBars[i].getProgress() != netServ.battle.currentPoke(i).lifePercent)// ||
-						//hpBars[i].getSecondaryProgress() != netServ.battle.currentPoke(i).lifePercent)
-					handler.postDelayed(this, 20);
+				ShallowBattlePoke poke = netServ.battle.currentPoke(i);
+				if(poke != null) {
+					if(hpBars[i].getProgress() != poke.lifePercent)
+						handler.postDelayed(this, 100);
+				}
 			}
 		}
 	};
@@ -155,18 +194,51 @@ public class BattleActivity extends Activity {
 			infoScroll.invalidate();
 			
 			if(netServ.battle.pokeChanged) {
+				ShallowBattlePoke poke = netServ.battle.currentPoke(me);
 				// Load correct moveset and name
-				currentPokeNames[netServ.battle.me].setText(netServ.battle.currentPoke(netServ.battle.me).rnick());
-				hpBars[netServ.battle.me].setProgress(netServ.battle.currentPoke(netServ.battle.me).lifePercent);
-		        for(int i = 0; i < 4; i++) {
-		        	attack[i].setText(netServ.battle.myTeam.pokes[0].moves[i].toString());
-		        }
-		        netServ.battle.pokeChanged = false;
+				if(poke != null) {
+					currentPokeNames[me].setText(netServ.battle.currentPoke(me).rnick());
+					hpBars[me].setProgress(netServ.battle.currentPoke(me).lifePercent);
+					BattlePoke battlePoke = netServ.battle.myTeam.pokes[0];
+			        for(int i = 0; i < 4; i++) {
+			        	attack[i].setText(battlePoke.moves[i].toString());
+			        }
+			        int resID = getResources().getIdentifier("p" + poke.uID.pokeNum + "_back",
+			        		"drawable", "com.pokebros.android.pokemononline");
+			        
+			        Bitmap bmp = BitmapFactory.decodeResource(getResources(), resID);
+					int width = bmp.getWidth();
+					int height = (int)(bmp.getHeight() * .8);
+
+					Bitmap cropped = Bitmap.createBitmap(bmp, 0, 0, width, height);
+			        pokeSprites[me].setImageBitmap(cropped);
+			        
+			        //updateHPColors(me, hpBars[me].getProgress(), true);
+			        netServ.battle.pokeChanged = false;
+				}
 			}
 			if(netServ.battle.oppPokeChanged) {
-				currentPokeNames[netServ.battle.opp].setText(netServ.battle.currentPoke(netServ.battle.opp).rnick());
-				hpBars[netServ.battle.opp].setProgress(netServ.battle.currentPoke(netServ.battle.opp).lifePercent);
-				netServ.battle.oppPokeChanged = false;
+				ShallowBattlePoke poke = netServ.battle.currentPoke(opp);
+				// Load correct moveset and name
+				if(poke != null) {
+					currentPokeNames[opp].setText(netServ.battle.currentPoke(opp).rnick());
+					hpBars[opp].setProgress(netServ.battle.currentPoke(opp).lifePercent);
+					//updateHPColors(opp, hpBars[opp].getProgress(), true);
+					int resID = getResources().getIdentifier("p" + poke.uID.pokeNum + "_front",
+			        		"drawable", "com.pokebros.android.pokemononline");
+					
+					Bitmap bmp = BitmapFactory.decodeResource(getResources(), resID);
+					int width = bmp.getWidth();
+					int height = bmp.getHeight();
+					int startHeight = (int)(height * .1);
+
+					Bitmap cropped = Bitmap.createBitmap(bmp, 0, startHeight, width, height - startHeight);
+			        //pokeSprites[me].setImageBitmap(cropped);
+			        
+					Drawable pokeSprite = getResources().getDrawable(resID);
+			        pokeSprites[opp].setImageBitmap(cropped);
+					netServ.battle.oppPokeChanged = false;
+				}
 			}
 			
 			for(int i = 0; i < 6; i++) {
@@ -191,22 +263,29 @@ public class BattleActivity extends Activity {
                     Toast.LENGTH_SHORT).show();
 			
 			// Set the UI to display the correct info
-	        
+	        me = netServ.battle.me;
+	        opp = netServ.battle.opp;
 	        // We don't know which timer is which until the battle starts,
 	        // so set them here.
-	        timers[netServ.battle.me] = (TextView)findViewById(R.id.timerB);
-	        timers[netServ.battle.opp] = (TextView)findViewById(R.id.timerA);
-	        names[netServ.battle.me] = (TextView)findViewById(R.id.nameB);
-	        names[netServ.battle.opp] = (TextView)findViewById(R.id.nameA);
+	        timers[me] = (TextView)findViewById(R.id.timerB);
+	        timers[opp] = (TextView)findViewById(R.id.timerA);
+	        names[me] = (TextView)findViewById(R.id.nameB);
+	        names[opp] = (TextView)findViewById(R.id.nameA);
 	        
-	        names[netServ.battle.me].setText(netServ.battle.players[netServ.battle.me].nick);
-	        names[netServ.battle.opp].setText(netServ.battle.players[netServ.battle.opp].nick);
+	        names[me].setText(netServ.battle.players[me].nick);
+	        names[opp].setText(netServ.battle.players[opp].nick);
 	        
-	        hpBars[netServ.battle.me] = (ProgressBar)findViewById(R.id.hpBarB);
-	        hpBars[netServ.battle.opp] = (ProgressBar)findViewById(R.id.hpBarA);
+	        hpBars[me] = (TextProgressBar)findViewById(R.id.hpBarB);
+	        hpBars[opp] = (TextProgressBar)findViewById(R.id.hpBarA);
 	        
-	        currentPokeNames[netServ.battle.me] = (TextView)findViewById(R.id.currentPokeNameB);
-	        currentPokeNames[netServ.battle.opp] = (TextView)findViewById(R.id.currentPokeNameA);
+	        currentPokeNames[me] = (TextView)findViewById(R.id.currentPokeNameB);
+	        currentPokeNames[opp] = (TextView)findViewById(R.id.currentPokeNameA);
+	        
+	        pokeSprites[me] = (ImageView)findViewById(R.id.pokeSpriteB);
+	        pokeSprites[opp] = (ImageView)findViewById(R.id.pokeSpriteA);
+	        
+	        for(int i = 0; i < 2; i++)
+	        	lastHPs[i] = netServ.battle.currentPoke(i).lifePercent;
 	        
 	        // Load scrollback
 	        infoView.setText(netServ.battle.hist);

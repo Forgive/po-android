@@ -49,8 +49,7 @@
 	<!-- END Player A Title -->
 	
 	<!-- START Battle Screen -->
-	<LinearLayout
-		android:orientation="vertical"
+	<RelativeLayout
 		android:text="Battle Screen"
 		android:layout_width="fill_parent"
 		android:textColor="#000000"
@@ -60,66 +59,54 @@
 		android:layout_marginLeft="4dp"
 		android:layout_marginRight="4dp"
 		android:id="@+id/battleScreen"  
-		android:layout_height="100dp" 
-		android:layout_weight="30">
-		<LinearLayout
-			android:layout_width="fill_parent"
-			android:gravity="top"
-			android:orientation="horizontal"
-			android:layout_height="wrap_content"
-			android:layout_weight="1"
-			android:layout_marginTop="4dp"
-			android:layout_marginLeft="4dp"
-			android:layout_marginRight="4dp">
-			<ProgressBar
+		android:layout_height="150dp">
+		<TextView
+				android:layout_width="wrap_content"
+				android:textColor="#000000"
+				android:id="@+id/currentPokeNameA"
+				android:layout_height="wrap_content"
+				android:layout_alignParentLeft="true"
+				android:layout_marginRight="5dp"/>
+			<com.pokebros.android.pokemononline.TextProgressBar
 				android:indeterminateOnly="false"
-				android:progressDrawable="@android:drawable/progress_horizontal"
 				android:indeterminateDrawable="@android:drawable/progress_indeterminate_horizontal"
 				android:layout_height="10dp" 
 				android:layout_width="fill_parent"
 				android:id="@+id/hpBarA"
-				android:gravity="left|center_vertical"
-				android:layout_weight="1"/>
-			<TextView
-				android:layout_width="fill_parent"
-				android:textColor="#000000"
-				android:id="@+id/currentPokeNameA"
-				android:layout_height="wrap_content"
-				android:gravity="right|center_vertical"
-				android:layout_weight="2"/>
-		</LinearLayout>
-		<!-- <TextView
-			android:text="Battle Screen"
-			android:layout_width="fill_parent"
-			android:textColor="#000000"
-			android:layout_height="wrap_content"/> -->
-		<LinearLayout
-			android:layout_width="fill_parent"
-			android:orientation="horizontal"
-			android:layout_height="wrap_content"
-			android:gravity="bottom" 
-			android:layout_weight="1">
+				android:layout_toRightOf="@id/currentPokeNameA"
+				android:layout_alignTop="@id/currentPokeNameA"
+				android:progressDrawable="@drawable/green_progress"/>
+				<ImageView
+					android:id="@+id/pokeSpriteA"
+					android:layout_height="wrap_content"
+					android:layout_width="wrap_content"
+					android:layout_alignParentRight="true"
+					android:layout_below="@id/hpBarA"/>
 			<TextView
 				android:textColor="#000000"
-				android:layout_width="fill_parent"
+				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:gravity="left|center_vertical"
 				android:id="@+id/currentPokeNameB"
-				android:layout_weight="2"/>
-			<ProgressBar
+				android:layout_alignParentRight="true"
+				android:layout_alignParentBottom="true"
+				android:layout_marginLeft="5dp"/>
+			<com.pokebros.android.pokemononline.TextProgressBar
 				android:indeterminateOnly="false"
-				android:progressDrawable="@android:drawable/progress_horizontal"
 				android:indeterminateDrawable="@android:drawable/progress_indeterminate_horizontal"
 				android:layout_height="10dp" 
 				android:layout_width="fill_parent"
 				android:id="@+id/hpBarB"
-				android:gravity="right|center_vertical"
-				android:layout_weight="1"
-				android:layout_marginBottom="4dp"
-				android:layout_marginLeft="4dp"
-				android:layout_marginRight="4dp"/>
-			</LinearLayout>
-	</LinearLayout>
+				android:layout_toLeftOf="@id/currentPokeNameB"
+				android:layout_alignBottom="@id/currentPokeNameB"
+				android:progressDrawable="@drawable/green_progress"/>
+				<ImageView
+					android:id="@+id/pokeSpriteB"
+					android:layout_height="wrap_content"
+					android:layout_width="wrap_content"
+					android:layout_above="@id/hpBarB"
+					android:layout_alignLeft="@id/hpBarB"/>
+					<!-- android:layout_alignBottom="@id/hpBarB"-->
+	</RelativeLayout>
 	<!-- END Battle Screen -->
 	
 	<!-- START Player B Title -->

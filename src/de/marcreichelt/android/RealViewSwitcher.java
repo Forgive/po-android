@@ -339,11 +339,11 @@ public class RealViewSwitcher extends ViewGroup {
 		}
 
 		if(mTouchState == TOUCH_STATE_REST) {
-			System.out.println("REST!");
+			//System.out.println("REST!");
 			return false;
 		}
 		else {
-			System.out.println("SCROLLING!");
+			//System.out.println("SCROLLING!");
 			return true;
 		}
 	}

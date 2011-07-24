@@ -127,31 +127,29 @@ public class Battle {
 		System.out.println("Battle Command Received: " + bc.toString());
 		switch(bc) {
 		case SendOut:
-			//boolean isSilent = msg.readBool();
-			byte toSpot = msg.readByte();
+			boolean isSilent = msg.readBool();
+			//byte toSpot = msg.readByte();
 			byte fromSpot = msg.readByte();
 			
-			// Switching actually changes the order
-			// of the pokes in the array, so we need
-			// to keep track of the original order
-			// so UI updates will still work.
 			if(player == me) {
-				BattlePoke temp = myTeam.pokes[toSpot];
-				myTeam.pokes[toSpot] = myTeam.pokes[fromSpot];
+				BattlePoke temp = myTeam.pokes[0];
+				
+				myTeam.pokes[0] = myTeam.pokes[fromSpot];
 				myTeam.pokes[fromSpot] = temp;
 				pokeChanged = true;
 			}
 			else oppPokeChanged = true;
 			
-			ShallowBattlePoke tempPoke = pokes[player][toSpot];
-			pokes[player][toSpot] = pokes[player][fromSpot];
+			ShallowBattlePoke tempPoke = pokes[player][0];
+			pokes[player][0] = pokes[player][fromSpot];
 			pokes[player][fromSpot] = tempPoke;
 			
 			if(msg.available() > 0) // this is the first time you've seen it
-				pokes[player][toSpot] = new ShallowBattlePoke(msg, player);
+				pokes[player][0] = new ShallowBattlePoke(msg, player);
 			
-			histDelta.append("\n" + (players[player].nick() + " sent out " + 
-					currentPoke(player).rnick() + "!"));
+			if(!isSilent)
+				histDelta.append("\n" + (players[player].nick() + " sent out " + 
+						currentPoke(player).rnick() + "!"));
 			break;
 		case SendBack:
 			histDelta.append("\n" + (players[player].nick() + " called " + 
@@ -312,6 +310,19 @@ public class Battle {
 					": " + new EscapeHtml(message)));
 			break;
 		case MoveMessage:
+			/*String s = "%s %ts %tf %t %f %m %d %q %i %a %p";
+			s = s.replaceAll("%t", currentPoke(player).nick);
+			s = s.replaceAll("%ts", players[me].nick);
+			s = s.replaceAll("%tf", players[opp].nick);
+			s = s.replaceAll("%t", "HAAARP");
+			s = s.replaceAll("%f", currentPoke(opp).nick);*/
+			//s = s.replaceAll("%m", MoveName.values()[move].toString());
+			//s = s.replaceAll("%d", new Short(other).toString());
+			//s = s.replaceAll("%q", q);
+			//s = s.replaceAll("%i", other);
+			//s = s.replaceAll("%a", );
+			//s = s.replaceAll("%p", replacement);
+			// TODO
 			short move = msg.readShort();
 			byte part = msg.readByte();
 			DataBaseHelper datHelp = new DataBaseHelper(netServ);
@@ -389,8 +400,9 @@ public class Battle {
 				histDelta.append("\n" + currentPoke(player).nick() + " lost " + damage + 
 						" HP! (" + (damage * 100 / myTeam.pokes[0].totalHP) + "% of its health)");
 			}
-			else
+			else {
 				histDelta.append("\n" + currentPoke(player).nick() + " lost " + damage + "% of its health!");
+			}
 			break;
 		case ClockStart:
 			remainingTime[player % 2] = msg.readShort();
@@ -405,10 +417,13 @@ public class Battle {
 			short newHP = msg.readShort();
 			if(player == me) {
 				myTeam.pokes[0].currentHP = newHP;
-				currentPoke(me).lifePercent = (byte)(newHP * 100 / myTeam.pokes[0].totalHP);
+				currentPoke(player).lastKnownPercent = (byte)newHP;
+				currentPoke(player).lifePercent = (byte)(newHP * 100 / myTeam.pokes[0].totalHP);
 			}
-			else
+			else {
+				currentPoke(player).lastKnownPercent = (byte)newHP;
 				currentPoke(player).lifePercent = (byte)newHP;
+			}
 			break;
 		default:
 			System.out.println("Battle command unimplemented");

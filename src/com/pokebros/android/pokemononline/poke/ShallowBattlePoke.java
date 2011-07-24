@@ -9,11 +9,12 @@ public class ShallowBattlePoke extends SerializeBytes {
 	String rnick;
 	public String nick = "";
 	int fullStatus = 0;
-	UniqueID uID = new UniqueID();
+	public UniqueID uID = new UniqueID();
 	boolean shiny = false;
 	byte gender = 0;
 	public byte lifePercent = 0;
 	byte level = 0;
+	public byte lastKnownPercent = 0;
 	
 	public String nick() { return nick; }
 	public String rnick() { return rnick; }
