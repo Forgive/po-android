@@ -6,8 +6,7 @@ import com.pokebros.android.pokemononline.SerializeBytes;
 
 // This class represents the Opponent's poke during a battle.
 public class ShallowBattlePoke extends SerializeBytes {
-	String rnick;
-	public String nick = "";
+	public String rnick, nick = "";
 	int fullStatus = 0;
 	public UniqueID uID = new UniqueID();
 	boolean shiny = false;
@@ -16,8 +15,6 @@ public class ShallowBattlePoke extends SerializeBytes {
 	byte level = 0;
 	public byte lastKnownPercent = 0;
 	
-	public String nick() { return nick; }
-	public String rnick() { return rnick; }
 	public ShallowBattlePoke(Bais msg, int player) {
 		uID = new UniqueID(msg);
 		rnick = nick = msg.readQString();

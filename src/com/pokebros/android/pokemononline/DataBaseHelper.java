@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import android.content.Context;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public class DataBaseHelper extends SQLiteOpenHelper {
@@ -24,7 +25,14 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 	}
 	
 	public void createDatabase() throws IOException {
+		if (databaseExists())
+			return;
+		
 		InputStream assetsDB = myContext.getAssets().open("Move_Message");
+		
+		// This makes an empty file, otherwise it won't be able to write
+		this.getReadableDatabase();
+		
 		OutputStream dbOut = new FileOutputStream("/data/data/com.pokebros.android.pokemononline/databases/Move_Message");
 		
 		byte[] buffer = new byte[1024];
@@ -36,6 +44,22 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 		dbOut.flush();
 		dbOut.close();
 		assetsDB.close();
+	}
+	
+	private boolean databaseExists() {
+		SQLiteDatabase checkDB = null;
+
+		try {
+			checkDB = SQLiteDatabase.openDatabase("/data/data/com.pokebros.android.pokemononline/databases/Move_Message", null, SQLiteDatabase.OPEN_READONLY);
+		} catch(SQLiteException e){
+			//database does't exist yet.
+		}
+
+		if(checkDB != null){
+			checkDB.close();
+		}
+
+		return checkDB != null;
 	}
 	
 	@Override

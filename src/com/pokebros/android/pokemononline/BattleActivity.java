@@ -197,7 +197,7 @@ public class BattleActivity extends Activity {
 				ShallowBattlePoke poke = netServ.battle.currentPoke(me);
 				// Load correct moveset and name
 				if(poke != null) {
-					currentPokeNames[me].setText(netServ.battle.currentPoke(me).rnick());
+					currentPokeNames[me].setText(netServ.battle.currentPoke(me).rnick);
 					hpBars[me].setProgress(netServ.battle.currentPoke(me).lifePercent);
 					BattlePoke battlePoke = netServ.battle.myTeam.pokes[0];
 			        for(int i = 0; i < 4; i++) {
@@ -221,7 +221,7 @@ public class BattleActivity extends Activity {
 				ShallowBattlePoke poke = netServ.battle.currentPoke(opp);
 				// Load correct moveset and name
 				if(poke != null) {
-					currentPokeNames[opp].setText(netServ.battle.currentPoke(opp).rnick());
+					currentPokeNames[opp].setText(netServ.battle.currentPoke(opp).rnick);
 					hpBars[opp].setProgress(netServ.battle.currentPoke(opp).lifePercent);
 					//updateHPColors(opp, hpBars[opp].getProgress(), true);
 					int resID = getResources().getIdentifier("p" + poke.uID.pokeNum + "_front",
