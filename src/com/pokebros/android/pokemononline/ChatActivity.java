@@ -80,14 +80,14 @@ public class ChatActivity extends Activity {
         		chatBox.append(msg.getData().getString("ChannelMessage") + "\n");
             	chatScroll.post(new Runnable() {
             		public void run() {
+            			//TODO: Prevent auto scrolling if user has finger pressed to chatScroll
 		    			chatScroll.smoothScrollTo(0, chatBox.getMeasuredHeight());
             		}
             	});
         	}
         }
     };
-    
-    private Messenger messenger = new Messenger(handler);
+
 	private ServiceConnection connection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			netServ =	((NetworkService.LocalBinder)service).getService();
@@ -96,7 +96,7 @@ public class ChatActivity extends Activity {
 			if (netServ.battle == null)
 				netServ.showNotification(ChatActivity.class, "Chat");
 			
-	        // Load scrollback //XXX
+	        // Load scrollback
 			if (netServ.currentChannel != null) {
 		        chatBox.setText(netServ.currentChannel.hist);
 		    	chatScroll.post(new Runnable() {
