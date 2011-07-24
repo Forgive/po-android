@@ -1,6 +1,9 @@
 package com.pokebros.android.pokemononline.battle;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.lang.Math;
 
@@ -13,6 +16,7 @@ import android.text.SpannableStringBuilder;
 
 import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
+import com.pokebros.android.pokemononline.BattleActivity;
 import com.pokebros.android.pokemononline.DataBaseHelper;
 import com.pokebros.android.pokemononline.EscapeHtml;
 import com.pokebros.android.pokemononline.NetworkService;
@@ -309,22 +313,23 @@ public class Battle {
 			break;
 		case MoveMessage:
 			// TODO
-/*			short move = msg.readShort();
+			short move = msg.readShort();
 			byte part = msg.readByte();
 			DataBaseHelper datHelp = new DataBaseHelper(netServ);
 			try {
-				datHelp.createDataBase();
+				datHelp.createDatabase();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			datHelp.openDataBase();
-			//SQLiteDatabase mess = datHelp.getReadableDatabase();
-			//Cursor messCurs = mess.rawQuery("SELECT EFFECT" + part + " FROM Move_message WHERE _id = " + move, new String[]{""});
-			//String[] herp = {"Effect" + part};
-			//Cursor messCurs = mess.query("Move_message", herp, "", new String[]{""}, "", "", "");
-			//System.out.println("HERE GOES NOTHING " + datHelp.getString(move, part));*/
-			
+			datHelp.open();
+			SQLiteDatabase mess = datHelp.getReadableDatabase();
+			Cursor messCurs = mess.rawQuery("SELECT EFFECT" + part + " FROM [Move_message] WHERE _id = " + move, null);
+			messCurs.moveToFirst();
+			String specMess = messCurs.getString(0);
+			messCurs.close();
+			datHelp.close();
+			histDelta.append("\n" + specMess);
 			break;
 		case NoOpponent:
 			histDelta.append("\nBut there was no target...");
