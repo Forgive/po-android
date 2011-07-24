@@ -310,21 +310,14 @@ public class Battle {
 					": " + new EscapeHtml(message)));
 			break;
 		case MoveMessage:
-			/*String s = "%s %ts %tf %t %f %m %d %q %i %a %p";
-			s = s.replaceAll("%t", currentPoke(player).nick);
-			s = s.replaceAll("%ts", players[me].nick);
-			s = s.replaceAll("%tf", players[opp].nick);
-			s = s.replaceAll("%t", "HAAARP");
-			s = s.replaceAll("%f", currentPoke(opp).nick);*/
-			//s = s.replaceAll("%m", MoveName.values()[move].toString());
-			//s = s.replaceAll("%d", new Short(other).toString());
-			//s = s.replaceAll("%q", q);
-			//s = s.replaceAll("%i", other);
-			//s = s.replaceAll("%a", );
-			//s = s.replaceAll("%p", replacement);
 			// TODO
 			short move = msg.readShort();
 			byte part = msg.readByte();
+			byte type = msg.readByte();
+			byte foe = msg.readByte();
+			short other = msg.readShort();
+			String q = msg.readQString();
+			
 			DataBaseHelper datHelp = new DataBaseHelper(netServ);
 			try {
 				datHelp.createDatabase();
@@ -335,10 +328,23 @@ public class Battle {
 			SQLiteDatabase mess = datHelp.getReadableDatabase();
 			Cursor messCurs = mess.rawQuery("SELECT EFFECT" + part + " FROM [Move_message] WHERE _id = " + move, null);
 			messCurs.moveToFirst();
-			String specMess = messCurs.getString(0);
+			String s = messCurs.getString(0);
 			messCurs.close();
 			datHelp.close();
-			histDelta.append("\n" + specMess);
+			
+			s = s.replaceAll("%s", currentPoke(player).nick);
+			s = s.replaceAll("%ts", players[me].nick);
+			s = s.replaceAll("%tf", players[opp].nick);
+			s = s.replaceAll("%t", Type.values()[type].toString());
+			s = s.replaceAll("%f", currentPoke(foe).nick);
+			s = s.replaceAll("%m", MoveName.values()[move].toString());
+			s = s.replaceAll("%d", new Short(other).toString());
+			s = s.replaceAll("%q", q);
+			//s = s.replaceAll("%i", other);
+			//s = s.replaceAll("%a", );
+			//s = s.replaceAll("%p", replacement);
+			
+			histDelta.append("\n" + s);
 			break;
 		case NoOpponent:
 			histDelta.append("\nBut there was no target...");
