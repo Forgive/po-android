@@ -43,7 +43,7 @@ public class Battle {
 	public byte me = 0, opp = 1;
 	int gen = 0;
 	int bID = 0;
-	private NetworkService netServ;
+	private static NetworkService netServ;
 	public boolean pokeChanged = false;
 	public boolean oppPokeChanged = false;
 	public BattleTeam myTeam;
@@ -121,6 +121,24 @@ public class Battle {
 		return b;
 	}
 	
+	public static String queryDB(String query) {
+		DataBaseHelper datHelp = new DataBaseHelper(netServ);
+		try {
+			datHelp.createDatabase();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		datHelp.open();
+		SQLiteDatabase mess = datHelp.getReadableDatabase();
+		Cursor messCurs = mess.rawQuery(query, null);
+		messCurs.moveToFirst();
+		String s = messCurs.getString(0);
+		messCurs.close();
+		datHelp.close();
+		
+		return s;
+	}
+	
 	public void receiveCommand(Bais msg)  {
 		BattleCommand bc = BattleCommand.values()[msg.readByte()];
 		byte player = msg.readByte();
@@ -158,7 +176,8 @@ public class Battle {
 		case UseAttack:
 			short attack = msg.readShort();
 			histDelta.append("\n" + currentPoke(player).nick +
-					" used " + MoveName.values()[attack].toString() + "!");
+					" used " + queryDB("SELECT name FROM [Moves] WHERE _id = " + attack) + "!");
+			
 			break;
 		case BeginTurn:
 			int turn = msg.readInt();
@@ -318,26 +337,14 @@ public class Battle {
 			short other = msg.readShort();
 			String q = msg.readQString();
 			
-			DataBaseHelper datHelp = new DataBaseHelper(netServ);
-			try {
-				datHelp.createDatabase();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			datHelp.open();
-			SQLiteDatabase mess = datHelp.getReadableDatabase();
-			Cursor messCurs = mess.rawQuery("SELECT EFFECT" + part + " FROM [Move_message] WHERE _id = " + move, null);
-			messCurs.moveToFirst();
-			String s = messCurs.getString(0);
-			messCurs.close();
-			datHelp.close();
+			String s = queryDB("SELECT EFFECT" + part + " FROM [Move_message] WHERE _id = " + move);
 			
 			s = s.replaceAll("%s", currentPoke(player).nick);
 			s = s.replaceAll("%ts", players[me].nick);
 			s = s.replaceAll("%tf", players[opp].nick);
 			if(type  != -1) s = s.replaceAll("%t", Type.values()[type].toString());
 			if(foe   != -1) s = s.replaceAll("%f", currentPoke(foe).nick);
-			if(move  != -1) s = s.replaceAll("%m", MoveName.values()[move].toString());
+			if(move  != -1) s = s.replaceAll("%m", queryDB("SELECT name FROM [Moves] WHERE _id = " + move));
 			s = s.replaceAll("%d", new Short(other).toString());
 			s = s.replaceAll("%q", q);
 			//s = s.replaceAll("%i", other);

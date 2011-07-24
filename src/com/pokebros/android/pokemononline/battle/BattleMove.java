@@ -10,7 +10,7 @@ public class BattleMove extends SerializeBytes {
 	short num = 0;
 	
 	public String toString() {
-		return MoveName.values()[num].toString();
+		return Battle.queryDB("SELECT name FROM [Moves] WHERE _id = " + num);
 	}
 	
 	public BattleMove(Bais msg) {
