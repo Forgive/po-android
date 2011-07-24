@@ -253,8 +253,8 @@ public class BattleActivity extends Activity {
 	        names[me] = (TextView)findViewById(R.id.nameB);
 	        names[opp] = (TextView)findViewById(R.id.nameA);
 	        
-	        names[me].setText(netServ.battle.players[me].nick);
-	        names[opp].setText(netServ.battle.players[opp].nick);
+	        names[me].setText(netServ.battle.players[me].nick());
+	        names[opp].setText(netServ.battle.players[opp].nick());
 	        
 	        hpBars[me] = (TextProgressBar)findViewById(R.id.hpBarB);
 	        hpBars[opp] = (TextProgressBar)findViewById(R.id.hpBarA);

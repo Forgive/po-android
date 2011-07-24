@@ -35,8 +35,10 @@ public class Channel {
 			switch(c) {
 			case JoinChannel: {
 				PlayerInfo p = netServ.players.get(msg.readInt());
-				if(p != null)
+				if(p != null){
 					players.put(p.id(), p);
+					//XXX ChatActivity.playerAdapter.add(p);
+				}
 				else
 					System.out.println("Tried to add nonexistant player id" +
 							"to channel " + id + ", ignoring");

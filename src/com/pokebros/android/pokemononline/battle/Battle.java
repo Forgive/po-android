@@ -77,8 +77,8 @@ public class Battle {
 		remainingTime[0] = remainingTime[1] = 5*60;
 		ticking[0] = ticking[1] = false;
 		
-		histDelta.append("The battle between " + players[me].nick + 
-						" and " + players[opp].nick + " has begun!");
+		histDelta.append("The battle between " + players[me].nick() + 
+						" and " + players[opp].nick() + " has begun!");
 	}
 	
 	public Boolean isMyTimerTicking() {
@@ -166,11 +166,11 @@ public class Battle {
 				pokes[player][0] = new ShallowBattlePoke(msg, player);
 			
 			if(!isSilent)
-				histDelta.append("\n" + (players[player].nick + " sent out " + 
+				histDelta.append("\n" + (players[player].nick() + " sent out " + 
 						currentPoke(player).rnick + "!"));
 			break;
 		case SendBack:
-			histDelta.append("\n" + (players[player].nick + " called " + 
+			histDelta.append("\n" + (players[player].nick() + " called " + 
 					currentPoke(player).rnick + " back!"));
 			break;
 		case UseAttack:
@@ -313,7 +313,7 @@ public class Battle {
 			if (message.equals(""))
 				break;
 			histDelta.append(Html.fromHtml("<br><font color=" + (player !=0 ? "#5811b1>" : QtColor.Green) +
-					"<b>" + new EscapeHtml(players[player].nick) + ": </b></font color>" +
+					"<b>" + new EscapeHtml(players[player].nick()) + ": </b></font color>" +
 					new EscapeHtml(message)));
 			break;
 		case Spectating:
@@ -340,8 +340,8 @@ public class Battle {
 			String s = queryDB("SELECT EFFECT" + part + " FROM [Move_message] WHERE _id = " + move);
 			
 			s = s.replaceAll("%s", currentPoke(player).nick);
-			s = s.replaceAll("%ts", players[me].nick);
-			s = s.replaceAll("%tf", players[opp].nick);
+			s = s.replaceAll("%ts", players[me].nick());
+			s = s.replaceAll("%tf", players[opp].nick());
 			if(type  != -1) s = s.replaceAll("%t", Type.values()[type].toString());
 			if(foe   != -1) s = s.replaceAll("%f", currentPoke(foe).nick);
 			if(move  != -1) s = s.replaceAll("%m", queryDB("SELECT name FROM [Moves] WHERE _id = " + move));

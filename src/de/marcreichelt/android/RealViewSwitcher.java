@@ -57,26 +57,26 @@ public class RealViewSwitcher extends ViewGroup {
 
 	}
 
-	private static final int SNAP_VELOCITY = 1000;
-	private static final int INVALID_SCREEN = -1;
+	protected static final int SNAP_VELOCITY = 1000;
+	protected static final int INVALID_SCREEN = -1;
 
-	private Scroller mScroller;
-	private VelocityTracker mVelocityTracker;
+	protected Scroller mScroller;
+	protected VelocityTracker mVelocityTracker;
 
-	private final static int TOUCH_STATE_REST = 0;
-	private final static int TOUCH_STATE_SCROLLING = 1;
+	protected final static int TOUCH_STATE_REST = 0;
+	protected final static int TOUCH_STATE_SCROLLING = 1;
 
-	private int mTouchState = TOUCH_STATE_REST;
+	protected int mTouchState = TOUCH_STATE_REST;
 
-	private float mLastMotionX;
-	private int mTouchSlop;
-	private int mMaximumVelocity;
-	private int mCurrentScreen;
-	private int mNextScreen = INVALID_SCREEN;
+	protected float mLastMotionX;
+	protected int mTouchSlop;
+	protected int mMaximumVelocity;
+	protected int mCurrentScreen;
+	protected int mNextScreen = INVALID_SCREEN;
 
-	private boolean mFirstLayout = true;
+	protected boolean mFirstLayout = true;
 
-	private OnScreenSwitchListener mOnScreenSwitchListener;
+	protected OnScreenSwitchListener mOnScreenSwitchListener;
 
 	public RealViewSwitcher(Context context) {
 		super(context);
@@ -88,7 +88,7 @@ public class RealViewSwitcher extends ViewGroup {
 		init();
 	}
 
-	private void init() {
+	protected void init() {
 		mScroller = new Scroller(getContext());
 
 		final ViewConfiguration configuration = ViewConfiguration.get(getContext());
@@ -275,7 +275,7 @@ public class RealViewSwitcher extends ViewGroup {
 
 			// Remember where the motion event started
 			mLastMotionX = x;
-
+        	System.out.println("ActionDown Touch Event mTouchState= " + mTouchState);
 			mTouchState = mScroller.isFinished() ? TOUCH_STATE_REST : TOUCH_STATE_SCROLLING;
 
 			break;
@@ -339,16 +339,16 @@ public class RealViewSwitcher extends ViewGroup {
 		}
 
 		if(mTouchState == TOUCH_STATE_REST) {
-			//System.out.println("REST!");
+			System.out.println("REST!");
 			return false;
 		}
 		else {
-			//System.out.println("SCROLLING!");
+			System.out.println("SCROLLING!");
 			return true;
 		}
 	}
 
-	private void snapToDestination() {
+	protected void snapToDestination() {
 		final int screenWidth = getWidth();
 		final int whichScreen = (getScrollX() + (screenWidth / 2)) / screenWidth;
 

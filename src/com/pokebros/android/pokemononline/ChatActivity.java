@@ -1,7 +1,8 @@
 package com.pokebros.android.pokemononline;
 
+import com.pokebros.android.pokemononline.ServerListAdapter.Server;
+
 import de.marcreichelt.android.ChatRealViewSwitcher;
-import de.marcreichelt.android.RealViewSwitcher;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -14,22 +15,28 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.os.Messenger;
-import android.text.Html;
 import android.text.SpannableStringBuilder;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnKeyListener;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.EditText;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.view.KeyEvent;
 
 public class ChatActivity extends Activity {
+	public final static int SWIPE_TIME_THRESHOLD = 100;
+	
+	public static PlayerListAdapter playerAdapter;
+	
 	private NetworkService netServ = null;
 	private ScrollView chatScroll;
 	private TextView chatBox;
@@ -46,6 +53,28 @@ public class ChatActivity extends Activity {
     	chatBox = (TextView)findViewById(R.id.chatBox);
     	chatViewSwitcher = (ChatRealViewSwitcher)findViewById(R.id.chatPokeSwitcher);
     	chatViewSwitcher.setCurrentScreen(1);
+ 
+        ListView players = (ListView)findViewById(R.id.playerlisting);
+        playerAdapter = new PlayerListAdapter(this, R.id.playerlisting);
+        players.setAdapter(playerAdapter);
+        
+        players.setOnItemClickListener(new OnItemClickListener() {
+        	// Set the edit texts on list item click
+			public void onItemClick(AdapterView<?> parent, View view, int position,
+					long id) {
+				//TODO: Send challenge to player that has been clicked
+			}        	
+		});
+        
+        players.setOnItemLongClickListener(new OnItemLongClickListener() {
+			public boolean onItemLongClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				// TODO: Display player description
+				return true;
+			}
+		});
+
+        
         Intent intent = new Intent(ChatActivity.this, NetworkService.class);
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
         //startService(intent);//new Intent(this, NetworkService.class));
@@ -194,14 +223,23 @@ public class ChatActivity extends Activity {
     	}
     	return true;
     }
-    
-    @Override
-	public boolean dispatchTouchEvent(MotionEvent e) {
-		if(chatViewSwitcher.onTouchEvent(e))
-			return true;
-		return super.dispatchTouchEvent(e);
+	//XXX: need to implement I think
+/*	public void PlayerListEnd() {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				playerAdapter.sortByNick();
+			}
+		});
 	}
-	
+
+	public void NewPlayer(final String nick, final String info) {
+		runOnUiThread(new Runnable() {
+			public void run() {
+            	playerAdapter.addPlayer(nick, info);		
+			}
+		});
+	}*/
+    
     @Override
     public void onDestroy() {
     	unbindService(connection);

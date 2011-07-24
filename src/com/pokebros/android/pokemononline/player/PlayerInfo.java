@@ -9,7 +9,7 @@ import com.pokebros.android.pokemononline.poke.UniqueID;
 // Represents a player in the player list
 public class PlayerInfo extends SerializeBytes {
 	int id = 0;
-	public String nick = "BROLOLHAH";
+	String nick = "BROLOLHAH";
 	String info = "SUP";
 	byte auth = 0, flags = 0;
 	short rating = 0;
@@ -20,6 +20,7 @@ public class PlayerInfo extends SerializeBytes {
 	byte gen = 5;
 	
 	public String nick() { return nick; }
+	public String info() { return info; }
 	public int id() { return id; }
 	public String toString() { return nick; }
 	
