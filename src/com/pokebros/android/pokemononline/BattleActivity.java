@@ -205,15 +205,7 @@ public class BattleActivity extends Activity {
 			        }
 			        int resID = getResources().getIdentifier("p" + poke.uID.pokeNum + "_back",
 			        		"drawable", "com.pokebros.android.pokemononline");
-			        
-			        Bitmap bmp = BitmapFactory.decodeResource(getResources(), resID);
-					int width = bmp.getWidth();
-					int height = (int)(bmp.getHeight() * .8);
-
-					Bitmap cropped = Bitmap.createBitmap(bmp, 0, 0, width, height);
-			        pokeSprites[me].setImageBitmap(cropped);
-			        
-			        //updateHPColors(me, hpBars[me].getProgress(), true);
+					pokeSprites[me].setImageDrawable(getResources().getDrawable(resID));
 			        netServ.battle.pokeChanged = false;
 				}
 			}
@@ -223,20 +215,9 @@ public class BattleActivity extends Activity {
 				if(poke != null) {
 					currentPokeNames[opp].setText(netServ.battle.currentPoke(opp).rnick);
 					hpBars[opp].setProgress(netServ.battle.currentPoke(opp).lifePercent);
-					//updateHPColors(opp, hpBars[opp].getProgress(), true);
 					int resID = getResources().getIdentifier("p" + poke.uID.pokeNum + "_front",
 			        		"drawable", "com.pokebros.android.pokemononline");
-					
-					Bitmap bmp = BitmapFactory.decodeResource(getResources(), resID);
-					int width = bmp.getWidth();
-					int height = bmp.getHeight();
-					int startHeight = (int)(height * .1);
-
-					Bitmap cropped = Bitmap.createBitmap(bmp, 0, startHeight, width, height - startHeight);
-			        //pokeSprites[me].setImageBitmap(cropped);
-			        
-					Drawable pokeSprite = getResources().getDrawable(resID);
-			        pokeSprites[opp].setImageBitmap(cropped);
+			        pokeSprites[opp].setImageDrawable(getResources().getDrawable(resID));
 					netServ.battle.oppPokeChanged = false;
 				}
 			}

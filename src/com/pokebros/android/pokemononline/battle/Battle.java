@@ -335,9 +335,9 @@ public class Battle {
 			s = s.replaceAll("%s", currentPoke(player).nick);
 			s = s.replaceAll("%ts", players[me].nick);
 			s = s.replaceAll("%tf", players[opp].nick);
-			s = s.replaceAll("%t", Type.values()[type].toString());
-			s = s.replaceAll("%f", currentPoke(foe).nick);
-			s = s.replaceAll("%m", MoveName.values()[move].toString());
+			if(type  != -1) s = s.replaceAll("%t", Type.values()[type].toString());
+			if(foe   != -1) s = s.replaceAll("%f", currentPoke(foe).nick);
+			if(move  != -1) s = s.replaceAll("%m", MoveName.values()[move].toString());
 			s = s.replaceAll("%d", new Short(other).toString());
 			s = s.replaceAll("%q", q);
 			//s = s.replaceAll("%i", other);
