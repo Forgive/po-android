@@ -45,11 +45,13 @@ public class ChatActivity extends Activity {
 	private EditText chatInput;
 	private ChatRealViewSwitcher chatViewSwitcher;
 	private Handler handler = new Handler();
+	private boolean hidden = false;
 	
 	/** Called when the activity is first created. */
 	@Override
     public void onCreate(Bundle savedInstanceState) {
 		System.out.println("CREATED CHAT ACTIVITY");
+		hidden = false;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat);
         chatScroll = (ScrollView) findViewById(R.id.chatScroll);
@@ -132,6 +134,8 @@ public class ChatActivity extends Activity {
 	
 	public Runnable updateUIChatTask = new Runnable() {
 		public void run() {
+			if (hidden)
+				return;
 			if (netServ.currentChannel != null) {
 				SpannableStringBuilder delta = netServ.currentChannel.histDelta;
 				chatBox.append(delta);
@@ -288,6 +292,7 @@ public class ChatActivity extends Activity {
     
     @Override
     public void onDestroy() {
+    	hidden = true;
     	unbindService(connection);
     	super.onDestroy();
     }
