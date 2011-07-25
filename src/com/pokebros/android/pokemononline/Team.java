@@ -18,6 +18,8 @@ public class Team extends SerializeBytes {
 	}
 	
 	public Team(PokeParser p) {
+		gen = p.getGen();
+		
 		String[][] mTP = new String[6][10]; 
 		for (int i = 0; i < 6; i++) {
 			for (int j = 0; j < 10; j++) {

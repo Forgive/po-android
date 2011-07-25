@@ -32,8 +32,6 @@ public class NetworkService extends Service {
 	Thread sThread, rThread;
 	PokeClientSocket socket = null;
 	
-	private Bais msg;
-	
 	private FullPlayerInfo meLoginPlayer = new FullPlayerInfo();
 	private PlayerInfo mePlayer = new PlayerInfo();
 	protected Battle battle;// = new Battle();
@@ -87,8 +85,8 @@ public class NetworkService extends Service {
         			}
         			Baos tmp = socket.getMsg();
         			if(tmp != null) {
-        				msg = new Bais(tmp.toByteArray());
-        				handleMsg();
+        				Bais msg = new Bais(tmp.toByteArray());
+        				handleMsg(msg);
         			} else {
         				// don't use all CPU when no message
         				try {
@@ -123,7 +121,7 @@ public class NetworkService extends Service {
         this.startForeground(NOTIFICATION, notification);
     }
 	
-	public void handleMsg() {
+	public void handleMsg(Bais msg) {
 		/* Completely obvious way to "convert"
 		 * a byte into a value in an enum.
 		 */

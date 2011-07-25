@@ -220,8 +220,26 @@ public class ChatActivity extends Activity {
     		netServ.disconnect();
 			finish();
     		break;
+		case R.id.findbattle:
+			// TODO present menu to choose these bools
+			netServ.socket.sendMessage(
+					constructFindBattle(false, true, true, (short) 200, (byte) 0),
+					Command.FindBattle);
+			break;
     	}
     	return true;
+    }
+    
+    private Baos constructFindBattle(boolean onlyInRange, boolean forceSameTier,
+    		boolean forceRated, short range, byte mode) {
+		Baos find = new Baos();
+		find.putBool(false); // Padding
+		find.putBool(onlyInRange);
+		find.putBool(forceSameTier);
+		find.putBool(forceRated);
+		find.putShort(range);
+		find.write(mode); // singles/doubles/triples
+		return find;
     }
 	//XXX: need to implement I think
 /*	public void PlayerListEnd() {

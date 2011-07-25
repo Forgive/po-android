@@ -11,7 +11,6 @@ import com.pokebros.android.pokemononline.SerializeBytes;
 // Contains all the information about the player.
 // Used for logging into the server.
 public class FullPlayerInfo extends SerializeBytes {
-	protected PokeParser p;
 	protected PlayerTeam playerTeam;
 		
 	protected boolean ladderEnabled = false;
@@ -28,7 +27,7 @@ public class FullPlayerInfo extends SerializeBytes {
 	public FullPlayerInfo() {
 		File team = new File("/sdcard/team.xml");
 		if (team.exists()) {
-			p = new PokeParser();
+			PokeParser p = new PokeParser();
 			playerTeam = new PlayerTeam(p);
 		}
 		else {	
