@@ -37,7 +37,7 @@ public class Channel {
 				PlayerInfo p = netServ.players.get(msg.readInt());
 				if(p != null){
 					players.put(p.id(), p);
-					//XXX ChatActivity.playerAdapter.add(p);
+				//	ChatActivity.NewPlayer(p); //XXX
 				}
 				else
 					System.out.println("Tried to add nonexistant player id" +

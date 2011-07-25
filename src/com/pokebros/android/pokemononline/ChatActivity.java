@@ -1,6 +1,7 @@
 package com.pokebros.android.pokemononline;
 
 import com.pokebros.android.pokemononline.ServerListAdapter.Server;
+import com.pokebros.android.pokemononline.player.PlayerInfo;
 import com.pokebros.android.pokemononline.battle.ChallengeEnums.*;
 
 import de.marcreichelt.android.ChatRealViewSwitcher;
@@ -36,7 +37,7 @@ import android.view.KeyEvent;
 public class ChatActivity extends Activity {
 	public final static int SWIPE_TIME_THRESHOLD = 100;
 	
-	public static PlayerListAdapter playerAdapter;
+	private PlayerListAdapter playerAdapter;
 	
 	private NetworkService netServ = null;
 	private ScrollView chatScroll;
@@ -259,7 +260,7 @@ public class ChatActivity extends Activity {
 		return find;
     }
 	//XXX: need to implement I think
-/*	public void PlayerListEnd() {
+	public void PlayerListEnd() {
 		runOnUiThread(new Runnable() {
 			public void run() {
 				playerAdapter.sortByNick();
@@ -267,13 +268,13 @@ public class ChatActivity extends Activity {
 		});
 	}
 
-	public void NewPlayer(final String nick, final String info) {
+	public void NewPlayer(final PlayerInfo pi) {
 		runOnUiThread(new Runnable() {
 			public void run() {
-            	playerAdapter.addPlayer(nick, info);		
+            	playerAdapter.addPlayer(pi);		
 			}
 		});
-	}*/
+	}
     
     @Override
     public void onDestroy() {

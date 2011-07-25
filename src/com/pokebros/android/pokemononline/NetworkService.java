@@ -162,6 +162,7 @@ public class NetworkService extends Service {
 			mode = msg.readByte();
 			System.out.println("Desc: " + desc + " Opponent: " + opponent + " Clauses: " + clauses + " Mode: " + mode);
 			if (desc == ChallengeDesc.Sent.ordinal()) {
+				//TODO: Uncomment before Alpha release
 				/*Notification note = new Notification(R.drawable.icon, "You've been challenged!", System.currentTimeMillis());
 				Intent intent = new Intent(this, ChatActivity.class);
 				intent.putExtra("opponent", opponent);
@@ -179,7 +180,7 @@ public class NetworkService extends Service {
 		        socket.sendMessage(b, Command.ChallengeStuff);
 			}
 			break;
-		case ChannelsList:
+		case ChannelsList://XXX
 			int numChannels = msg.readInt();
 			for(int k = 0; k < numChannels; k++) {
 				int chanID = msg.readInt();
@@ -188,7 +189,7 @@ public class NetworkService extends Service {
 			System.out.println(channels.toString());
 			currentChannel = channels.get(0);
 			break;
-		case ChannelPlayers: {
+		case ChannelPlayers: //XXX 
 			Channel ch = channels.get(msg.readInt());
 			int numPlayers = msg.readInt();
 			if(ch != null) {
@@ -200,7 +201,6 @@ public class NetworkService extends Service {
 			else
 				System.out.println("Received message for nonexistant channel");
 			break;
-		}
 		case HtmlMessage:
 			String htmlMessage = msg.readQString();
 			System.out.println("Html Message: " + htmlMessage);
@@ -287,7 +287,7 @@ public class NetworkService extends Service {
 	protected void herp() {
 		System.out.println("HERP");
 	}
-	
+
     public void disconnect() {
     	//TODO: Send logout message and disconnect socket
     	this.stopForeground(true);

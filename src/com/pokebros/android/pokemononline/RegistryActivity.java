@@ -119,7 +119,7 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-    			Toast.makeText(getApplicationContext(), "You are super cool!", Toast.LENGTH_SHORT).show();
+    			Toast.makeText(getApplicationContext(), "'Import Team' has not been implemented yet! Put your team in /sdcard/team.xml", Toast.LENGTH_SHORT).show();
     		}
     	}
     };
@@ -134,7 +134,7 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
     
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        	Toast.makeText(this, "You pressed the icon!", Toast.LENGTH_LONG).show();
+        	Toast.makeText(this, "'Import Team' has not been implemented yet! Put your team in /sdcard/team.xml", Toast.LENGTH_LONG).show();
         return true;
     }
     

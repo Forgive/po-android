@@ -19,6 +19,18 @@ public class PlayerListAdapter extends ArrayAdapter<com.pokebros.android.pokemon
 		super(context, resource);
 	}
 	
+	public void addPlayer(PlayerInfo p) {
+		add(p);
+	}
+	
+	public void sortByNick() {
+		super.sort(new Comparator<PlayerInfo>() {
+			public int compare(PlayerInfo pi1, PlayerInfo pi2) {
+				return pi1.nick().compareTo(pi2.nick());
+			}
+		});
+	}
+	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View view = convertView;
