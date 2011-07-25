@@ -45,26 +45,6 @@ public class Team extends SerializeBytes {
 			}
 		}
 		
-		for (int i = 0; i < 6; i++) {
-			for (int j = 0; j < 10; j++) {
-				System.out.println(mTP[i][j]);
-			}
-		}
-		for (int i = 0; i < 6; i++) {
-			for (int j = 0; j < 4; j++) {
-				System.out.println(mM[i][j]);
-			}
-		}
-		for (int i = 0; i < 6; i++) {
-			for (int j = 0; j < 6; j++) {
-				System.out.println(mDV[i][j]);
-			}
-		}
-		for (int i = 0; i < 6; i++) {
-			for (int j = 0; j < 6; j++) {
-				System.out.println(mEV[i][j]);
-			}
-		}
 		for(int i = 0; i < 6; i++)
 			pokes[i] = new TeamPoke(mTP, mM, mDV, mEV, i);
 	}

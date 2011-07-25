@@ -1,9 +1,6 @@
 package com.pokebros.android.pokemononline.battle;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.lang.Math;
 
@@ -16,7 +13,6 @@ import android.text.SpannableStringBuilder;
 
 import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
-import com.pokebros.android.pokemononline.BattleActivity;
 import com.pokebros.android.pokemononline.DataBaseHelper;
 import com.pokebros.android.pokemononline.EscapeHtml;
 import com.pokebros.android.pokemononline.NetworkService;
@@ -152,7 +148,6 @@ public class Battle {
 		switch(bc) {
 		case SendOut:
 			boolean isSilent = msg.readBool();
-			//byte toSpot = msg.readByte();
 			byte fromSpot = msg.readByte();
 			
 			if(player == me) {
@@ -160,11 +155,6 @@ public class Battle {
 				
 				myTeam.pokes[0] = myTeam.pokes[fromSpot];
 				myTeam.pokes[fromSpot] = temp;
-				if (netServ.battleActivity != null)
-					netServ.battleActivity.updateMyPoke();
-			} else {
-				if (netServ.battleActivity != null)
-					netServ.battleActivity.updateOppPoke();
 			}
 			
 			ShallowBattlePoke tempPoke = pokes[player][0];
@@ -174,6 +164,10 @@ public class Battle {
 			if(msg.available() > 0) // this is the first time you've seen it
 				pokes[player][0] = new ShallowBattlePoke(msg, (player == me) ? true : false);
 			
+			if(netServ.battleActivity != null) {
+				if(player == me) netServ.battleActivity.updateMyPoke();
+				else netServ.battleActivity.updateOppPoke();
+			}
 			if(!isSilent)
 				histDelta.append("\n" + (players[player].nick() + " sent out " + 
 						currentPoke(player).rnick + "!"));
