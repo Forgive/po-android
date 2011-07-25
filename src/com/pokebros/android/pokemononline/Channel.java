@@ -20,6 +20,8 @@ public class Channel {
 	
 	private NetworkService netServ;
 	
+	public String name(){ return name; }
+	
 	public String toString() {
 		return name;
 	}
@@ -36,11 +38,23 @@ public class Channel {
 			players.put(p.id(), p);
 			
 			if(netServ != null && netServ.chatActivity != null)
-				netServ.chatActivity.newPlayer(p);
+				netServ.chatActivity.addPlayer(p);
 		}
 		else
 			System.out.println("Tried to add nonexistant player id" +
 					"to channel " + name + ", ignoring");
+	}
+	
+	public void removePlayer(PlayerInfo p){
+		if(p != null){
+			players.remove(p.id());
+			
+			if(netServ != null && netServ.chatActivity != null)
+				netServ.chatActivity.removePlayer(p);
+		}
+		else
+			System.out.println("Tried to remove nonexistant player id" +
+					"from channel " + name + ", ignoring");
 	}
 	
 	public void handleChannelMsg(Command c, Bais msg) {
@@ -55,14 +69,13 @@ public class Channel {
 				 String message = "<br><b>" + msg.readQString();
 				 message = message.replaceFirst(":", ":</b>");
 				 histDelta.append(Html.fromHtml(message));
-				 netServ.chatActivity.updateChat();
 				break;
 			case HtmlChannel:
 				histDelta.append(Html.fromHtml(msg.readQString()));
-				netServ.chatActivity.updateChat();
 				break;
 			case LeaveChannel:
-				players.remove(msg.readInt());
+				PlayerInfo p = netServ.players.get(msg.readInt());
+				removePlayer(p);
 				break;
 			default:
 				break;

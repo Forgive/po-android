@@ -306,6 +306,8 @@ public class NetworkService extends Service {
 		}
 		if (hasBattle() && battleActivity != null && battle.histDelta.length() != 0)
 			battleActivity.updateBattleInfo();
+		if (chatActivity != null && currentChannel != null && currentChannel.histDelta.length() != 0)
+			chatActivity.updateChat();
 	}
 	protected void herp() {
 		System.out.println("HERP");

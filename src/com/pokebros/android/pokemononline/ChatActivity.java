@@ -69,7 +69,10 @@ public class ChatActivity extends Activity {
         	// Set the edit texts on list item click
 			public void onItemClick(AdapterView<?> parent, View view, int position,
 					long id) {
-				//TODO: Send challenge to player that has been clicked
+				int opp = ((PlayerListAdapter)parent.getAdapter()).getItem(position).id();
+				netServ.socket.sendMessage(constructChallenge(ChallengeDesc.Sent.ordinal(), 
+						((PlayerListAdapter)parent.getAdapter()).getItem(position).id(), 
+						Clauses.SleepClause.ordinal(), Mode.Singles.ordinal()), Command.ChallengeStuff);
 			}        	
 		});
         
@@ -119,21 +122,18 @@ public class ChatActivity extends Activity {
 			
 			netServ.chatActivity = ChatActivity.this;
 			
-	        // Load scrollback
 			if (netServ.currentChannel != null) {
 				// Populate the player list
 				Enumeration<PlayerInfo> e = netServ.currentChannel.players.elements();
+				playerAdapter.setNotifyOnChange(false);
 				while(e.hasMoreElements())
 					playerAdapter.addPlayer(e.nextElement());
-					
+				playerAdapter.setNotifyOnChange(true);
+				playerAdapter.sortByNick();
+				//Load scrollback	
 		        chatBox.setText(netServ.currentChannel.hist);
-		    	chatScroll.post(new Runnable() {
-		    		public void run() {
-		    			chatScroll.smoothScrollTo(0, chatBox.getMeasuredHeight());
-		    		}
-		    	});
+		        updateChat();
 			}
-	    	//handler.postDelayed(updateUIChatTask, 50);
 		}
 		
 		public void onServiceDisconnected(ComponentName className) {
@@ -161,7 +161,6 @@ public class ChatActivity extends Activity {
 					netServ.currentChannel.hist.append(delta);
 					delta.clear();
 				}
-				handler.postDelayed(this, 1000);
 			}});
 	}
 	
@@ -284,23 +283,23 @@ public class ChatActivity extends Activity {
 		find.write(mode); // singles/doubles/triples
 		return find;
     }
-	//XXX: need to implement I think
-	public void playerListEnd() {
-		runOnUiThread(new Runnable() {
-			public void run() {
-				playerAdapter.sortByNick();
-			}
-		});
-	}
 
-	public void newPlayer(final PlayerInfo pi) {
+	public void removePlayer(final PlayerInfo pi){
 		runOnUiThread(new Runnable() {
 			public void run() {
-            	playerAdapter.addPlayer(pi);		
+            	playerAdapter.removePlayer(pi);
 			}
 		});
 	}
-    
+	
+	public void addPlayer(final PlayerInfo pi) {
+		runOnUiThread(new Runnable() {
+			public void run() {
+            	playerAdapter.addPlayer(pi);
+			}
+		});
+	}
+	
     @Override
     public void onDestroy() {
     	hidden = true;
