@@ -422,10 +422,12 @@ public class Battle {
 			remainingTime[player % 2] = msg.readShort();
 			startingTime[player % 2] = SystemClock.uptimeMillis();
 			ticking[player % 2] = true;
+			clickable = true;
 			break;
 		case ClockStop:
 			remainingTime[player % 2] = msg.readShort();
 			ticking[player % 2] = false;
+			clickable = false;
 			break;
 		case ChangeHp:
 			short newHP = msg.readShort();

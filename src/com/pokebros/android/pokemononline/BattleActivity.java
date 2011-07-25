@@ -9,12 +9,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.LightingColorFilter;
-import android.graphics.PorterDuff;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -29,7 +24,6 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -233,9 +227,6 @@ public class BattleActivity extends Activity {
 			        	int resID = getResources().getIdentifier(type + "_type_button",
 					        		"drawable", "com.pokebros.android.pokemononline");
 			        	attack[i].setBackgroundResource(resID);
-			        	//attack[i].getBackground().setColorFilter(battlePoke.moves[i].getColor(), 
-			        	//		PorterDuff.Mode.SRC_ATOP);
-			        	//attack[i].setEnabled(false);
 			        }
 			        int resID = getResources().getIdentifier("p" + poke.uID.pokeNum + "_back",
 			        		"drawable", "com.pokebros.android.pokemononline");
@@ -261,6 +252,23 @@ public class BattleActivity extends Activity {
 				pokeListNames[i].setText(poke.nick);
 	    		pokeListHPs[i].setText(poke.currentHP +
 	    				"/" + poke.totalHP);
+			}
+			
+			if(!netServ.battle.clickable) {
+				for(int i = 0; i < 4; i++) {
+					attack[i].setEnabled(false);
+				}
+				for(int i = 0; i < 6; i++) {
+					pokeListButtons[i].setEnabled(false);
+				}
+			}
+			else {
+				for(int i = 0; i < 4; i++) {
+					attack[i].setEnabled(true);
+				}
+				for(int i = 0; i < 6; i++) {
+					pokeListButtons[i].setEnabled(true);
+				}
 			}
 	    	netServ.battle.hist.append(delta);
 			delta.clear();
@@ -366,6 +374,12 @@ public class BattleActivity extends Activity {
     				realViewSwitcher.snapToScreen(0);
     			}
     		}
+    		for(int i = 0; i < 4; i++) {
+				attack[i].setEnabled(false);
+			}
+			for(int i = 0; i < 6; i++) {
+				pokeListButtons[i].setEnabled(false);
+			}
     	}
     };
     
