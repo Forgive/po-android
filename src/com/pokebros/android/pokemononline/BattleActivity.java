@@ -11,6 +11,8 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.LightingColorFilter;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -202,6 +204,8 @@ public class BattleActivity extends Activity {
 					BattlePoke battlePoke = netServ.battle.myTeam.pokes[0];
 			        for(int i = 0; i < 4; i++) {
 			        	attack[i].setText(battlePoke.moves[i].toString());
+			        	attack[i].getBackground().setColorFilter(battlePoke.moves[i].getColor(), 
+			        			PorterDuff.Mode.SCREEN);
 			        }
 			        int resID = getResources().getIdentifier("p" + poke.uID.pokeNum + "_back",
 			        		"drawable", "com.pokebros.android.pokemononline");

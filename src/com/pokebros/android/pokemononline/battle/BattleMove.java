@@ -1,8 +1,12 @@
 package com.pokebros.android.pokemononline.battle;
 
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+
 import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
 import com.pokebros.android.pokemononline.SerializeBytes;
+import com.pokebros.android.pokemononline.ColorEnums.TypeColor;
 
 public class BattleMove extends SerializeBytes {
 	byte currentPP = 0;
@@ -11,6 +15,14 @@ public class BattleMove extends SerializeBytes {
 	
 	public String toString() {
 		return Battle.queryDB("SELECT name FROM [Moves] WHERE _id = " + num);
+		
+	}
+	
+	public int getColor() {
+		int type = new Integer(Battle.queryDB("SELECT type FROM [Moves] WHERE _id = " + num));
+		String s = TypeColor.values()[type].toString();
+		s = s.replaceAll(">", "");
+		return Color.parseColor(s);
 	}
 	
 	public BattleMove(Bais msg) {
