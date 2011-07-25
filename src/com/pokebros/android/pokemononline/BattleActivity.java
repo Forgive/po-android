@@ -41,6 +41,7 @@ public class BattleActivity extends Activity {
 	TextView[] pokeListItems = new TextView[6];
 	TextView[] pokeListAbilities = new TextView[6];
 	TextView[] pokeListHPs = new TextView[6];
+	ImageView[] pokeListIcons = new ImageView[6];
 	LinearLayout[] pokeListButtons = new LinearLayout[6];
 	public TextView infoView;
 	public ScrollView infoScroll;
@@ -103,6 +104,13 @@ public class BattleActivity extends Activity {
         pokeListButtons[3] = (LinearLayout)findViewById(R.id.pokeViewLayout4);
         pokeListButtons[4] = (LinearLayout)findViewById(R.id.pokeViewLayout5);
         pokeListButtons[5] = (LinearLayout)findViewById(R.id.pokeViewLayout6);
+        
+        pokeListIcons[0] = (ImageView)findViewById(R.id.pokeViewIcon1);
+        pokeListIcons[1] = (ImageView)findViewById(R.id.pokeViewIcon2);
+        pokeListIcons[2] = (ImageView)findViewById(R.id.pokeViewIcon3);
+        pokeListIcons[3] = (ImageView)findViewById(R.id.pokeViewIcon4);
+        pokeListIcons[4] = (ImageView)findViewById(R.id.pokeViewIcon5);
+        pokeListIcons[5] = (ImageView)findViewById(R.id.pokeViewIcon6);
         
         infoView = (TextView)findViewById(R.id.infoWindow);
         infoScroll = (ScrollView)findViewById(R.id.infoScroll);
@@ -285,6 +293,9 @@ public class BattleActivity extends Activity {
 			public void run() {
 				for (int i = 0; i < 6; i++) {
 					BattlePoke poke = netServ.battle.myTeam.pokes[i];
+					int resID = getResources().getIdentifier("pi" + poke.uID.pokeNum +
+							"_icon", "drawable", "com.pokebros.android.pokemononline");
+					pokeListIcons[i].setImageResource(resID);
 					pokeListNames[i].setText(poke.nick);
 					pokeListHPs[i].setText(poke.currentHP +
 							"/" + poke.totalHP);
