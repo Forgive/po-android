@@ -65,7 +65,7 @@ public class Channel {
 				break;
 			}
 			case ChannelMessage:
-				//makes name bold since first occurence of : marks end of name in msg.
+				//makes name bold since first occurrence of : marks end of name in msg.
 				 String message = "<br><b>" + msg.readQString();
 				 message = message.replaceFirst(":", ":</b>");
 				 histDelta.append(Html.fromHtml(message));

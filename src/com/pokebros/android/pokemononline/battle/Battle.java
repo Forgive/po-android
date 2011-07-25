@@ -42,7 +42,7 @@ public class Battle {
 	int mode = 0, numberOfSlots = 0;
 	public byte me = 0, opp = 1;
 	int gen = 0;
-	int bID = 0;
+	public int bID = 0;
 	private static NetworkService netServ;
 	public BattleTeam myTeam;
 	public boolean clickable = true;

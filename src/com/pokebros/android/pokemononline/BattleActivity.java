@@ -429,6 +429,9 @@ public class BattleActivity extends Activity {
         {
     case R.id.forfeit_yes:
     	//TODO: implement forfeit
+    	Baos forfeit = new Baos();
+    	forfeit.putInt(netServ.battle.bID);
+    	netServ.socket.sendMessage(forfeit, Command.BattleFinished);
     	break;
     case R.id.forfeit_no:
     	break;
