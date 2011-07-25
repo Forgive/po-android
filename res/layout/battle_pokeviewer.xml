@@ -176,14 +176,26 @@
 			android:layout_height="fill_parent"
 			android:layout_weight="1"
 			android:gravity="center"
-			android:id="@+id/attack1"/>
+			android:id="@+id/attack1"
+			android:background="@drawable/battle_border_button"
+			android:layout_marginRight="2dp"
+			android:layout_marginTop="2dp"
+			android:layout_marginLeft="2dp"
+			android:layout_marginBottom="2dp"
+			android:textStyle="bold"/>
 		<Button
 			android:text="Attack 2"
 			android:layout_width="fill_parent"
 			android:layout_height="fill_parent"
 			android:layout_weight="1"
 			android:gravity="center"
-			android:id="@+id/attack2"/>
+			android:id="@+id/attack2"
+			android:background="@drawable/normal_type_button"
+			android:layout_marginRight="2dp"
+			android:layout_marginTop="2dp"
+			android:layout_marginLeft="2dp"
+			android:layout_marginBottom="2dp"
+			android:textStyle="bold"/>
 		
 	</LinearLayout>
 
@@ -199,14 +211,26 @@
 			android:layout_height="fill_parent"
 			android:layout_weight="1"
 			android:gravity="center"
-			android:id="@+id/attack3"/>
+			android:id="@+id/attack3"
+			android:background="@drawable/battle_border_button"
+			android:layout_marginRight="2dp"
+			android:layout_marginTop="2dp"
+			android:layout_marginLeft="2dp"
+			android:layout_marginBottom="2dp"
+			android:textStyle="bold"/>
 		<Button
 			android:text="Attack 4"
 			android:layout_width="fill_parent"
 			android:layout_height="fill_parent"
 			android:layout_weight="1"
 			android:gravity="center"
-			android:id="@+id/attack4"/>
+			android:id="@+id/attack4"
+			android:background="@drawable/battle_border_button"
+			android:layout_marginRight="2dp"
+			android:layout_marginTop="2dp"
+			android:layout_marginLeft="2dp"
+			android:layout_marginBottom="2dp"
+			android:textStyle="bold"/>
 		
 	</LinearLayout>
 	<!-- END Action Buttons -->

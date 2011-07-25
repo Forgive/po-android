@@ -47,6 +47,7 @@ public class Battle {
 	public boolean pokeChanged = false;
 	public boolean oppPokeChanged = false;
 	public BattleTeam myTeam;
+	public boolean clickable = true;
 	
 	ShallowBattlePoke[][] pokes = new ShallowBattlePoke[2][6];
 	ArrayList<Boolean> pokeAlive = new ArrayList<Boolean>();

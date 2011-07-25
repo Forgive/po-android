@@ -204,8 +204,14 @@ public class BattleActivity extends Activity {
 					BattlePoke battlePoke = netServ.battle.myTeam.pokes[0];
 			        for(int i = 0; i < 4; i++) {
 			        	attack[i].setText(battlePoke.moves[i].toString());
-			        	attack[i].getBackground().setColorFilter(battlePoke.moves[i].getColor(), 
-			        			PorterDuff.Mode.SCREEN);
+			        	String type = battlePoke.moves[i].getTypeString();
+			        	type = type.toLowerCase();
+			        	int resID = getResources().getIdentifier(type + "_type_button",
+					        		"drawable", "com.pokebros.android.pokemononline");
+			        	attack[i].setBackgroundResource(resID);
+			        	//attack[i].getBackground().setColorFilter(battlePoke.moves[i].getColor(), 
+			        	//		PorterDuff.Mode.SRC_ATOP);
+			        	//attack[i].setEnabled(false);
 			        }
 			        int resID = getResources().getIdentifier("p" + poke.uID.pokeNum + "_back",
 			        		"drawable", "com.pokebros.android.pokemononline");

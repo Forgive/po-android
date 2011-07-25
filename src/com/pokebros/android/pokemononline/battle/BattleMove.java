@@ -14,8 +14,7 @@ public class BattleMove extends SerializeBytes {
 	short num = 0;
 	
 	public String toString() {
-		return Battle.queryDB("SELECT name FROM [Moves] WHERE _id = " + num);
-		
+		return Battle.queryDB("SELECT name FROM [Moves] WHERE _id = " + num);	
 	}
 	
 	public int getColor() {
@@ -25,6 +24,11 @@ public class BattleMove extends SerializeBytes {
 		return Color.parseColor(s);
 	}
 	
+	public String getTypeString() {
+		int type = new Integer(Battle.queryDB("SELECT type FROM [Moves] WHERE _id = " + num));
+		String s = Type.values()[type].toString();
+		return s.replaceAll(">", "");
+	}
 	public BattleMove(Bais msg) {
 		num = msg.readShort();
 		currentPP = msg.readByte();
