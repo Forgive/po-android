@@ -44,8 +44,6 @@ public class Battle {
 	int gen = 0;
 	int bID = 0;
 	private static NetworkService netServ;
-	public boolean pokeChanged = false;
-	public boolean oppPokeChanged = false;
 	public BattleTeam myTeam;
 	public boolean clickable = true;
 	
@@ -155,9 +153,12 @@ public class Battle {
 				
 				myTeam.pokes[0] = myTeam.pokes[fromSpot];
 				myTeam.pokes[fromSpot] = temp;
-				pokeChanged = true;
+				if (netServ.battleActivity != null)
+					netServ.battleActivity.updateMyPoke();
+			} else {
+				if (netServ.battleActivity != null)
+					netServ.battleActivity.updateOppPoke();
 			}
-			else oppPokeChanged = true;
 			
 			ShallowBattlePoke tempPoke = pokes[player][0];
 			pokes[player][0] = pokes[player][fromSpot];
@@ -423,21 +424,28 @@ public class Battle {
 			break;
 		case Substitute:
 			currentPoke(player).sub = msg.readBool();
-			if (player == me)
-				pokeChanged = true;
-			else
-				oppPokeChanged = true;
+			if (player == me) {
+				if (netServ.battleActivity != null)
+					netServ.battleActivity.updateMyPoke();
+			} else {
+				if (netServ.battleActivity != null)
+					netServ.battleActivity.updateOppPoke();
+			}
 			break;
 		case ClockStart:
 			remainingTime[player % 2] = msg.readShort();
 			startingTime[player % 2] = SystemClock.uptimeMillis();
 			ticking[player % 2] = true;
 			clickable = true;
+			if (netServ.battleActivity != null)
+				netServ.battleActivity.updateButtons(clickable);
 			break;
 		case ClockStop:
 			remainingTime[player % 2] = msg.readShort();
 			ticking[player % 2] = false;
 			clickable = false;
+			if (netServ.battleActivity != null)
+				netServ.battleActivity.updateButtons(clickable);
 			break;
 		case ChangeHp:
 			short newHP = msg.readShort();

@@ -241,11 +241,11 @@ public class NetworkService extends Service {
 			default:
 				outcome = " had no idea against ";
 			}
-			if (players.get(id1) != null && players.get(id2) != null)
-				currentChannel.histDelta.append("\n" + players.get(id1).nick() + outcome + players.get(id2).nick() + ".");
 			Intent in; // XXX we should really figure out what to do with these
 			// End the BattleActivity if you were in the battle that just ended
 			if (id1 == mePlayer.id() || id2 == mePlayer.id()) {
+				if (players.get(id1) != null && players.get(id2) != null && battleDesc < 3)
+					currentChannel.histDelta.append("\n" + players.get(id1).nick() + outcome + players.get(id2).nick() + ".");
 				showNotification(ChatActivity.class, "Chat");
 				endBattle = true;
 				in = new Intent(this, BattleActivity.class);

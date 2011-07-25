@@ -217,15 +217,9 @@ public class BattleActivity extends Activity {
 		});
 	}
 	
-	public Runnable updateUITask = new Runnable() {
-		public void run() {
-			if (netServ.endBattle || hidden) {
-				finish();
-				return;
-			}
-			SpannableStringBuilder delta = netServ.battle.histDelta;
-			
-			if(netServ.battle.pokeChanged) {
+	public void updateMyPoke() {
+		runOnUiThread(new Runnable() {
+			public void run() {
 				ShallowBattlePoke poke = netServ.battle.currentPoke(me);
 				// Load correct moveset and name
 				if(poke != null) {
@@ -247,10 +241,15 @@ public class BattleActivity extends Activity {
 				        resID = getResources().getIdentifier("p" + poke.uID.pokeNum + "_back",
 				        		"drawable", "com.pokebros.android.pokemononline");
 					pokeSprites[me].setImageDrawable(getResources().getDrawable(resID));
-			        netServ.battle.pokeChanged = false;
 				}
 			}
-			if(netServ.battle.oppPokeChanged) {
+		});
+		updateTeam();
+	}
+	
+	public void updateOppPoke() {
+		runOnUiThread(new Runnable() {
+			public void run() {
 				ShallowBattlePoke poke = netServ.battle.currentPoke(opp);
 				// Load correct moveset and name
 				if(poke != null) {
@@ -263,33 +262,44 @@ public class BattleActivity extends Activity {
 						resID = getResources().getIdentifier("p" + poke.uID.pokeNum + "_front",
 			        		"drawable", "com.pokebros.android.pokemononline");
 			        pokeSprites[opp].setImageDrawable(getResources().getDrawable(resID));
-					netServ.battle.oppPokeChanged = false;
 				}
 			}
-			
-			for(int i = 0; i < 6; i++) {
-				BattlePoke poke = netServ.battle.myTeam.pokes[i];
-				pokeListNames[i].setText(poke.nick);
-	    		pokeListHPs[i].setText(poke.currentHP +
-	    				"/" + poke.totalHP);
-			}
-			
-			if(!netServ.battle.clickable) {
+		});		
+	}
+	
+	public void updateButtons(final boolean enabled) {
+		runOnUiThread(new Runnable() {
+			public void run() {
 				for(int i = 0; i < 4; i++) {
-					attack[i].setEnabled(false);
+					attack[i].setEnabled(enabled);
 				}
 				for(int i = 0; i < 6; i++) {
-					pokeListButtons[i].setEnabled(false);
+					pokeListButtons[i].setEnabled(enabled);
 				}
 			}
-			else {
-				for(int i = 0; i < 4; i++) {
-					attack[i].setEnabled(true);
-				}
-				for(int i = 0; i < 6; i++) {
-					pokeListButtons[i].setEnabled(true);
+		});
+	}
+	
+	public void updateTeam() {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				for (int i = 0; i < 6; i++) {
+					BattlePoke poke = netServ.battle.myTeam.pokes[i];
+					pokeListNames[i].setText(poke.nick);
+					pokeListHPs[i].setText(poke.currentHP +
+							"/" + poke.totalHP);
 				}
 			}
+		});
+	}
+	
+	public Runnable updateUITask = new Runnable() {
+		public void run() {
+			if (netServ.endBattle || hidden) {
+				finish();
+				return;
+			}
+
 			handler.postDelayed(animateHPBars, 50);
 			handler.postDelayed(this, 1000);
 		}
@@ -338,7 +348,12 @@ public class BattleActivity extends Activity {
 	        updateBattleInfo();
 	    	
 	    	// Prompt a UI update of the pokemon
-	        netServ.battle.pokeChanged = netServ.battle.oppPokeChanged = true;
+	        updateMyPoke();
+	        updateOppPoke();
+	        
+	        // Enable or disable buttons
+	        updateButtons(netServ.battle.clickable);
+	        
 	    	// Set up the UI polling and timer updating
 	        handler.postDelayed(updateUITask, 50);
 	        handler.postDelayed(updateTimeTask, 100);
