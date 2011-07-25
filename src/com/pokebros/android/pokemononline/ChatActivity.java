@@ -1,5 +1,7 @@
 package com.pokebros.android.pokemononline;
 
+import java.util.Enumeration;
+
 import com.pokebros.android.pokemononline.ServerListAdapter.Server;
 import com.pokebros.android.pokemononline.player.PlayerInfo;
 import com.pokebros.android.pokemononline.battle.ChallengeEnums.*;
@@ -109,14 +111,21 @@ public class ChatActivity extends Activity {
 
 	private ServiceConnection connection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
-			netServ =	((NetworkService.LocalBinder)service).getService();
+			netServ = ((NetworkService.LocalBinder)service).getService();
 			Toast.makeText(ChatActivity.this, "Service connected",
                     Toast.LENGTH_SHORT).show();
-			if (netServ.battle == null)
+			if (!netServ.hasBattle())
 				netServ.showNotification(ChatActivity.class, "Chat");
+			
+			netServ.chatActivity = ChatActivity.this;
 			
 	        // Load scrollback
 			if (netServ.currentChannel != null) {
+				// Populate the player list
+				Enumeration<PlayerInfo> e = netServ.currentChannel.players.elements();
+				while(e.hasMoreElements())
+					playerAdapter.addPlayer(e.nextElement());
+					
 		        chatBox.setText(netServ.currentChannel.hist);
 		    	chatScroll.post(new Runnable() {
 		    		public void run() {
@@ -124,35 +133,37 @@ public class ChatActivity extends Activity {
 		    		}
 		    	});
 			}
-	    	handler.postDelayed(updateUIChatTask, 50);
+	    	//handler.postDelayed(updateUIChatTask, 50);
 		}
 		
 		public void onServiceDisconnected(ComponentName className) {
+			netServ.chatActivity = null;
 			netServ = null;
 		}
 	};
 	
-	public Runnable updateUIChatTask = new Runnable() {
-		public void run() {
-			if (hidden)
-				return;
-			if (netServ.currentChannel != null) {
-				SpannableStringBuilder delta = netServ.currentChannel.histDelta;
-				chatBox.append(delta);
-				if (delta.length() != 0) {
-			    	chatScroll.post(new Runnable() {
-			    		public void run() {
-	            			//TODO: Prevent auto scrolling if user has finger pressed to chatScroll
-			    			chatScroll.smoothScrollTo(0, chatBox.getMeasuredHeight());
-			    		}
-			    	});
+	public void updateChat() {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				if (hidden)
+					return;
+				if (netServ.currentChannel != null) {
+					SpannableStringBuilder delta = netServ.currentChannel.histDelta;
+					chatBox.append(delta);
+					if (delta.length() != 0) {
+						chatScroll.post(new Runnable() {
+							public void run() {
+								//TODO: Prevent auto scrolling if user has finger pressed to chatScroll
+								chatScroll.smoothScrollTo(0, chatBox.getMeasuredHeight());
+							}
+						});
+					}
+					netServ.currentChannel.hist.append(delta);
+					delta.clear();
 				}
-		    	netServ.currentChannel.hist.append(delta);
-				delta.clear();
-			}
-			handler.postDelayed(this, 1000);
-		}
-	};
+				handler.postDelayed(this, 1000);
+			}});
+	}
 	
 	@Override
 	public void onNewIntent(Intent intent) {
@@ -274,7 +285,7 @@ public class ChatActivity extends Activity {
 		return find;
     }
 	//XXX: need to implement I think
-	public void PlayerListEnd() {
+	public void playerListEnd() {
 		runOnUiThread(new Runnable() {
 			public void run() {
 				playerAdapter.sortByNick();
@@ -282,7 +293,7 @@ public class ChatActivity extends Activity {
 		});
 	}
 
-	public void NewPlayer(final PlayerInfo pi) {
+	public void newPlayer(final PlayerInfo pi) {
 		runOnUiThread(new Runnable() {
 			public void run() {
             	playerAdapter.addPlayer(pi);		

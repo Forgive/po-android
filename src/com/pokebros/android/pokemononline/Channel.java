@@ -31,17 +31,23 @@ public class Channel {
 		hist.append(Html.fromHtml("<i>Joined channel: <b>" + name + "</b></i>"));
 	}
 
+	public void addPlayer(PlayerInfo p) {
+		if(p != null) {
+			players.put(p.id(), p);
+			
+			if(netServ != null)
+				netServ.chatActivity.newPlayer(p);
+		}
+		else
+			System.out.println("Tried to add nonexistant player id" +
+					"to channel " + name + ", ignoring");
+	}
+	
 	public void handleChannelMsg(Command c, Bais msg) {
 			switch(c) {
 			case JoinChannel: {
 				PlayerInfo p = netServ.players.get(msg.readInt());
-				if(p != null){
-					players.put(p.id(), p);
-				//	ChatActivity.NewPlayer(p); //XXX
-				}
-				else
-					System.out.println("Tried to add nonexistant player id" +
-							"to channel " + id + ", ignoring");
+				addPlayer(p);		
 				break;
 			}
 			case ChannelMessage:
@@ -49,9 +55,11 @@ public class Channel {
 				 String message = "<br><b>" + msg.readQString();
 				 message = message.replaceFirst(":", ":</b>");
 				 histDelta.append(Html.fromHtml(message));
+				 netServ.chatActivity.updateChat();
 				break;
 			case HtmlChannel:
 				histDelta.append(Html.fromHtml(msg.readQString()));
+				netServ.chatActivity.updateChat();
 				break;
 			case LeaveChannel:
 				players.remove(msg.readInt());

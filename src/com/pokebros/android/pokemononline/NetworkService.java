@@ -33,6 +33,7 @@ public class NetworkService extends Service {
 	Thread sThread, rThread;
 	PokeClientSocket socket = null;
 	boolean findingBattle = false, endBattle = false;
+	public ChatActivity chatActivity = null;
 	
 	public boolean hasBattle() {
 		if (endBattle)
@@ -202,7 +203,7 @@ public class NetworkService extends Service {
 			if(ch != null) {
 				for(int k = 0; k < numPlayers; k++) {
 					int id = msg.readInt();
-					ch.players.put(id, players.get(id));
+					ch.addPlayer(players.get(id));
 				}
 			}
 			else
