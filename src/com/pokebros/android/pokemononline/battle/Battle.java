@@ -418,6 +418,16 @@ public class Battle {
 				histDelta.append("\n" + currentPoke(player).nick + " lost " + damage + "% of its health!");
 			}
 			break;
+		case AbilityMessage:
+			// TODO
+			break;
+		case Substitute:
+			currentPoke(player).sub = msg.readBool();
+			if (player == me)
+				pokeChanged = true;
+			else
+				oppPokeChanged = true;
+			break;
 		case ClockStart:
 			remainingTime[player % 2] = msg.readShort();
 			startingTime[player % 2] = SystemClock.uptimeMillis();

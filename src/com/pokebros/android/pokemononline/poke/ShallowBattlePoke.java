@@ -14,6 +14,7 @@ public class ShallowBattlePoke extends SerializeBytes {
 	public byte lifePercent = 0;
 	byte level = 0;
 	public byte lastKnownPercent = 0;
+	public boolean sub = false;
 	
 	public ShallowBattlePoke(Bais msg, int player) {
 		uID = new UniqueID(msg);

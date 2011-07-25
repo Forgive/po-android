@@ -48,11 +48,13 @@ public class BattleActivity extends Activity {
 	ImageView[] pokeSprites = new ImageView[2];
 	private NetworkService netServ = null;
 	int me, opp;
+	boolean hidden = false;
 	
 	 /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
     	System.out.println("BattleActivity Created");
+    	hidden = false;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.battle_pokeviewer);
 
@@ -121,7 +123,7 @@ public class BattleActivity extends Activity {
     
 	private Runnable updateTimeTask = new Runnable() {
 		public void run() {
-			if (netServ.endBattle)
+			if (netServ.endBattle || hidden)
 				return;
 			for(int i = 0; i < 2; i++) {
 				int seconds;
@@ -151,7 +153,7 @@ public class BattleActivity extends Activity {
 	
 	public Runnable animateHPBars = new Runnable() {
 		public void run() {
-			if (netServ.endBattle)
+			if (netServ.endBattle || hidden)
 				return;
 			for(int i = 0; i < 2; i++) {
 				ShallowBattlePoke poke = netServ.battle.currentPoke(i);
@@ -198,7 +200,7 @@ public class BattleActivity extends Activity {
 	
 	public Runnable updateUITask = new Runnable() {
 		public void run() {
-			if (netServ.endBattle) {
+			if (netServ.endBattle || hidden) {
 				finish();
 				return;
 			}
@@ -228,8 +230,12 @@ public class BattleActivity extends Activity {
 					        		"drawable", "com.pokebros.android.pokemononline");
 			        	attack[i].setBackgroundResource(resID);
 			        }
-			        int resID = getResources().getIdentifier("p" + poke.uID.pokeNum + "_back",
-			        		"drawable", "com.pokebros.android.pokemononline");
+			        int resID;
+			        if (poke.sub)
+			        	resID = getResources().getIdentifier("sub_back", "drawable", "com.pokebros.android.pokemononline");
+			        else
+				        resID = getResources().getIdentifier("p" + poke.uID.pokeNum + "_back",
+				        		"drawable", "com.pokebros.android.pokemononline");
 					pokeSprites[me].setImageDrawable(getResources().getDrawable(resID));
 			        netServ.battle.pokeChanged = false;
 				}
@@ -240,7 +246,11 @@ public class BattleActivity extends Activity {
 				if(poke != null) {
 					currentPokeNames[opp].setText(netServ.battle.currentPoke(opp).rnick);
 					hpBars[opp].setProgress(netServ.battle.currentPoke(opp).lifePercent);
-					int resID = getResources().getIdentifier("p" + poke.uID.pokeNum + "_front",
+					int resID;
+					if (poke.sub)
+						resID = getResources().getIdentifier("sub_front", "drawable", "com.pokebros.android.pokemononline");
+					else
+						resID = getResources().getIdentifier("p" + poke.uID.pokeNum + "_front",
 			        		"drawable", "com.pokebros.android.pokemononline");
 			        pokeSprites[opp].setImageDrawable(getResources().getDrawable(resID));
 					netServ.battle.oppPokeChanged = false;
@@ -350,6 +360,7 @@ public class BattleActivity extends Activity {
     		netServ.battle = null;
     		netServ.endBattle = false;
     	}
+    	hidden = true;
     	unbindService(connection);
     	super.onDestroy();
     }
