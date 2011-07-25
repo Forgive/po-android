@@ -32,7 +32,14 @@ public class NetworkService extends Service {
 	public Channel currentChannel = null;
 	Thread sThread, rThread;
 	PokeClientSocket socket = null;
-	boolean findingBattle = false;
+	boolean findingBattle = false, endBattle = false;
+	
+	public boolean hasBattle() {
+		if (endBattle)
+			return false;
+		else
+			return (battle == null);
+	}
 	
 	private FullPlayerInfo meLoginPlayer = new FullPlayerInfo();
 	private PlayerInfo mePlayer = new PlayerInfo();
@@ -232,7 +239,13 @@ public class NetworkService extends Service {
 			default:
 				outcome = " had no idea against ";
 			}
-			System.out.println("Outcome of battle " + battleID + ": Player " + id1 + outcome + "Player " + id2);
+			currentChannel.histDelta.append("\n" + players.get(id1).nick() + outcome + players.get(id2).nick() + ".");
+			showNotification(ChatActivity.class, "Chat");
+			endBattle = true;
+			Intent in = new Intent(this, BattleActivity.class);
+			in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			startActivity(in);
+			break;
 		case SendPM:
 			playerID = msg.readInt();
 			// Ignore the message
@@ -269,7 +282,8 @@ public class NetworkService extends Service {
 						players.get(conf.id(1)), mePlayer.id(), bID, this);
 					System.out.println("The battle between " + mePlayer.nick() + 
 						" and " + players.get(pID2).nick() + " has begun!");
-					Intent in = new Intent(this, BattleActivity.class);
+					in = new Intent(this, BattleActivity.class);
+					in.putExtra("endBattle", true);
 					in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 					startActivity(in);
 				}
@@ -287,7 +301,7 @@ public class NetworkService extends Service {
 	protected void herp() {
 		System.out.println("HERP");
 	}
-
+	
     public void disconnect() {
     	//TODO: Send logout message and disconnect socket
     	this.stopForeground(true);

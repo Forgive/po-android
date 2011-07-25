@@ -12,7 +12,9 @@ public class BattlePoke extends SerializeBytes {
 	public short currentHP = 0;
 	public short totalHP = 0;
 	short item = 0;
+	String itemString;
 	short ability = 0;
+	String abilityString;
 	int fullStatus = 0;
 	byte statusCount = 0;
 	byte originalStatusCount = 0;

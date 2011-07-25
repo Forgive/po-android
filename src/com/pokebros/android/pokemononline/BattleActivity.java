@@ -44,6 +44,8 @@ public class BattleActivity extends Activity {
 	public Button[] attack = new Button[4];
 	public TextView[] timers = new TextView[2];
 	TextView[] pokeListNames = new TextView[6];
+	TextView[] pokeListItems = new TextView[6];
+	TextView[] pokeListAbilities = new TextView[6];
 	TextView[] pokeListHPs = new TextView[6];
 	LinearLayout[] pokeListButtons = new LinearLayout[6];
 	public TextView infoView;
@@ -84,6 +86,20 @@ public class BattleActivity extends Activity {
         pokeListHPs[3] = (TextView)findViewById(R.id.hp4);
         pokeListHPs[4] = (TextView)findViewById(R.id.hp5);
         pokeListHPs[5] = (TextView)findViewById(R.id.hp6);
+
+        pokeListItems[0] = (TextView)findViewById(R.id.item1);
+        pokeListItems[1] = (TextView)findViewById(R.id.item2);
+        pokeListItems[2] = (TextView)findViewById(R.id.item3);
+        pokeListItems[3] = (TextView)findViewById(R.id.item4);
+        pokeListItems[4] = (TextView)findViewById(R.id.item5);
+        pokeListItems[5] = (TextView)findViewById(R.id.item6);
+
+        pokeListAbilities[0] = (TextView)findViewById(R.id.ability1);
+        pokeListAbilities[1] = (TextView)findViewById(R.id.ability2);
+        pokeListAbilities[2] = (TextView)findViewById(R.id.ability3);
+        pokeListAbilities[3] = (TextView)findViewById(R.id.ability4);
+        pokeListAbilities[4] = (TextView)findViewById(R.id.ability5);
+        pokeListAbilities[5] = (TextView)findViewById(R.id.ability6);
         
         pokeListButtons[0] = (LinearLayout)findViewById(R.id.pokeViewLayout1);
         pokeListButtons[1] = (LinearLayout)findViewById(R.id.pokeViewLayout2);
@@ -111,6 +127,8 @@ public class BattleActivity extends Activity {
     
 	private Runnable updateTimeTask = new Runnable() {
 		public void run() {
+			if (netServ.endBattle)
+				return;
 			for(int i = 0; i < 2; i++) {
 				int seconds;
 				if (netServ.battle.ticking[i]) {
@@ -139,6 +157,8 @@ public class BattleActivity extends Activity {
 	
 	public Runnable animateHPBars = new Runnable() {
 		public void run() {
+			if (netServ.endBattle)
+				return;
 			for(int i = 0; i < 2; i++) {
 				ShallowBattlePoke poke = netServ.battle.currentPoke(i);
 				if(poke != null) {
@@ -184,6 +204,10 @@ public class BattleActivity extends Activity {
 	
 	public Runnable updateUITask = new Runnable() {
 		public void run() {
+			if (netServ.endBattle) {
+				finish();
+				return;
+			}
 			SpannableStringBuilder delta = netServ.battle.histDelta;
 			infoView.append(delta);
 			if (delta.length() != 0) {
@@ -249,6 +273,10 @@ public class BattleActivity extends Activity {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			netServ =	((NetworkService.LocalBinder)service).getService();
 			netServ.herp();
+			if (netServ.endBattle) {
+				finish();
+				return;
+			}
 			netServ.showNotification(BattleActivity.class, "Battle");
 			Toast.makeText(BattleActivity.this, "Service connected",
                     Toast.LENGTH_SHORT).show();
@@ -303,11 +331,17 @@ public class BattleActivity extends Activity {
 	@Override
 	public void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
-		Toast.makeText(BattleActivity.this, "New Intent", Toast.LENGTH_SHORT);
+		if (intent.hasExtra("endBattle"))
+			finish();
 	}
     
     @Override
     public void onDestroy() {
+    	if (netServ.endBattle) {
+        	System.out.println("BATTLE ACTIVITY GONE");
+    		netServ.battle = null;
+    		netServ.endBattle = false;
+    	}
     	unbindService(connection);
     	super.onDestroy();
     }
