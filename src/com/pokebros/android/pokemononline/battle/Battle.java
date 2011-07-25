@@ -104,6 +104,13 @@ public class Battle {
 		return pokes[player][0];
 	}
 	
+	public Baos constructCancel() {
+		Baos b = new Baos();
+		b.putInt(bID);
+		b.putBaos(new BattleChoice(me, ChoiceType.CancelType));
+		return b;
+	}
+	
 	public Baos constructAttack(byte attack) {
 		Baos b = new Baos();
 		b.putInt(bID);
@@ -165,7 +172,7 @@ public class Battle {
 			pokes[player][fromSpot] = tempPoke;
 			
 			if(msg.available() > 0) // this is the first time you've seen it
-				pokes[player][0] = new ShallowBattlePoke(msg, player);
+				pokes[player][0] = new ShallowBattlePoke(msg, (player == me) ? true : false);
 			
 			if(!isSilent)
 				histDelta.append("\n" + (players[player].nick() + " sent out " + 

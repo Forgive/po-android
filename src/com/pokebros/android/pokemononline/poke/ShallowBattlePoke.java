@@ -16,10 +16,10 @@ public class ShallowBattlePoke extends SerializeBytes {
 	public byte lastKnownPercent = 0;
 	public boolean sub = false;
 	
-	public ShallowBattlePoke(Bais msg, int player) {
+	public ShallowBattlePoke(Bais msg, boolean isMe) {
 		uID = new UniqueID(msg);
 		rnick = nick = msg.readQString();
-		if (player == 0)
+		if (!isMe)
 			nick = "The foe's " + nick;
 		lifePercent = msg.readByte();
 		fullStatus = msg.readInt();

@@ -17,14 +17,6 @@ enum ChoiceType {
 abstract class Choice extends SerializeBytes {
 }
 
-class CancelChoice extends Choice {
-	public Baos serializeBytes() { 
-		System.out.println("Error: serializeBytes called on CancelChoice");
-		System.exit(-1);
-		return null; 
-	}
-}
-
 class AttackChoice extends Choice {
 	byte attackSlot;
 	byte attackTarget;
@@ -114,6 +106,11 @@ public class BattleChoice extends SerializeBytes {
 		choice = c;
 		choiceType = ct;
 		type = (byte)ct.ordinal();
+	}
+	
+	public BattleChoice(byte ps, ChoiceType ct) {
+		playerSlot = ps;
+		choiceType = ct;
 	}
 	
 	public BattleChoice(Bais msg) {

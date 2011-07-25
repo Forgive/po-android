@@ -416,6 +416,12 @@ public class BattleActivity extends Activity {
     };
     
     @Override
+    public void onBackPressed() {
+    	if(netServ != null)
+    		netServ.socket.sendMessage(netServ.battle.constructCancel(), Command.BattleMessage);
+    }
+    
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
