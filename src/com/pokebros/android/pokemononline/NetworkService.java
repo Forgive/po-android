@@ -7,6 +7,7 @@ import java.util.Hashtable;
 import com.pokebros.android.pokemononline.battle.Battle;
 import com.pokebros.android.pokemononline.battle.BattleConf;
 import com.pokebros.android.pokemononline.battle.BattleTeam;
+import com.pokebros.android.pokemononline.battle.ChallengeEnums.ChallengeDesc;
 import com.pokebros.android.pokemononline.player.FullPlayerInfo;
 import com.pokebros.android.pokemononline.player.PlayerInfo;
 
@@ -31,6 +32,7 @@ public class NetworkService extends Service {
 	public Channel currentChannel = null;
 	Thread sThread, rThread;
 	PokeClientSocket socket = null;
+	boolean findingBattle = false;
 	
 	private FullPlayerInfo meLoginPlayer = new FullPlayerInfo();
 	private PlayerInfo mePlayer = new PlayerInfo();
@@ -159,22 +161,23 @@ public class NetworkService extends Service {
 			clauses = msg.readInt();
 			mode = msg.readByte();
 			System.out.println("Desc: " + desc + " Opponent: " + opponent + " Clauses: " + clauses + " Mode: " + mode);
-			/*Notification note = new Notification(R.drawable.icon, "You've been challenged!", System.currentTimeMillis());
-			Intent intent = new Intent(this, ChatActivity.class);
-			intent.putExtra("desc", desc);
-			intent.putExtra("opponent", opponent);
-			intent.putExtra("clauses", clauses);
-			intent.putExtra("mode", mode);
-	        note.setLatestEventInfo(this, "POAndroid", "You've been challenged!", PendingIntent.getActivity(this, 0,
-	                intent, Intent.FLAG_ACTIVITY_NEW_TASK));
-			noteMan.notify(NOTIFICATION+1, note);*/
-			// Accept challenge for my sanity
-			Baos b = new Baos();
-			b.write(1);
-			b.putInt(opponent);
-			b.putInt(clauses);
-			b.write(mode);
-	        socket.sendMessage(b, Command.ChallengeStuff);
+			if (desc == ChallengeDesc.Sent.ordinal()) {
+				/*Notification note = new Notification(R.drawable.icon, "You've been challenged!", System.currentTimeMillis());
+				Intent intent = new Intent(this, ChatActivity.class);
+				intent.putExtra("opponent", opponent);
+				intent.putExtra("clauses", clauses);
+				intent.putExtra("mode", mode);
+		        note.setLatestEventInfo(this, "POAndroid", "You've been challenged!", PendingIntent.getActivity(this, 0,
+		                intent, Intent.FLAG_ACTIVITY_NEW_TASK));
+				noteMan.notify(NOTIFICATION+1, note);*/
+				// Accept challenge for my sanity
+				Baos b = new Baos();
+				b.write(1);
+				b.putInt(opponent);
+				b.putInt(clauses);
+				b.write(mode);
+		        socket.sendMessage(b, Command.ChallengeStuff);
+			}
 			break;
 		case ChannelsList:
 			int numChannels = msg.readInt();
@@ -271,6 +274,7 @@ public class NetworkService extends Service {
 					startActivity(in);
 				}
 			}
+			findingBattle = false;
 			break;
 		case Login:
 			mePlayer = new PlayerInfo(msg);

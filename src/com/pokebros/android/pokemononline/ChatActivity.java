@@ -1,6 +1,7 @@
 package com.pokebros.android.pokemononline;
 
 import com.pokebros.android.pokemononline.ServerListAdapter.Server;
+import com.pokebros.android.pokemononline.battle.ChallengeEnums.*;
 
 import de.marcreichelt.android.ChatRealViewSwitcher;
 import android.app.Activity;
@@ -42,6 +43,7 @@ public class ChatActivity extends Activity {
 	private TextView chatBox;
 	private EditText chatInput;
 	private ChatRealViewSwitcher chatViewSwitcher;
+	private Handler handler = new Handler();
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -102,21 +104,6 @@ public class ChatActivity extends Activity {
         }
 	}
 
-	private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-        	if (msg.getData().containsKey("ChannelMessage")) {
-        		chatBox.append(msg.getData().getString("ChannelMessage") + "\n");
-            	chatScroll.post(new Runnable() {
-            		public void run() {
-            			//TODO: Prevent auto scrolling if user has finger pressed to chatScroll
-		    			chatScroll.smoothScrollTo(0, chatBox.getMeasuredHeight());
-            		}
-            	});
-        	}
-        }
-    };
-
 	private ServiceConnection connection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			netServ =	((NetworkService.LocalBinder)service).getService();
@@ -150,6 +137,7 @@ public class ChatActivity extends Activity {
 				if (delta.length() != 0) {
 			    	chatScroll.post(new Runnable() {
 			    		public void run() {
+	            			//TODO: Prevent auto scrolling if user has finger pressed to chatScroll
 			    			chatScroll.smoothScrollTo(0, chatBox.getMeasuredHeight());
 			    		}
 			    	});
@@ -180,15 +168,16 @@ public class ChatActivity extends Activity {
 			.setPositiveButton(this.getString(R.string.accept), new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
 					// Accept challenge
-					Baos b = new Baos();
-					b.write(1);
-					b.putInt(args.getInt("opponent"));
-					b.putInt(args.getInt("clauses"));
-					b.write(args.getByte("mode"));
-			        netServ.socket.sendMessage(b, Command.ChallengeStuff);
+			        netServ.socket.sendMessage(
+			        		constructChallenge(ChallengeDesc.Accepted.ordinal(),
+			        				args.getInt("opponent"),
+			        				args.getInt("clauses"),
+			        				args.getInt("mode")),
+			        		Command.ChallengeStuff);
 				}
 			})
 			.setNegativeButton(this.getString(R.string.decline), null);
+			break;
 		}
 		return builder.create();
 	}
@@ -199,6 +188,17 @@ public class ChatActivity extends Activity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.chatoptions, menu);
         return true;
+    }
+    
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+    	MenuItem findbattle = menu.findItem(R.id.findbattle);
+    	if (netServ != null && netServ.findingBattle) {
+    		findbattle.setTitle("Cancel Find Battle");
+    	} else {
+    		findbattle.setTitle("Find Battle");
+    	}
+    	return true;
     }
     
     @Override
@@ -221,22 +221,39 @@ public class ChatActivity extends Activity {
 			finish();
     		break;
 		case R.id.findbattle:
-			// TODO present menu to choose these bools
-			netServ.socket.sendMessage(
-					constructFindBattle(false, true, true, (short) 200, (byte) 0),
-					Command.FindBattle);
+			if (netServ.findingBattle) {
+				netServ.findingBattle = false;
+				netServ.socket.sendMessage(
+						constructChallenge(ChallengeDesc.Cancelled.ordinal(), 0, Clauses.SleepClause.mask(), Mode.Singles.ordinal()),
+						Command.ChallengeStuff);
+			} else {
+				netServ.findingBattle = true;
+				// TODO present menu to choose these bools
+				netServ.socket.sendMessage(
+						constructFindBattle(false, false, false, (short) 200, (byte) 0),
+						Command.FindBattle);
+			}
 			break;
     	}
     	return true;
     }
     
-    private Baos constructFindBattle(boolean onlyInRange, boolean forceSameTier,
-    		boolean forceRated, short range, byte mode) {
+    private Baos constructChallenge(int desc, int opp, int clauses, int mode) {
+    	Baos challenge = new Baos();
+    	challenge.write(desc);
+    	challenge.putInt(opp);
+    	challenge.putInt(clauses);
+    	challenge.write(mode);
+    	return challenge;
+    }
+    
+    private Baos constructFindBattle(boolean forceRated, boolean forceSameTier,
+    		boolean onlyInRange, short range, byte mode) {
 		Baos find = new Baos();
-		find.putBool(false); // Padding
-		find.putBool(onlyInRange);
-		find.putBool(forceSameTier);
 		find.putBool(forceRated);
+		find.putBool(forceSameTier);
+		find.putBool(onlyInRange);
+		find.putBool(false); // Padding
 		find.putShort(range);
 		find.write(mode); // singles/doubles/triples
 		return find;
