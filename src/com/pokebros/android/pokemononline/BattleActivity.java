@@ -198,6 +198,25 @@ public class BattleActivity extends Activity {
 		}
 	};
 	
+	public void updateBattleInfo() {
+		runOnUiThread(new Runnable() {
+			SpannableStringBuilder delta = netServ.battle.histDelta;
+			public void run() {
+				infoView.append(delta);
+				if (delta.length() != 0) {
+			    	infoScroll.post(new Runnable() {
+			    		public void run() {
+			    			infoScroll.smoothScrollTo(0, infoView.getMeasuredHeight());
+			    		}
+			    	});
+				}
+				infoScroll.invalidate();
+		    	netServ.battle.hist.append(delta);
+				delta.clear();
+			}
+		});
+	}
+	
 	public Runnable updateUITask = new Runnable() {
 		public void run() {
 			if (netServ.endBattle || hidden) {
@@ -205,15 +224,6 @@ public class BattleActivity extends Activity {
 				return;
 			}
 			SpannableStringBuilder delta = netServ.battle.histDelta;
-			infoView.append(delta);
-			if (delta.length() != 0) {
-		    	infoScroll.post(new Runnable() {
-		    		public void run() {
-		    			infoScroll.smoothScrollTo(0, infoView.getMeasuredHeight());
-		    		}
-		    	});
-			}
-			infoScroll.invalidate();
 			
 			if(netServ.battle.pokeChanged) {
 				ShallowBattlePoke poke = netServ.battle.currentPoke(me);
@@ -280,8 +290,6 @@ public class BattleActivity extends Activity {
 					pokeListButtons[i].setEnabled(true);
 				}
 			}
-	    	netServ.battle.hist.append(delta);
-			delta.clear();
 			handler.postDelayed(animateHPBars, 50);
 			handler.postDelayed(this, 1000);
 		}
@@ -291,6 +299,7 @@ public class BattleActivity extends Activity {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			netServ =	((NetworkService.LocalBinder)service).getService();
 			netServ.herp();
+			netServ.battleActivity = BattleActivity.this;
 			if (netServ.endBattle) {
 				finish();
 				return;
@@ -326,11 +335,7 @@ public class BattleActivity extends Activity {
 	        
 	        // Load scrollback
 	        infoView.setText(netServ.battle.hist);
-	    	infoScroll.post(new Runnable() {
-	    		public void run() {
-	    			infoScroll.smoothScrollTo(0, infoView.getMeasuredHeight());
-	    		}
-	    	});
+	        updateBattleInfo();
 	    	
 	    	// Prompt a UI update of the pokemon
 	        netServ.battle.pokeChanged = netServ.battle.oppPokeChanged = true;
@@ -340,6 +345,7 @@ public class BattleActivity extends Activity {
 		}
 		
 		public void onServiceDisconnected(ComponentName className) {
+			netServ.battleActivity = null;
 			netServ = null;
 			Toast.makeText(BattleActivity.this, "Service disconnected",
 					Toast.LENGTH_SHORT).show();

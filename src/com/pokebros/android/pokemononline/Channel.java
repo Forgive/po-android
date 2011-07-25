@@ -35,7 +35,7 @@ public class Channel {
 		if(p != null) {
 			players.put(p.id(), p);
 			
-			if(netServ != null)
+			if(netServ != null && netServ.chatActivity != null)
 				netServ.chatActivity.newPlayer(p);
 		}
 		else

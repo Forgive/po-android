@@ -34,17 +34,18 @@ public class NetworkService extends Service {
 	PokeClientSocket socket = null;
 	boolean findingBattle = false, endBattle = false;
 	public ChatActivity chatActivity = null;
+	public BattleActivity battleActivity = null;
 	
 	public boolean hasBattle() {
 		if (endBattle)
 			return false;
 		else
-			return (battle == null);
+			return (battle != null);
 	}
 	
 	private FullPlayerInfo meLoginPlayer = new FullPlayerInfo();
 	private PlayerInfo mePlayer = new PlayerInfo();
-	protected Battle battle;// = new Battle();
+	protected Battle battle = null;// = new Battle();
 	
 	protected Hashtable<Integer, Channel> channels = new Hashtable<Integer, Channel>();
 	public Hashtable<Integer, PlayerInfo> players = new Hashtable<Integer, PlayerInfo>();
@@ -303,6 +304,8 @@ public class NetworkService extends Service {
 		default:
 			System.out.println("Unimplented message");
 		}
+		if (hasBattle() && battleActivity != null && battle.histDelta.length() != 0)
+			battleActivity.updateBattleInfo();
 	}
 	protected void herp() {
 		System.out.println("HERP");

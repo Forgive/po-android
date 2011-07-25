@@ -20,7 +20,7 @@
     <string name="channel_list">Channel List</string>
     <string name="accept">Accept</string>
     <string name="decline">Decline</string>
-    <string name="accept_challenge">Accept Challenge from </string>
+    <string name="accept_challenge">Accept Challenge from</string>
     <string name="stat_attack">Attack</string>
     <string name="stat_defense">Defense</string>
     <string name="stat_spAttack">Sp. Att</string>
