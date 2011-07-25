@@ -170,21 +170,21 @@ public class NetworkService extends Service {
 			System.out.println("Desc: " + desc + " Opponent: " + opponent + " Clauses: " + clauses + " Mode: " + mode);
 			if (desc == ChallengeDesc.Sent.ordinal()) {
 				//TODO: Uncomment before Alpha release
-				/*Notification note = new Notification(R.drawable.icon, "You've been challenged!", System.currentTimeMillis());
+				Notification note = new Notification(R.drawable.icon, "You've been challenged by " + players.get(opponent).nick() + "!", System.currentTimeMillis());
 				Intent intent = new Intent(this, ChatActivity.class);
 				intent.putExtra("opponent", opponent);
 				intent.putExtra("clauses", clauses);
 				intent.putExtra("mode", mode);
 		        note.setLatestEventInfo(this, "POAndroid", "You've been challenged!", PendingIntent.getActivity(this, 0,
 		                intent, Intent.FLAG_ACTIVITY_NEW_TASK));
-				noteMan.notify(NOTIFICATION+1, note);*/
+				noteMan.notify(NOTIFICATION+1, note);
 				// Accept challenge for my sanity
-				Baos b = new Baos();
+/*				Baos b = new Baos();
 				b.write(1);
 				b.putInt(opponent);
 				b.putInt(clauses);
 				b.write(mode);
-		        socket.sendMessage(b, Command.ChallengeStuff);
+		        socket.sendMessage(b, Command.ChallengeStuff);*/
 			}
 			break;
 		case ChannelsList://XXX
@@ -239,12 +239,17 @@ public class NetworkService extends Service {
 			default:
 				outcome = " had no idea against ";
 			}
-			currentChannel.histDelta.append("\n" + players.get(id1).nick() + outcome + players.get(id2).nick() + ".");
-			showNotification(ChatActivity.class, "Chat");
-			endBattle = true;
-			Intent in = new Intent(this, BattleActivity.class);
-			in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			startActivity(in);
+			if (players.get(id1) != null && players.get(id2) != null)
+				currentChannel.histDelta.append("\n" + players.get(id1).nick() + outcome + players.get(id2).nick() + ".");
+			Intent in; // XXX we should really figure out what to do with these
+			// End the BattleActivity if you were in the battle that just ended
+			if (id1 == mePlayer.id() || id2 == mePlayer.id()) {
+				showNotification(ChatActivity.class, "Chat");
+				endBattle = true;
+				in = new Intent(this, BattleActivity.class);
+				in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				startActivity(in);
+			}
 			break;
 		case SendPM:
 			playerID = msg.readInt();

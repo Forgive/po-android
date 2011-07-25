@@ -164,7 +164,7 @@ public class ChatActivity extends Activity {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		switch (id) {
 		case 0:
-			builder.setMessage(this.getString(R.string.accept_challenge)) // TODO add challenge info
+			builder.setMessage(this.getString(R.string.accept_challenge) + netServ.players.get(args.getInt("opponent")).nick() + "?") // TODO add challenge info
 			.setCancelable(false)
 			.setPositiveButton(this.getString(R.string.accept), new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
@@ -177,7 +177,17 @@ public class ChatActivity extends Activity {
 			        		Command.ChallengeStuff);
 				}
 			})
-			.setNegativeButton(this.getString(R.string.decline), null);
+			.setNegativeButton(this.getString(R.string.decline), new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					// Accept challenge
+			        netServ.socket.sendMessage(
+			        		constructChallenge(ChallengeDesc.Refused.ordinal(),
+			        				args.getInt("opponent"),
+			        				args.getInt("clauses"),
+			        				args.getInt("mode")),
+			        		Command.ChallengeStuff);
+				}
+			});
 			break;
 		}
 		return builder.create();
