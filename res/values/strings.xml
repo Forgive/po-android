@@ -16,6 +16,7 @@
     <string name="no">No</string>
     <string name="disconnect">Disconnect</string>
     <string name="suggest_draw">Suggest Draw</string>
+    <string name="return_to_chat">Return to Chat</string>
 	<string name="player_list">Player List</string>
     <string name="channel_list">Channel List</string>
     <string name="accept">Accept</string>

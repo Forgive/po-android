@@ -442,18 +442,20 @@ public class BattleActivity extends Activity {
     
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-    	switch (item.getItemId())
-        {
-    case R.id.forfeit_yes:
-    	//TODO: implement forfeit
-    	Baos forfeit = new Baos();
-    	forfeit.putInt(netServ.battle.bID);
-    	netServ.socket.sendMessage(forfeit, Command.BattleFinished);
-    	break;
-    case R.id.forfeit_no:
-    	break;
-    case R.id.draw:
-    	break;
+    	switch (item.getItemId()) {
+    	case R.id.to_chat:
+    		finish();
+    		break;
+    	case R.id.forfeit_yes:
+    		//TODO: implement forfeit
+    		Baos forfeit = new Baos();
+    		forfeit.putInt(netServ.battle.bID);
+    		netServ.socket.sendMessage(forfeit, Command.BattleFinished);
+    		break;
+    	case R.id.forfeit_no:
+    		break;
+    	case R.id.draw:
+    		break;
         }
         return true;
     }

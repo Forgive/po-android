@@ -8,6 +8,8 @@ import com.pokebros.android.pokemononline.RegistryConnectionService.RegistryComm
 import com.pokebros.android.pokemononline.ServerListAdapter.Server;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -34,6 +36,7 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 	private ServerListAdapter adapter;
 	private EditText ip;
 	private EditText port;
+	private boolean bound;
 	
 	RegistryConnectionService service;
 	
@@ -41,6 +44,17 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // If we are already connected to a server show ChatActivity instead of RegistryActivity
+        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if ("com.pokebros.android.pokemononline.NetworkService".equals(service.service.getClassName())) {
+				startActivity(new Intent(RegistryActivity.this, ChatActivity.class));
+            	finish();
+            	return;
+            }
+        }
+        
         setContentView(R.layout.main);
          
 		ip = (EditText)RegistryActivity.this.findViewById(R.id.ipedit);
@@ -111,6 +125,7 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 				intent.putExtra("port", portVal);
 				startService(intent);
 				startActivity(new Intent(RegistryActivity.this, ChatActivity.class));
+				RegistryActivity.this.finish();
     		}
     		else if (v == findViewById(R.id.importteambutton)) {
 					try {
@@ -157,18 +172,21 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 	}
 
 	public void onServiceConnected(ComponentName name, IBinder binder) {
+		bound = true;
 		service = ((RegistryConnectionService.LocalBinder)binder).getService();
 		service.setListener(this);
 	}
 	
 	public void onServiceDisconnected(ComponentName name) {
+		bound = false;
 		if (service != null)
 	    	service.setListener(null);
 	}
     
     @Override
     public void onDestroy() {
-    	unbindService(this);
+    	if (bound)
+    		unbindService(this);
     	super.onDestroy();
     }
 }

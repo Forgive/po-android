@@ -72,46 +72,43 @@ public class NetworkService extends Service {
 		super.onCreate();
 	}
 	
-	public void connect(String ip, int port) {
-		socket = new PokeClientSocket(ip, port);
-        /*sThread = new Thread(new NetworkSendThread(socket, trainer.serializeBytes(), Command.Login));
-        sThread.start();*/
-		// Sending messages no longer blocks, so there
-		// is no need to spawn a new thread.
-		socket.waitConnect();
-
-		socket.sendMessage(meLoginPlayer.serializeBytes(), Command.Login);
-		
-		// Polling the socket also no longer blocks, but we'll just
-		// throw it in its own thread until we think of something better
-		// (assuming we do think of something better)
-		rThread = new Thread(new Runnable() {
-        	public void run() {
-        		while(true) {
-        			try {
-        				socket.recvMessagePoll();
-        			} catch (IOException e) {
-        				// Disconnected
-        				break;
-        			}
-        			Baos tmp = socket.getMsg();
-        			if(tmp != null) {
-        				Bais msg = new Bais(tmp.toByteArray());
-        				handleMsg(msg);
-        			} else {
-        				// don't use all CPU when no message
-        				try {
-							Thread.sleep(10);
-						} catch (InterruptedException e) {
-							// no action
-						}
-        			}
-        		}
-        	}
-        });
-        rThread.start();
+	public void connect(final String ip, final int port) {
+		// XXX This should probably have a timeout
+		new Thread(new Runnable() {
+			public void run() {
+        		socket = new PokeClientSocket(ip, port);
+				socket.waitConnect();
+				socket.sendMessage(meLoginPlayer.serializeBytes(), Command.Login);
+				if (chatActivity != null)
+					chatActivity.populateUI();
+				new Thread(new Runnable() {
+		        	public void run() {
+		        		while(true) {
+		        			try {
+		        				socket.recvMessagePoll();
+		        			} catch (IOException e) {
+		        				// Disconnected
+		        				break;
+		        			}
+		        			Baos tmp = socket.getMsg();
+		        			if(tmp != null) {
+		        				Bais msg = new Bais(tmp.toByteArray());
+		        				handleMsg(msg);
+		        			} else {
+		        				// don't use all CPU when no message
+		        				try {
+									Thread.sleep(10);
+								} catch (InterruptedException e) {
+									// no action
+								}
+		        			}
+		        		}
+		        	}
+		        }).start();
+			}
+		}).start();
 	}
-	
+
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		super.onStartCommand(intent, flags, startId);
@@ -309,6 +306,7 @@ public class NetworkService extends Service {
 		if (chatActivity != null && currentChannel != null && currentChannel.histDelta.length() != 0)
 			chatActivity.updateChat();
 	}
+	
 	protected void herp() {
 		System.out.println("HERP");
 	}
@@ -316,6 +314,7 @@ public class NetworkService extends Service {
     public void disconnect() {
     	//TODO: Send logout message and disconnect socket
     	this.stopForeground(true);
+    	this.stopSelf();
     }
 	
 }

@@ -30,7 +30,7 @@ public class Channel {
 		id = i;
 		name = n;
 		netServ = net;
-		hist.append(Html.fromHtml("<i>Joined channel: <b>" + name + "</b></i>"));
+		histDelta.append(Html.fromHtml("<i>Joined channel: <b>" + name + "</b></i>"));
 	}
 
 	public void addPlayer(PlayerInfo p) {

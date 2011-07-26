@@ -53,15 +53,11 @@ public class RegistryConnectionService extends Service {
 	}
 	
 	private void connect() {
-		// Sending messages no longer blocks, so there
-		// is no need to spawn a new thread.
-		socket = new PokeClientSocket("pokemon-online.dynalias.net", 5081);
-		socket.waitConnect();		
-		// Polling the socket also no longer blocks, but we'll just
-		// throw it in its own thread until we think of something better
-		// (assuming we do think of something better)
-		rThread = new Thread(new Runnable() {
+		// XXX This should probably have a timeout
+		new Thread(new Runnable() {
         	public void run() {
+        		socket = new PokeClientSocket("pokemon-online.dynalias.net", 5081);
+        		socket.waitConnect();		
         		while(true) {
         			try {
         				socket.recvMessagePoll();
@@ -74,17 +70,16 @@ public class RegistryConnectionService extends Service {
         				msg = new Bais(tmp.toByteArray());
         				handleMsg();
         			} else {
-        				 // don't use all CPU when no message
+        				// don't use all CPU when no message
         				try {
-							Thread.sleep(10);
-						} catch (InterruptedException e) {
-							// no action
-						}
+        					Thread.sleep(10);
+        				} catch (InterruptedException e) {
+        					// no action
+        				}
         			}
         		}
         	}
-        });
-        rThread.start();
+        }).start();
 	}
 	
 	@Override

@@ -47,13 +47,11 @@ public class ChatActivity extends Activity {
 	private EditText chatInput;
 	private ChatRealViewSwitcher chatViewSwitcher;
 	private Handler handler = new Handler();
-	private boolean hidden = false;
 	
 	/** Called when the activity is first created. */
 	@Override
     public void onCreate(Bundle savedInstanceState) {
 		System.out.println("CREATED CHAT ACTIVITY");
-		hidden = false;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat);
         chatScroll = (ScrollView) findViewById(R.id.chatScroll);
@@ -70,9 +68,10 @@ public class ChatActivity extends Activity {
 			public void onItemClick(AdapterView<?> parent, View view, int position,
 					long id) {
 				int opp = ((PlayerListAdapter)parent.getAdapter()).getItem(position).id();
-				netServ.socket.sendMessage(constructChallenge(ChallengeDesc.Sent.ordinal(), 
-						((PlayerListAdapter)parent.getAdapter()).getItem(position).id(), 
-						Clauses.SleepClause.ordinal(), Mode.Singles.ordinal()), Command.ChallengeStuff);
+				if (netServ.socket.isConnected())
+					netServ.socket.sendMessage(constructChallenge(ChallengeDesc.Sent.ordinal(), 
+							((PlayerListAdapter)parent.getAdapter()).getItem(position).id(), 
+							Clauses.SleepClause.ordinal(), Mode.Singles.ordinal()), Command.ChallengeStuff);
 			}        	
 		});
         
@@ -92,8 +91,10 @@ public class ChatActivity extends Activity {
         chatInput.setOnKeyListener(new OnKeyListener() {
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 // If the event is a key-down event on the "enter" button
+            	// and the socket is connected
                 if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
-                    (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                    (keyCode == KeyEvent.KEYCODE_ENTER) &&
+                    netServ.socket.isConnected()) {
                   // Perform action on key press
                 	Baos b = new Baos();
                 	b.putInt(0);
@@ -122,18 +123,7 @@ public class ChatActivity extends Activity {
 			
 			netServ.chatActivity = ChatActivity.this;
 			
-			if (netServ.currentChannel != null) {
-				// Populate the player list
-				Enumeration<PlayerInfo> e = netServ.currentChannel.players.elements();
-				playerAdapter.setNotifyOnChange(false);
-				while(e.hasMoreElements())
-					playerAdapter.addPlayer(e.nextElement());
-				playerAdapter.setNotifyOnChange(true);
-				playerAdapter.sortByNick();
-				//Load scrollback	
-		        chatBox.setText(netServ.currentChannel.hist);
-		        updateChat();
-			}
+			populateUI();
 		}
 		
 		public void onServiceDisconnected(ComponentName className) {
@@ -142,11 +132,27 @@ public class ChatActivity extends Activity {
 		}
 	};
 	
+	public void populateUI() {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				if (netServ.currentChannel != null) {
+					// Populate the player list
+					Enumeration<PlayerInfo> e = netServ.currentChannel.players.elements();
+					playerAdapter.setNotifyOnChange(false);
+					while(e.hasMoreElements())
+						playerAdapter.addPlayer(e.nextElement());
+					playerAdapter.setNotifyOnChange(true);
+					playerAdapter.sortByNick();
+					//Load scrollback	
+					chatBox.setText(netServ.currentChannel.hist);
+					updateChat();
+				}
+			}});
+	}
+	
 	public void updateChat() {
 		runOnUiThread(new Runnable() {
 			public void run() {
-				if (hidden)
-					return;
 				if (netServ.currentChannel != null) {
 					SpannableStringBuilder delta = netServ.currentChannel.histDelta;
 					chatBox.append(delta);
@@ -183,23 +189,25 @@ public class ChatActivity extends Activity {
 			.setPositiveButton(this.getString(R.string.accept), new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
 					// Accept challenge
-			        netServ.socket.sendMessage(
-			        		constructChallenge(ChallengeDesc.Accepted.ordinal(),
-			        				args.getInt("opponent"),
-			        				args.getInt("clauses"),
-			        				args.getByte("mode")),
-			        		Command.ChallengeStuff);
+					if (netServ.socket.isConnected())
+						netServ.socket.sendMessage(
+								constructChallenge(ChallengeDesc.Accepted.ordinal(),
+										args.getInt("opponent"),
+										args.getInt("clauses"),
+										args.getByte("mode")),
+										Command.ChallengeStuff);
 				}
 			})
 			.setNegativeButton(this.getString(R.string.decline), new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
 					// Accept challenge
-			        netServ.socket.sendMessage(
-			        		constructChallenge(ChallengeDesc.Refused.ordinal(),
-			        				args.getInt("opponent"),
-			        				args.getInt("clauses"),
-			        				args.getByte("mode")),
-			        		Command.ChallengeStuff);
+					if (netServ.socket.isConnected())
+						netServ.socket.sendMessage(
+								constructChallenge(ChallengeDesc.Refused.ordinal(),
+										args.getInt("opponent"),
+										args.getInt("clauses"),
+										args.getByte("mode")),
+										Command.ChallengeStuff);
 				}
 			});
 			break;
@@ -230,7 +238,7 @@ public class ChatActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
     	switch (item.getItemId()) {
     	case R.id.backtobattle: 
-    		if(netServ.battle != null) {
+    		if(netServ.hasBattle()) {
     			Intent in = new Intent(this, BattleActivity.class);
     			in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     			startActivity(in);
@@ -243,20 +251,25 @@ public class ChatActivity extends Activity {
     		}
 		case R.id.chat_disconnect:
     		netServ.disconnect();
+    		Intent intent = new Intent(this, RegistryActivity.class);
+    		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    		startActivity(intent);
 			finish();
     		break;
 		case R.id.findbattle:
-			if (netServ.findingBattle) {
-				netServ.findingBattle = false;
-				netServ.socket.sendMessage(
-						constructChallenge(ChallengeDesc.Cancelled.ordinal(), 0, Clauses.SleepClause.mask(), Mode.Singles.ordinal()),
-						Command.ChallengeStuff);
-			} else {
-				netServ.findingBattle = true;
-				// TODO present menu to choose these bools
-				netServ.socket.sendMessage(
-						constructFindBattle(false, false, false, (short) 200, (byte) 0),
-						Command.FindBattle);
+			if (netServ.socket.isConnected()) {
+				if (netServ.findingBattle) {
+					netServ.findingBattle = false;
+					netServ.socket.sendMessage(
+							constructChallenge(ChallengeDesc.Cancelled.ordinal(), 0, Clauses.SleepClause.mask(), Mode.Singles.ordinal()),
+							Command.ChallengeStuff);
+				} else {
+					netServ.findingBattle = true;
+					// TODO present menu to choose these bools
+					netServ.socket.sendMessage(
+							constructFindBattle(false, false, false, (short) 200, (byte) 0),
+							Command.FindBattle);
+				}
 			}
 			break;
     	}
@@ -302,7 +315,6 @@ public class ChatActivity extends Activity {
 	
     @Override
     public void onDestroy() {
-    	hidden = true;
     	unbindService(connection);
     	super.onDestroy();
     }
