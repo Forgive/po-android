@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.lang.Math;
 
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.SystemClock;
@@ -24,6 +25,13 @@ import com.pokebros.android.pokemononline.poke.UniqueID;
 import com.pokebros.android.pokemononline.poke.PokeEnums.*;
 
 public class Battle {
+	public enum BattleResult {
+		Forfeit,
+		Win,
+		Tie,
+		Close
+	}
+	
 	ArrayList<Boolean> sub = new ArrayList<Boolean>();
 	ArrayList<UniqueID> specialSprite = new ArrayList<UniqueID>();
 	ArrayList<UniqueID> lastSeenSpecialSprite = new ArrayList<UniqueID>();
@@ -72,8 +80,8 @@ public class Battle {
 		remainingTime[0] = remainingTime[1] = 5*60;
 		ticking[0] = ticking[1] = false;
 		
-		histDelta.append("The battle between " + players[me].nick() + 
-						" and " + players[opp].nick() + " has begun!");
+		histDelta.append("Battle between " + players[me].nick() + 
+						" and " + players[opp].nick() + " started!");
 	}
 	
 	public Boolean isMyTimerTicking() {
@@ -341,13 +349,14 @@ public class Battle {
 			String q = msg.readQString();
 			
 			String s = queryDB("SELECT EFFECT" + part + " FROM [Move_message] WHERE _id = " + move);
-			
+			String mmove = queryDB("SELECT name FROM [Moves] WHERE _id = " + move);
+			System.out.println("MOVE IS " + move + " WHICH MEANS " + mmove);
 			s = s.replaceAll("%s", currentPoke(player).nick);
 			s = s.replaceAll("%ts", players[me].nick());
 			s = s.replaceAll("%tf", players[opp].nick());
 			if(type  != -1) s = s.replaceAll("%t", Type.values()[type].toString());
 			if(foe   != -1) s = s.replaceAll("%f", currentPoke(foe).nick);
-			if(move  != -1) s = s.replaceAll("%m", queryDB("SELECT name FROM [Moves] WHERE _id = " + move));
+			if(move  != -1) s = s.replaceAll("%m", mmove);//queryDB("SELECT name FROM [Moves] WHERE _id = " + move));
 			s = s.replaceAll("%d", new Short(other).toString());
 			s = s.replaceAll("%q", q);
 			//s = s.replaceAll("%i", other);
@@ -433,6 +442,37 @@ public class Battle {
 					netServ.battleActivity.updateOppPoke();
 			}
 			break;
+		case BattleEnd:
+			byte res = msg.readByte();
+			if (res == BattleResult.Tie.ordinal())
+				histDelta.append(Html.fromHtml("<br><b><font color =" + QtColor.Blue +
+						"Tie between " + players[0].nick() + " and " + players[1].nick() +
+						"!</b></font>")); // XXX Personally I don't think this deserves !
+			else
+				histDelta.append(Html.fromHtml("<br><b><font color =" + QtColor.Blue +
+						players[player].nick() +" won the battle!</b></font>"));
+			break;
+		case BlankMessage:
+			// XXX This prints out a lot of extra space
+			// histDelta.append("\n");
+			break;
+		case Clause:
+			// TODO
+			break;
+		case Rated:
+			boolean rated = msg.readBool();
+			histDelta.append(Html.fromHtml("<br><b><font color =" + QtColor.Blue + 
+					(rated ? "Rated" : "Unrated") + "</b></font>"));
+			// TODO Print clauses
+			break;
+		case TierSection:
+			String tier = msg.readQString();
+			histDelta.append(Html.fromHtml("<br><b><font color =" + QtColor.Blue +
+					"Tier: " + tier + "</b></font>"));
+			break;
+		case TempPokeChange:
+			// TODO
+			break;
 		case ClockStart:
 			remainingTime[player % 2] = msg.readShort();
 			startingTime[player % 2] = SystemClock.uptimeMillis();
@@ -459,6 +499,9 @@ public class Battle {
 				currentPoke(player).lastKnownPercent = (byte)newHP;
 				currentPoke(player).lifePercent = (byte)newHP;
 			}
+			break;
+		case SpotShifts:
+			// TODO
 			break;
 		default:
 			System.out.println("Battle command unimplemented");

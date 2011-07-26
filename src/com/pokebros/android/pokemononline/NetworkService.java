@@ -33,15 +33,12 @@ public class NetworkService extends Service {
 	public Channel currentChannel = null;
 	Thread sThread, rThread;
 	PokeClientSocket socket = null;
-	boolean findingBattle = false, endBattle = false;
+	boolean findingBattle = false;
 	public ChatActivity chatActivity = null;
 	public BattleActivity battleActivity = null;
 	
 	public boolean hasBattle() {
-		if (endBattle)
-			return false;
-		else
-			return (battle != null);
+		return battle != null;
 	}
 	
 	private FullPlayerInfo meLoginPlayer = new FullPlayerInfo();
@@ -241,16 +238,16 @@ public class NetworkService extends Service {
 			default:
 				outcome = " had no idea against ";
 			}
-			Intent in; // XXX we should really figure out what to do with these
-			// End the BattleActivity if you were in the battle that just ended
 			if (id1 == mePlayer.id() || id2 == mePlayer.id()) {
 				if (players.get(id1) != null && players.get(id2) != null && battleDesc < 3)
 					currentChannel.histDelta.append("\n" + players.get(id1).nick() + outcome + players.get(id2).nick() + ".");
+				// End the BattleActivity if you were in the battle that just ended
+				Intent in = new Intent(this, BattleActivity.class);
+                in.putExtra("endBattle", true);
+                in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(in);
+				battle = null;
 				showNotification(ChatActivity.class, "Chat");
-				endBattle = true;
-				in = new Intent(this, BattleActivity.class);
-				in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				startActivity(in);
 			}
 			break;
 		case SendPM:
@@ -279,21 +276,18 @@ public class NetworkService extends Service {
 			bID = msg.readInt();
 			int pID1 = msg.readInt();
 			int pID2 = msg.readInt();
-			// This is us!
-			if(pID1 == 0) {
+			if(pID1 == 0) { // This is us!
 				BattleConf conf = new BattleConf(msg);
 				BattleTeam team = new BattleTeam(msg);
 				// Start the battle
-				if(pID1 == 0) { // This is us!
-					battle = new Battle(conf, team, players.get(conf.id(0)),
-						players.get(conf.id(1)), mePlayer.id(), bID, this);
-					System.out.println("The battle between " + mePlayer.nick() + 
-						" and " + players.get(pID2).nick() + " has begun!");
-					in = new Intent(this, BattleActivity.class);
-					in.putExtra("endBattle", true);
-					in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-					startActivity(in);
-				}
+				battle = new Battle(conf, team, players.get(conf.id(0)),
+					players.get(conf.id(1)), mePlayer.id(), bID, this);
+				currentChannel.histDelta.append("\nBattle between " + mePlayer.nick() + 
+					" and " + players.get(pID2).nick() + " started!");
+				Intent in;
+				in = new Intent(this, BattleActivity.class);
+				in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				startActivity(in);
 			}
 			findingBattle = false;
 			break;

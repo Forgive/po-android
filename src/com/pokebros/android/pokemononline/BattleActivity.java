@@ -49,14 +49,16 @@ public class BattleActivity extends Activity {
 	ImageView[] pokeSprites = new ImageView[2];
 	private NetworkService netServ = null;
 	int me, opp;
-	boolean hidden = false;
 	
 	 /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
     	System.out.println("BattleActivity Created");
-    	hidden = false;
         super.onCreate(savedInstanceState);
+		if (getIntent().hasExtra("endBattle")) {
+			finish();
+			return;
+		}
         setContentView(R.layout.battle_pokeviewer);
 
         Intent intent = new Intent(BattleActivity.this, NetworkService.class);
@@ -131,7 +133,7 @@ public class BattleActivity extends Activity {
     
 	private Runnable updateTimeTask = new Runnable() {
 		public void run() {
-			if (netServ.endBattle || hidden)
+			if (netServ.battle == null)
 				return;
 			for(int i = 0; i < 2; i++) {
 				int seconds;
@@ -161,8 +163,6 @@ public class BattleActivity extends Activity {
 	
 	public Runnable animateHPBars = new Runnable() {
 		public void run() {
-			if (netServ.endBattle || hidden)
-				return;
 			for(int i = 0; i < 2; i++) {
 				ShallowBattlePoke poke = netServ.battle.currentPoke(i);
 				if(poke != null) {
@@ -208,8 +208,10 @@ public class BattleActivity extends Activity {
 	
 	public void updateBattleInfo() {
 		runOnUiThread(new Runnable() {
-			SpannableStringBuilder delta = netServ.battle.histDelta;
 			public void run() {
+				if (!netServ.hasBattle())
+					return;
+				SpannableStringBuilder delta = netServ.battle.histDelta;
 				infoView.append(delta);
 				if (delta.length() != 0) {
 			    	infoScroll.post(new Runnable() {
@@ -304,28 +306,11 @@ public class BattleActivity extends Activity {
 		});
 	}
 	
-	public Runnable updateUITask = new Runnable() {
-		public void run() {
-			if (netServ.endBattle || hidden) {
-				finish();
-				return;
-			}
-
-			handler.postDelayed(animateHPBars, 50);
-			handler.postDelayed(this, 1000);
-		}
-	};
-
 	private ServiceConnection connection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			netServ =	((NetworkService.LocalBinder)service).getService();
 			netServ.herp();
 
-			if (netServ.endBattle) {
-				finish();
-				return;
-			}
-			
 			netServ.showNotification(BattleActivity.class, "Battle");
 			Toast.makeText(BattleActivity.this, "Service connected",
                     Toast.LENGTH_SHORT).show();
@@ -366,8 +351,7 @@ public class BattleActivity extends Activity {
 	        // Enable or disable buttons
 	        updateButtons(netServ.battle.clickable);
 	        
-	    	// Set up the UI polling and timer updating
-	        handler.postDelayed(updateUITask, 50);
+	    	// Start timer updating
 	        handler.postDelayed(updateTimeTask, 100);
 	        
 	        // Don't set netServ.battleActivity until after we've finished
@@ -393,13 +377,10 @@ public class BattleActivity extends Activity {
     
     @Override
     public void onDestroy() {
-    	if (netServ.endBattle) {
-        	System.out.println("BATTLE ACTIVITY GONE");
-    		netServ.battle = null;
-    		netServ.endBattle = false;
-    	}
-    	hidden = true;
-    	unbindService(connection);
+    	if (netServ == null || !netServ.hasBattle())
+    		System.out.println("BATTLE ACTIVITY GONE");
+    	if (netServ != null)
+    		unbindService(connection);
     	super.onDestroy();
     }
 
@@ -450,6 +431,7 @@ public class BattleActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
     	switch (item.getItemId()) {
     	case R.id.to_chat:
+    		startActivity(new Intent(this, ChatActivity.class));
     		finish();
     		break;
     	case R.id.forfeit_yes:
