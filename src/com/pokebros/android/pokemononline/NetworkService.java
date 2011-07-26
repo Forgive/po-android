@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+import com.pokebros.android.pokemononline.ChatActivity.ChatDialog;
 import com.pokebros.android.pokemononline.battle.Battle;
 import com.pokebros.android.pokemononline.battle.BattleConf;
 import com.pokebros.android.pokemononline.battle.BattleTeam;
@@ -167,23 +168,23 @@ public class NetworkService extends Service {
 			clauses = msg.readInt();
 			mode = msg.readByte();
 			System.out.println("Desc: " + desc + " Opponent: " + opponent + " Clauses: " + clauses + " Mode: " + mode);
-			if (desc == ChallengeDesc.Sent.ordinal()) {
-				//TODO: Uncomment before Alpha release
-				Notification note = new Notification(R.drawable.icon, "You've been challenged by " + players.get(opponent).nick() + "!", System.currentTimeMillis());
+			if (desc == ChallengeDesc.Sent.ordinal() && players.get(opponent) != null) {
+				// XXX this currently only supports one challenge at a time
 				Intent intent = new Intent(this, ChatActivity.class);
+				intent.putExtra("dialog", ChatDialog.Challenge.ordinal());
+				intent.putExtra("note", NOTIFICATION+1);
 				intent.putExtra("opponent", opponent);
+				intent.putExtra("oppName", players.get(opponent).nick());
 				intent.putExtra("clauses", clauses);
 				intent.putExtra("mode", mode);
-		        note.setLatestEventInfo(this, "POAndroid", "You've been challenged!", PendingIntent.getActivity(this, 0,
-		                intent, Intent.FLAG_ACTIVITY_NEW_TASK));
-				noteMan.notify(NOTIFICATION+1, note);
-				// Accept challenge for my sanity
-/*				Baos b = new Baos();
-				b.write(1);
-				b.putInt(opponent);
-				b.putInt(clauses);
-				b.write(mode);
-		        socket.sendMessage(b, Command.ChallengeStuff);*/
+				if (chatActivity != null && chatActivity.hasWindowFocus()) {
+					chatActivity.showDialogFromService(ChatDialog.Challenge, intent.getExtras());
+				} else {
+					Notification note = new Notification(R.drawable.icon, "You've been challenged by " + players.get(opponent).nick() + "!", System.currentTimeMillis());
+			        note.setLatestEventInfo(this, "POAndroid", "You've been challenged!", PendingIntent.getActivity(this, 0,
+			                intent, Intent.FLAG_ACTIVITY_NEW_TASK));
+					noteMan.notify(NOTIFICATION+1, note);
+				}
 			}
 			break;
 		case ChannelsList://XXX
@@ -297,6 +298,16 @@ public class NetworkService extends Service {
 		case Login:
 			mePlayer = new PlayerInfo(msg);
 			players.put(mePlayer.id(), mePlayer);
+			break;
+		case AskForPass:
+			// TODO
+			String salt = msg.readQString();
+			// XXX not sure what the point of the second half is supposed to check
+			// from analyze.cpp : 265 of PO's code
+			if (salt.length() < 6) { //  || strlen((" " + salt).toUtf8().data()) < 7)
+				System.out.println("Protocol Error: The server requires insecure authentication");
+				break;
+			}
 			break;
 		default:
 			System.out.println("Unimplented message");

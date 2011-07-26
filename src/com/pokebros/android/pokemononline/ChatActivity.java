@@ -37,6 +37,10 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.view.KeyEvent;
 
 public class ChatActivity extends Activity {
+	public enum ChatDialog {
+		Challenge
+	}
+	
 	public final static int SWIPE_TIME_THRESHOLD = 100;
 	
 	private PlayerListAdapter playerAdapter;
@@ -106,11 +110,6 @@ public class ChatActivity extends Activity {
                 return false;
             }
         });
-        // Handle challenges
-        System.out.println("INTENT: "+getIntent().toString());
-        if (getIntent().hasExtra("opponent")) {
-                showDialog(0);
-        }
 	}
 
 	private ServiceConnection connection = new ServiceConnection() {
@@ -124,13 +123,25 @@ public class ChatActivity extends Activity {
 			netServ.chatActivity = ChatActivity.this;
 			
 			populateUI();
-		}
+
+	        handleDialogs();
+        }
 		
 		public void onServiceDisconnected(ComponentName className) {
 			netServ.chatActivity = null;
 			netServ = null;
 		}
 	};
+	
+	public void handleDialogs() {
+		Intent intent = getIntent();
+        if (intent.hasExtra("dialog")) {
+        	Bundle extras = intent.getExtras();
+        	showDialog(extras.getInt("dialog"), extras);
+        	netServ.noteMan.cancel(extras.getInt("note"));
+    		getIntent().removeExtra("dialog");
+        }
+	}
 	
 	public void populateUI() {
 		runOnUiThread(new Runnable() {
@@ -172,19 +183,25 @@ public class ChatActivity extends Activity {
 	
 	@Override
 	public void onNewIntent(Intent intent) {
-        System.out.println("INTENT: "+intent.toString());
-        if (intent.hasExtra("opponent")) {
-        	showDialog(0, intent.getExtras());
-        	netServ.noteMan.cancel(netServ.NOTIFICATION+1);
-        }
+		setIntent(intent);
+		if (netServ != null) // We are already connected to the service
+			handleDialogs(); // so handle dialogs here instead of onServiceConnected
+	}
+	
+	public void showDialogFromService(ChatDialog id, final Bundle args) {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				showDialog(0, args);
+			}
+		});
 	}
 	
 	@Override
 	protected Dialog onCreateDialog(int id, final Bundle args) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		switch (id) {
-		case 0:
-			builder.setMessage(this.getString(R.string.accept_challenge) + " " + netServ.players.get(args.getInt("opponent")).nick() + "?") // TODO add challenge info
+		switch (ChatDialog.values()[id]) {
+		case Challenge:
+			builder.setMessage(this.getString(R.string.accept_challenge) + " " + args.getString("oppName") + "?") // TODO add challenge info
 			.setCancelable(false)
 			.setPositiveButton(this.getString(R.string.accept), new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
@@ -315,6 +332,7 @@ public class ChatActivity extends Activity {
 	
     @Override
     public void onDestroy() {
+    	netServ.chatActivity = null;
     	unbindService(connection);
     	super.onDestroy();
     }
