@@ -178,14 +178,14 @@ public class Battle {
 			break;
 		case UseAttack:
 			short attack = msg.readShort();
-			histDelta.append("\n" + currentPoke(player).nick +
-					" used " + queryDB("SELECT name FROM [Moves] WHERE _id = " + attack) + "!");
-			
+			histDelta.append(Html.fromHtml("<br>" + currentPoke(player).nick +
+					" used <font color =" + TypeColor.values()[new Integer(queryDB("SELECT type FROM [Moves] WHERE _id = " + attack))] +
+					queryDB("SELECT name FROM [Moves] WHERE _id = " + attack) + "</font>!"));
 			break;
 		case BeginTurn:
 			int turn = msg.readInt();
 			histDelta.append(Html.fromHtml("<br><b><font color=" + QtColor.Blue + 
-					"Start of turn " + turn + "</font color></b>"));
+					"Start of turn " + turn + "</font></b>"));
 			break;
 		case Ko:
 			histDelta.append(Html.fromHtml("<br><b>" + new EscapeHtml(currentPoke(player).nick) +
@@ -204,7 +204,7 @@ public class Battle {
 			case 1:
 			case 2:
 				histDelta.append(Html.fromHtml("<br><font color=" + QtColor.Gray +
-						"It's not very effective...</font color>"));
+						"It's not very effective...</font>"));
 				break;
 			case 8:
 			case 16:
@@ -214,7 +214,7 @@ public class Battle {
 			}
 			break;
 		case CriticalHit:
-			histDelta.append(Html.fromHtml("<br><font color=#6b0000>A critical hit!</font color>"));
+			histDelta.append(Html.fromHtml("<br><font color=#6b0000>A critical hit!</font>"));
 			break;
 		case Miss:
 			histDelta.append("\nThe attack of " + currentPoke(player).nick + " missed!");
@@ -242,7 +242,7 @@ public class Battle {
 			if (status > Status.Fine.ordinal() && status < Status.Confused.ordinal()) {
 				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(status) + 
 						currentPoke(player).nick + statusChangeMessages[status-1 +
-                        (status == Status.Poisoned.ordinal() && multipleTurns ? 1 : 0)] + "</font color>"));
+                        (status == Status.Poisoned.ordinal() && multipleTurns ? 1 : 0)] + "</font>"));
 			}
 			else if(status == Status.Confused.ordinal()){
 				/* The reason we need to handle confusion separately is because 
@@ -250,7 +250,7 @@ public class Battle {
 				 * enum, so confusion does not correspond to the same value in the above
 				 * string array as its enum value. */
 				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(status) + 
-						currentPoke(player).nick + " became confused!</font color>"));
+						currentPoke(player).nick + " became confused!</font>"));
 			}
 			break;
 		case AbsStatusChange:
@@ -260,50 +260,50 @@ public class Battle {
 			status = msg.readByte();
 			histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(status) +
 					currentPoke(player).nick + " is already " + Status.values()[status] +
-					".</font color>"));
+					".</font>"));
 			break;
 		case StatusMessage:
 			status = msg.readByte();
 			switch (StatusFeeling.values()[status]) {
 			case FeelConfusion:
 				histDelta.append(Html.fromHtml("<br><font color=" + TypeColor.Ghost +
-						currentPoke(player).nick + " is confused!</font color>"));
+						currentPoke(player).nick + " is confused!</font>"));
 				break;
 			case HurtConfusion:
 				histDelta.append(Html.fromHtml("<br><font color=" + TypeColor.Ghost +
-						"It hurt itself in its confusion!</font color>"));
+						"It hurt itself in its confusion!</font>"));
 				break;
 			case FreeConfusion:
 				histDelta.append(Html.fromHtml("<br><font color=" + TypeColor.Dark +
-						currentPoke(player).nick + " snapped out of its confusion!</font color>"));
+						currentPoke(player).nick + " snapped out of its confusion!</font>"));
 				break;
 			case PrevParalysed:
 				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Paralysed.ordinal())+
-						currentPoke(player).nick + " is paralyzed! It can't move!</font color>"));
+						currentPoke(player).nick + " is paralyzed! It can't move!</font>"));
 				break;
 			case FeelAsleep:
 				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Asleep.ordinal()) +
-						currentPoke(player).nick + " is fast asleep!</font color>"));
+						currentPoke(player).nick + " is fast asleep!</font>"));
 				break;
 			case FreeAsleep:
 				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Asleep.ordinal()) +
-						currentPoke(player).nick + " woke up!</font color>"));
+						currentPoke(player).nick + " woke up!</font>"));
 				break;
 			case HurtBurn:
 				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Burnt.ordinal()) +
-						currentPoke(player).nick + " is hurt by its burn!</font color>"));
+						currentPoke(player).nick + " is hurt by its burn!</font>"));
 				break;
 			case HurtPoison:
 				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Poisoned.ordinal()) +
-						currentPoke(player).nick + " is hurt by poison!</font color>"));
+						currentPoke(player).nick + " is hurt by poison!</font>"));
 				break;
 			case PrevFrozen:
 				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Frozen.ordinal())+
-						currentPoke(player).nick + " is frozen solid!</font color>"));
+						currentPoke(player).nick + " is frozen solid!</font>"));
 				break;
 			case FreeFrozen:
 				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Frozen.ordinal()) +
-						currentPoke(player).nick + " thawed out!</font color>"));
+						currentPoke(player).nick + " thawed out!</font>"));
 				break;
 			}
 			break;
@@ -316,7 +316,7 @@ public class Battle {
 			if (message.equals(""))
 				break;
 			histDelta.append(Html.fromHtml("<br><font color=" + (player !=0 ? "#5811b1>" : QtColor.Green) +
-					"<b>" + new EscapeHtml(players[player].nick()) + ": </b></font color>" +
+					"<b>" + new EscapeHtml(players[player].nick()) + ": </b></font>" +
 					new EscapeHtml(message)));
 			break;
 		case Spectating:
@@ -396,7 +396,7 @@ public class Battle {
 				default: message = "";
 				}
 				histDelta.append(Html.fromHtml("<br><font color=" + color +
-						currentPoke(player).nick + message + "</font color>"));
+						currentPoke(player).nick + message + "</font>"));
 				break;
 			case ContinueWeather:
 				switch (Weather.values()[weather]) {
