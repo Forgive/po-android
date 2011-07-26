@@ -36,7 +36,7 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 	private ServerListAdapter adapter;
 	private EditText ip;
 	private EditText port;
-	private boolean bound;
+	private boolean bound = false;
 	
 	RegistryConnectionService service;
 	
@@ -46,13 +46,15 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
         super.onCreate(savedInstanceState);
 
         // If we are already connected to a server show ChatActivity instead of RegistryActivity
-        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-        for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if ("com.pokebros.android.pokemononline.NetworkService".equals(service.service.getClassName())) {
-				startActivity(new Intent(RegistryActivity.this, ChatActivity.class));
-            	finish();
-            	return;
-            }
+        if (!getIntent().hasExtra("sticky")) {
+	        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+	        for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+	            if ("com.pokebros.android.pokemononline.NetworkService".equals(service.service.getClassName())) {
+					startActivity(new Intent(RegistryActivity.this, ChatActivity.class));
+	            	finish();
+	            	return;
+	            }
+	        }
         }
         
         setContentView(R.layout.main);
@@ -179,6 +181,7 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 	
 	public void onServiceDisconnected(ComponentName name) {
 		bound = false;
+		unbindService(this);
 		if (service != null)
 	    	service.setListener(null);
 	}

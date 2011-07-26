@@ -213,6 +213,12 @@ public class ChatActivity extends Activity {
 										args.getInt("clauses"),
 										args.getByte("mode")),
 										Command.ChallengeStuff);
+					// Without removeDialog() the dialog is reused and can only
+					// be modified in onPrepareDialog(). This dialog changes
+					// so much that I doubt it's worth the code to deal with
+					// onPrepareDialog() but we should use it if we have complex
+					// dialogs that only need to change a little
+					removeDialog(ChatDialog.Challenge.ordinal());
 				}
 			})
 			.setNegativeButton(this.getString(R.string.decline), new DialogInterface.OnClickListener() {
@@ -225,6 +231,7 @@ public class ChatActivity extends Activity {
 										args.getInt("clauses"),
 										args.getByte("mode")),
 										Command.ChallengeStuff);
+					removeDialog(ChatDialog.Challenge.ordinal());
 				}
 			});
 			break;
@@ -270,8 +277,9 @@ public class ChatActivity extends Activity {
     		netServ.disconnect();
     		Intent intent = new Intent(this, RegistryActivity.class);
     		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    		intent.putExtra("sticky", true);
     		startActivity(intent);
-			finish();
+    		ChatActivity.this.finish();
     		break;
 		case R.id.findbattle:
 			if (netServ.socket.isConnected()) {
@@ -332,7 +340,8 @@ public class ChatActivity extends Activity {
 	
     @Override
     public void onDestroy() {
-    	netServ.chatActivity = null;
+    	if (netServ != null)
+    		netServ.chatActivity = null;
     	unbindService(connection);
     	super.onDestroy();
     }

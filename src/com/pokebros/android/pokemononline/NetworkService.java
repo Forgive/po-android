@@ -170,17 +170,19 @@ public class NetworkService extends Service {
 			System.out.println("Desc: " + desc + " Opponent: " + opponent + " Clauses: " + clauses + " Mode: " + mode);
 			if (desc == ChallengeDesc.Sent.ordinal() && players.get(opponent) != null) {
 				// XXX this currently only supports one challenge at a time
+				String oppName = players.get(opponent).nick();
 				Intent intent = new Intent(this, ChatActivity.class);
 				intent.putExtra("dialog", ChatDialog.Challenge.ordinal());
 				intent.putExtra("note", NOTIFICATION+1);
 				intent.putExtra("opponent", opponent);
-				intent.putExtra("oppName", players.get(opponent).nick());
+				intent.putExtra("oppName", oppName);
 				intent.putExtra("clauses", clauses);
 				intent.putExtra("mode", mode);
+				System.out.println("OPP " + opponent + " WHO IS " + oppName);
 				if (chatActivity != null && chatActivity.hasWindowFocus()) {
 					chatActivity.showDialogFromService(ChatDialog.Challenge, intent.getExtras());
 				} else {
-					Notification note = new Notification(R.drawable.icon, "You've been challenged by " + players.get(opponent).nick() + "!", System.currentTimeMillis());
+					Notification note = new Notification(R.drawable.icon, "You've been challenged by " + oppName + "!", System.currentTimeMillis());
 			        note.setLatestEventInfo(this, "POAndroid", "You've been challenged!", PendingIntent.getActivity(this, 0,
 			                intent, Intent.FLAG_ACTIVITY_NEW_TASK));
 					noteMan.notify(NOTIFICATION+1, note);
@@ -323,7 +325,7 @@ public class NetworkService extends Service {
 	}
 	
     public void disconnect() {
-    	//TODO: Send logout message and disconnect socket
+    	socket.close();
     	this.stopForeground(true);
     	this.stopSelf();
     }
