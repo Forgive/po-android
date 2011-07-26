@@ -297,6 +297,8 @@ public class BattleActivity extends Activity {
 					BattlePoke poke = netServ.battle.myTeam.pokes[i];
 					int resID = getResources().getIdentifier("pi" + poke.uID.pokeNum +
 							"_icon", "drawable", "com.pokebros.android.pokemononline");
+					//int resID = getResources().getIdentifier("p" + poke.uID.pokeNum +
+					//		"_front", "drawable", "com.pokebros.android.pokemononline");
 					pokeListIcons[i].setImageResource(resID);
 					pokeListNames[i].setText(poke.nick);
 					pokeListHPs[i].setText(poke.currentHP +

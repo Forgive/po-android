@@ -68,7 +68,9 @@ public class RealViewSwitcher extends ViewGroup {
 
 	protected int mTouchState = TOUCH_STATE_REST;
 
+	protected boolean mPressed = false;
 	protected float mLastMotionX;
+	protected float mLastMotionY;
 	protected int mTouchSlop;
 	protected int mMaximumVelocity;
 	protected int mCurrentScreen;
@@ -142,7 +144,8 @@ public class RealViewSwitcher extends ViewGroup {
         }
 
         final float x = ev.getX();
-
+        final float y = ev.getY();
+        
         switch (action) {
             case MotionEvent.ACTION_MOVE:
                 /*
@@ -155,21 +158,24 @@ public class RealViewSwitcher extends ViewGroup {
                  * of the down event.
                  */
                 final int xDiff = (int) Math.abs(x - mLastMotionX);
-                //final int yDiff = (int) Math.abs(y - mLastMotionY);
+                final int yDiff = (int) Math.abs(y - mLastMotionY);
 
                 final int touchSlop = mTouchSlop;
                 boolean xMoved = xDiff > touchSlop;
-                //boolean yMoved = yDiff > touchSlop;
-                if (xMoved) {// || yMoved) {
+                boolean yMoved = yDiff > touchSlop;
+                if (xMoved || yMoved) {
                     // If xDiff > yDiff means the finger path pitch is smaller than 45deg so we assume the user want to scroll X axis
-                   // if (xDiff > yDiff) {
+                    if (xDiff > 2*yDiff) {
                         // Scroll if the user moved far enough along the X axis
                         mTouchState = TOUCH_STATE_SCROLLING;
+                        mPressed = false;
                         //enableChildrenCache(mCurrentScreen - 1, mCurrentScreen + 1);
 
-                   /* }
+                   }
+                    else
+                    	mPressed = true;
                     // If yDiff > xDiff means the finger path pitch is bigger than 45deg so we assume the user want to either scroll Y or Y-axis gesture
-                    else if (getOpenFolder()==null)
+                   /* else
                     {
                         // As x scrolling is left untouched (more or less untouched;)), every gesture should start by dragging in Y axis. In fact I only consider useful, swipe up and down.
                         // Guess if the first Pointer where the user click belongs to where a scrollable widget is.
@@ -199,7 +205,7 @@ public class RealViewSwitcher extends ViewGroup {
             case MotionEvent.ACTION_DOWN:
                 // Remember location of down touch
                 mLastMotionX = x;
-                //mLastMotionY = y;
+                mLastMotionY = y;
                 //mAllowLongPress = true;
 
                 /*
@@ -227,6 +233,7 @@ public class RealViewSwitcher extends ViewGroup {
                 }*/
                 // Release the drag
                 //clearChildrenCache();
+            	mPressed = false;
                 mTouchState = TOUCH_STATE_REST;
                 //mAllowLongPress = false;
                 break;
@@ -263,6 +270,7 @@ public class RealViewSwitcher extends ViewGroup {
 
 		final int action = ev.getAction();
 		final float x = ev.getX();
+		final float y = ev.getY();
 
 		switch (action) {
 		case MotionEvent.ACTION_DOWN:
@@ -275,7 +283,7 @@ public class RealViewSwitcher extends ViewGroup {
 
 			// Remember where the motion event started
 			mLastMotionX = x;
-        	System.out.println("ActionDown Touch Event mTouchState= " + mTouchState);
+			mLastMotionY = y;
 			mTouchState = mScroller.isFinished() ? TOUCH_STATE_REST : TOUCH_STATE_SCROLLING;
 
 			break;
@@ -412,6 +420,10 @@ public class RealViewSwitcher extends ViewGroup {
 	 */
 	public void setOnScreenSwitchListener(OnScreenSwitchListener onScreenSwitchListener) {
 		mOnScreenSwitchListener = onScreenSwitchListener;
+	}
+	
+	public boolean isPressed(){
+		return mPressed;
 	}
 
 }

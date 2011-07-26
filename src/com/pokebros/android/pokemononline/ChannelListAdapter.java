@@ -24,11 +24,13 @@ public class ChannelListAdapter extends ArrayAdapter<com.pokebros.android.pokemo
 	}
 	
 	public void sortByName() {
+		setNotifyOnChange(false);
 		super.sort(new Comparator<Channel>() {
 			public int compare(Channel ch1, Channel ch2) {
-				return ch1.name().compareTo(ch2.name());
+				return ch1.name().toLowerCase().compareTo(ch2.name().toLowerCase());
 			}
 		});
+		setNotifyOnChange(true);
 	}
 	
 	@Override
@@ -44,7 +46,12 @@ public class ChannelListAdapter extends ArrayAdapter<com.pokebros.android.pokemo
 			nick.setText(channel.name());
 		}
 		return view;
-		
+	}
+	
+	@Override
+	public void notifyDataSetChanged(){
+		sortByName();
+		super.notifyDataSetChanged();
 	}
 }
 

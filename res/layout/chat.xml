@@ -9,7 +9,8 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:orientation="vertical"
   android:layout_width="match_parent"
-  android:layout_height="match_parent">
+  android:layout_height="match_parent"
+  android:background="@drawable/battle_border_dark">
     <TextView android:layout_height="wrap_content" android:textSize="15sp" android:layout_gravity="right" android:id="@+id/playerlisttitle" android:text="@string/player_list" android:layout_width="wrap_content" android:textStyle="bold"></TextView>
     <ListView android:layout_height="wrap_content" android:id="@+id/playerlisting" android:layout_width="match_parent"></ListView>
     
@@ -21,7 +22,6 @@
 	android:orientation="vertical"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent"
-	android:background="#FFFFFF"
 	android:id="@+id/chatlayout">
 	<ScrollView
 		android:id="@+id/chatScroll"
@@ -34,9 +34,7 @@
 	>
 		<TextView
 			android:layout_height="wrap_content"
-			android:textColor="#000000"
 			android:id="@+id/chatBox"
-			android:background="@drawable/battle_border"
 			android:layout_width="fill_parent"
 		>
 		</TextView>
@@ -55,7 +53,8 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:orientation="vertical"
   android:layout_width="match_parent"
-  android:layout_height="match_parent">
+  android:layout_height="match_parent"
+  			android:background="@drawable/battle_border_dark">
     <TextView android:layout_height="wrap_content" android:textSize="15sp" android:layout_width="wrap_content" android:layout_gravity="left" android:id="@+id/channellisttitle" android:text="@string/channel_list" android:textStyle="bold"></TextView>
     <ListView android:layout_height="wrap_content" android:layout_width="match_parent" android:layout_gravity="left" android:id="@+id/channellisting"></ListView>
 </LinearLayout>

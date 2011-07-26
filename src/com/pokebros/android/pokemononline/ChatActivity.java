@@ -1,11 +1,8 @@
 package com.pokebros.android.pokemononline;
 
 import java.util.Enumeration;
-
-import com.pokebros.android.pokemononline.ServerListAdapter.Server;
 import com.pokebros.android.pokemononline.player.PlayerInfo;
 import com.pokebros.android.pokemononline.battle.ChallengeEnums.*;
-
 import de.marcreichelt.android.ChatRealViewSwitcher;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -16,11 +13,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.text.SpannableStringBuilder;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -50,7 +44,6 @@ public class ChatActivity extends Activity {
 	private TextView chatBox;
 	private EditText chatInput;
 	private ChatRealViewSwitcher chatViewSwitcher;
-	private Handler handler = new Handler();
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -71,7 +64,6 @@ public class ChatActivity extends Activity {
         	// Set the edit texts on list item click
 			public void onItemClick(AdapterView<?> parent, View view, int position,
 					long id) {
-				int opp = ((PlayerListAdapter)parent.getAdapter()).getItem(position).id();
 				if (netServ.socket.isConnected())
 					netServ.socket.sendMessage(constructChallenge(ChallengeDesc.Sent.ordinal(), 
 							((PlayerListAdapter)parent.getAdapter()).getItem(position).id(), 
@@ -169,8 +161,8 @@ public class ChatActivity extends Activity {
 					chatBox.append(delta);
 					if (delta.length() != 0) {
 						chatScroll.post(new Runnable() {
-							public void run() {
-								//TODO: Prevent auto scrolling if user has finger pressed to chatScroll
+							public void run() {						
+								if(!chatViewSwitcher.isPressed())
 								chatScroll.smoothScrollTo(0, chatBox.getMeasuredHeight());
 							}
 						});

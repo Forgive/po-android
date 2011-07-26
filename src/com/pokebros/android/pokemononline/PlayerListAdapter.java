@@ -50,7 +50,6 @@ public class PlayerListAdapter extends ArrayAdapter<com.pokebros.android.pokemon
 			nick.setText(player.nick());
 		}
 		return view;
-		
 	}
 	
 	@Override
