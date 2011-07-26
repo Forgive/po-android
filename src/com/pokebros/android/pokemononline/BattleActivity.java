@@ -231,7 +231,7 @@ public class BattleActivity extends Activity {
 				ShallowBattlePoke poke = netServ.battle.currentPoke(me);
 				// Load correct moveset and name
 				if(poke != null) {
-					currentPokeNames[me].setText(netServ.battle.currentPoke(me).rnick);
+					currentPokeNames[me].setText(poke.rnick);
 					hpBars[me].setProgress(netServ.battle.currentPoke(me).lifePercent);
 					BattlePoke battlePoke = netServ.battle.myTeam.pokes[0];
 			        for(int i = 0; i < 4; i++) {
@@ -261,7 +261,7 @@ public class BattleActivity extends Activity {
 				ShallowBattlePoke poke = netServ.battle.currentPoke(opp);
 				// Load correct moveset and name
 				if(poke != null) {
-					currentPokeNames[opp].setText(netServ.battle.currentPoke(opp).rnick);
+					currentPokeNames[opp].setText(poke.rnick);
 					hpBars[opp].setProgress(netServ.battle.currentPoke(opp).lifePercent);
 					int resID;
 					if (poke.sub)
@@ -320,11 +320,12 @@ public class BattleActivity extends Activity {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			netServ =	((NetworkService.LocalBinder)service).getService();
 			netServ.herp();
-			netServ.battleActivity = BattleActivity.this;
+
 			if (netServ.endBattle) {
 				finish();
 				return;
 			}
+			
 			netServ.showNotification(BattleActivity.class, "Battle");
 			Toast.makeText(BattleActivity.this, "Service connected",
                     Toast.LENGTH_SHORT).show();
@@ -368,6 +369,11 @@ public class BattleActivity extends Activity {
 	    	// Set up the UI polling and timer updating
 	        handler.postDelayed(updateUITask, 50);
 	        handler.postDelayed(updateTimeTask, 100);
+	        
+	        // Don't set netServ.battleActivity until after we've finished
+	        // getting UI elements. Otherwise there's a race condition if Battle
+	        // wants to update one of our UI elements we haven't gotten yet.
+			netServ.battleActivity = BattleActivity.this;
 		}
 		
 		public void onServiceDisconnected(ComponentName className) {
