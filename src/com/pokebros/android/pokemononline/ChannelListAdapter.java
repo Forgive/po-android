@@ -34,15 +34,14 @@ public class ChannelListAdapter extends ArrayAdapter<com.pokebros.android.pokemo
 	}
 	
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-		View view = convertView;
+	public View getView(int position, View view, ViewGroup parent) {
 		if (view == null) {
 			LayoutInflater inflater = (LayoutInflater)getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			view = inflater.inflate(R.layout.row_simple, null);
+			view = inflater.inflate(R.layout.row_simple_chan, null);
 		}
 		Channel channel = getItem(position);
 		if (channel != null) {
-			TextView nick = (TextView)view.findViewById(R.id.player_list_name);
+			TextView nick = (TextView)view.findViewById(R.id.channel_list_name);
 			nick.setText(channel.name());
 		}
 		return view;
@@ -54,6 +53,3 @@ public class ChannelListAdapter extends ArrayAdapter<com.pokebros.android.pokemo
 		super.notifyDataSetChanged();
 	}
 }
-
-
-

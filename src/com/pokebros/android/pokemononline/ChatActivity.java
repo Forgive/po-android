@@ -38,6 +38,7 @@ public class ChatActivity extends Activity {
 	public final static int SWIPE_TIME_THRESHOLD = 100;
 	
 	private PlayerListAdapter playerAdapter;
+	private ChannelListAdapter channelAdapter;
 	
 	private NetworkService netServ = null;
 	private ScrollView chatScroll;
@@ -56,10 +57,10 @@ public class ChatActivity extends Activity {
     	chatViewSwitcher = (ChatRealViewSwitcher)findViewById(R.id.chatPokeSwitcher);
     	chatViewSwitcher.setCurrentScreen(1);
  
+    	//Player List Stuff**
         ListView players = (ListView)findViewById(R.id.playerlisting);
         playerAdapter = new PlayerListAdapter(this, R.id.playerlisting);
         players.setAdapter(playerAdapter);
-        
         players.setOnItemClickListener(new OnItemClickListener() {
         	// Set the edit texts on list item click
 			public void onItemClick(AdapterView<?> parent, View view, int position,
@@ -70,15 +71,35 @@ public class ChatActivity extends Activity {
 							Clauses.SleepClause.ordinal(), Mode.Singles.ordinal()), Command.ChallengeStuff);
 			}        	
 		});
-        
         players.setOnItemLongClickListener(new OnItemLongClickListener() {
 			public boolean onItemLongClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				// TODO: Display player description
+				System.out.println("Player -- Long click works");
 				return true;
 			}
 		});
-
+        
+        //Channel List Stuff**
+        ListView channels = (ListView)findViewById(R.id.channellisting);
+        channelAdapter = new ChannelListAdapter(this, R.id.channellisting);
+        channels.setAdapter(channelAdapter);
+        channels.setOnItemClickListener(new OnItemClickListener() {
+        	// Set the edit texts on list item click
+			public void onItemClick(AdapterView<?> parent, View view, int position,
+					long id) {
+				//TODO: Connect to channel
+				System.out.println("Channel -- click works");
+			}
+		});
+        channels.setOnItemLongClickListener(new OnItemLongClickListener() {
+			public boolean onItemLongClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				// TODO: Disconnect from channel
+				System.out.println("Channel -- Long click works");
+				return true;
+			}
+		});
         
         bindService(new Intent(ChatActivity.this, NetworkService.class), connection,
         		Context.BIND_AUTO_CREATE);
@@ -153,6 +174,13 @@ public class ChatActivity extends Activity {
 						playerAdapter.addPlayer(e.nextElement());
 					playerAdapter.setNotifyOnChange(true);
 					playerAdapter.sortByNick();
+					//Populate the Channel list
+					Enumeration<Channel> c = netServ.channels.elements();
+					channelAdapter.setNotifyOnChange(false);
+					while(c.hasMoreElements())
+						channelAdapter.addChannel(c.nextElement());
+					channelAdapter.setNotifyOnChange(true);
+					channelAdapter.sortByName();
 					//Load scrollback	
 					chatBox.setText(netServ.currentChannel.hist);
 					chatScroll.post(new Runnable() {
@@ -338,6 +366,22 @@ public class ChatActivity extends Activity {
 		runOnUiThread(new Runnable() {
 			public void run() {
             	playerAdapter.addPlayer(pi);
+			}
+		});
+	}
+	
+	public void removeChannel(final Channel ch){
+		runOnUiThread(new Runnable() {
+			public void run() {
+            	channelAdapter.removeChannel(ch);
+			}
+		});
+	}
+	
+	public void addChannel(final Channel ch) {
+		runOnUiThread(new Runnable() {
+			public void run() {
+            	channelAdapter.addChannel(ch);
 			}
 		});
 	}

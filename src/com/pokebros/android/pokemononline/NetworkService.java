@@ -186,7 +186,7 @@ public class NetworkService extends Service {
 				}
 			}
 			break;
-		case ChannelsList://XXX
+		case ChannelsList:
 			int numChannels = msg.readInt();
 			for(int k = 0; k < numChannels; k++) {
 				int chanID = msg.readInt();
@@ -195,7 +195,7 @@ public class NetworkService extends Service {
 			System.out.println(channels.toString());
 			currentChannel = channels.get(0);
 			break;
-		case ChannelPlayers: //XXX 
+		case ChannelPlayers:
 			Channel ch = channels.get(msg.readInt());
 			int numPlayers = msg.readInt();
 			if(ch != null) {
@@ -303,6 +303,22 @@ public class NetworkService extends Service {
 				break;
 			}
 			break;
+		case AddChannel:
+			String chanName = msg.readQString();
+			int chanId = msg.readInt();
+			channels.put(chanId, new Channel(chanId, chanName, this));
+			chatActivity.addChannel(channels.get(chanId));
+			break;
+		case RemoveChannel:
+			chanId = msg.readInt();
+			chatActivity.removeChannel(channels.get(chanId));
+			channels.remove(chanId);
+			break;
+		case ChanNameChange:
+			chanId = msg.readInt();
+			chatActivity.removeChannel(channels.get(chanId));
+			channels.remove(chanId);
+			channels.put(chanId, new Channel(chanId, msg.readQString(), this));
 		default:
 			System.out.println("Unimplented message");
 		}
