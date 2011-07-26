@@ -2,6 +2,7 @@ package com.pokebros.android.pokemononline;
 
 import com.pokebros.android.pokemononline.poke.BattlePoke;
 import com.pokebros.android.pokemononline.poke.ShallowBattlePoke;
+import com.pokebros.android.pokemononline.poke.PokeEnums.Status;
 
 import de.marcreichelt.android.RealViewSwitcher;
 import android.app.Activity;
@@ -55,15 +56,10 @@ public class BattleActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
     	System.out.println("BattleActivity Created");
         super.onCreate(savedInstanceState);
-		if (getIntent().hasExtra("endBattle")) {
-			finish();
-			return;
-		}
         setContentView(R.layout.battle_pokeviewer);
 
-        Intent intent = new Intent(BattleActivity.this, NetworkService.class);
-        intent.putExtra("Type", "battle");
-        bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        bindService(new Intent(BattleActivity.this, NetworkService.class), connection,
+        		Context.BIND_AUTO_CREATE);
         
         realViewSwitcher = (RealViewSwitcher)findViewById(R.id.battlePokeSwitcher);
         //Capture out button from layout
@@ -124,12 +120,7 @@ public class BattleActivity extends Activity {
         	pokeListButtons[i].setOnClickListener(battleListener);
     }
 	
-	private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-                changeName(msg);
-        }
-    };
+	private Handler handler = new Handler();
     
 	private Runnable updateTimeTask = new Runnable() {
 		public void run() {
@@ -277,14 +268,20 @@ public class BattleActivity extends Activity {
 		});		
 	}
 	
-	public void updateButtons(final boolean enabled) {
+	public void updateButtons(final boolean allowSwitch, final boolean allowAttack, final boolean[] allowAttacks) {
 		runOnUiThread(new Runnable() {
 			public void run() {
 				for(int i = 0; i < 4; i++) {
-					attack[i].setEnabled(enabled);
+					if (allowAttack)
+						attack[i].setEnabled(allowAttacks[i]);
+					else
+						attack[i].setEnabled(false);
 				}
 				for(int i = 0; i < 6; i++) {
-					pokeListButtons[i].setEnabled(enabled);
+					if (netServ.battle.myTeam.pokes[i].status() != Status.Koed.poValue())
+						pokeListButtons[i].setEnabled(allowSwitch);
+					else
+						pokeListButtons[i].setEnabled(false);
 				}
 			}
 		});
@@ -297,8 +294,6 @@ public class BattleActivity extends Activity {
 					BattlePoke poke = netServ.battle.myTeam.pokes[i];
 					int resID = getResources().getIdentifier("pi" + poke.uID.pokeNum +
 							"_icon", "drawable", "com.pokebros.android.pokemononline");
-					//int resID = getResources().getIdentifier("p" + poke.uID.pokeNum +
-					//		"_front", "drawable", "com.pokebros.android.pokemononline");
 					pokeListIcons[i].setImageResource(resID);
 					pokeListNames[i].setText(poke.nick);
 					pokeListHPs[i].setText(poke.currentHP +
@@ -312,6 +307,11 @@ public class BattleActivity extends Activity {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			netServ =	((NetworkService.LocalBinder)service).getService();
 			netServ.herp();
+			if (netServ.battle.isOver) {
+	    		startActivity(new Intent(BattleActivity.this, ChatActivity.class));
+				finish();
+				return;
+			}
 
 			netServ.showNotification(BattleActivity.class, "Battle");
 			Toast.makeText(BattleActivity.this, "Service connected",
@@ -351,7 +351,7 @@ public class BattleActivity extends Activity {
 	        updateOppPoke();
 	        
 	        // Enable or disable buttons
-	        updateButtons(netServ.battle.clickable);
+	        updateButtons(netServ.battle.allowSwitch, netServ.battle.allowAttack, netServ.battle.allowAttacks);
 	        
 	    	// Start timer updating
 	        handler.postDelayed(updateTimeTask, 100);
@@ -364,35 +364,22 @@ public class BattleActivity extends Activity {
 		
 		public void onServiceDisconnected(ComponentName className) {
 			netServ.battleActivity = null;
+			if (netServ.battle.isOver)
+				netServ.battle = null;
 			netServ = null;
-			Toast.makeText(BattleActivity.this, "Service disconnected",
-					Toast.LENGTH_SHORT).show();
 		}
 	};
 	
-	@Override
-	public void onNewIntent(Intent intent) {
-		super.onNewIntent(intent);
-		if (intent.hasExtra("endBattle"))
-			finish();
+	public void end() {
+		runOnUiThread(new Runnable() { public void run() { BattleActivity.this.finish(); } } );
 	}
-    
+  
     @Override
     public void onDestroy() {
-    	if (netServ == null || !netServ.hasBattle())
-    		System.out.println("BATTLE ACTIVITY GONE");
-    	if (netServ != null)
-    		unbindService(connection);
+    	unbindService(connection);
     	super.onDestroy();
     }
 
-    public void changeName(Message msg) {
-    	if (msg != null && msg.obj != null) {
-    		TextView myView = (TextView)findViewById(R.id.nameA);
-    		myView.setText(msg.obj.toString());
-    	}
-    }
-    
     public OnClickListener battleListener = new OnClickListener() {
     	public void onClick(View v) {
     		int id = v.getId();
@@ -417,7 +404,7 @@ public class BattleActivity extends Activity {
     
     @Override
     public void onBackPressed() {
-    	if(netServ != null)
+    	if(netServ != null && !netServ.battle.isOver)
     		netServ.socket.sendMessage(netServ.battle.constructCancel(), Command.BattleMessage);
     }
     
@@ -437,10 +424,11 @@ public class BattleActivity extends Activity {
     		finish();
     		break;
     	case R.id.forfeit_yes:
-    		//TODO: implement forfeit
-    		Baos forfeit = new Baos();
-    		forfeit.putInt(netServ.battle.bID);
-    		netServ.socket.sendMessage(forfeit, Command.BattleFinished);
+    		if (netServ != null && !netServ.battle.isOver) {
+	    		Baos forfeit = new Baos();
+	    		forfeit.putInt(netServ.battle.bID);
+	    		netServ.socket.sendMessage(forfeit, Command.BattleFinished);
+    		}
     		break;
     	case R.id.forfeit_no:
     		break;

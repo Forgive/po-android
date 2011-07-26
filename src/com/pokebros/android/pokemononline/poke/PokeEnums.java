@@ -9,27 +9,34 @@ public class PokeEnums {
 		Female
 	}
 
-	public enum Status {
-		Fine, //= 0,
-		Paralysed, //= 1,
-		Asleep, //= 2,
-		Frozen, //= 3,
-		Burnt, //= 4,
-		Poisoned, //= 5,
-		Confused, //= 6,
-		Attracted, //= 7,
-		Wrapped, //= 8,
-		Nightmared, //= 9,
-		Tormented, //= 12,
-		Disabled, //= 13,
-		Drowsy, //= 14,
-		HealBlocked, //= 15,
-		Sleuthed, //= 17,
-		Seeded, //= 18,
-		Embargoed, //= 19,
-		Requiemed, //= 20,
-		Rooted, //= 21,
-		Koed //= 31
+	public enum Status { // XXX this is a monster
+		Fine { public final int poValue() { return 0; } },
+		Paralysed { public final int poValue() { return 1; } }, 
+		Asleep { public final int poValue() { return 2; } },
+		Frozen { public final int poValue() { return 3; } },
+		Burnt { public final int poValue() { return 4; } },
+		Poisoned { public final int poValue() { return 5; } },
+		Confused { public final int poValue() { return 6; } },
+		Attracted { public final int poValue() { return 7; } },
+		Wrapped { public final int poValue() { return 8; } },
+		Nightmared { public final int poValue() { return 9; } },
+		Tormented { public final int poValue() { return 12; } },
+		Disabled { public final int poValue() { return 13; } },
+		Drowsy { public final int poValue() { return 14; } },
+		HealBlocked { public final int poValue() { return 15; }  },
+		Sleuthed { public final int poValue() { return 17; } },
+		Seeded { public final int poValue() { return 18; } },
+		Embargoed { public final int poValue() { return 19; } },
+		Requiemed { public final int poValue() { return 20; } },
+		Rooted { public final int poValue() { return 21; } },
+		Koed  { public final int poValue() { return 31; } };
+		public abstract int poValue();
+		public final static Status[] poValues() {
+			Status[] values = new Status[Status.Koed.poValue()+1];
+			for (Status i : Status.values())
+				values[i.poValue()] = i;
+			return values;
+		}
 	}
 
 	public enum StatusFeeling {

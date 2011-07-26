@@ -241,13 +241,11 @@ public class NetworkService extends Service {
 			if (id1 == mePlayer.id() || id2 == mePlayer.id()) {
 				if (players.get(id1) != null && players.get(id2) != null && battleDesc < 3)
 					currentChannel.histDelta.append("\n" + players.get(id1).nick() + outcome + players.get(id2).nick() + ".");
-				// End the BattleActivity if you were in the battle that just ended
-				Intent in = new Intent(this, BattleActivity.class);
-                in.putExtra("endBattle", true);
-                in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(in);
-				battle = null;
-				showNotification(ChatActivity.class, "Chat");
+				if (!battle.gotEnd) {
+					battle.isOver = true;
+					if (battleActivity != null)
+						battleActivity.end();
+				}
 			}
 			break;
 		case SendPM:
@@ -288,8 +286,8 @@ public class NetworkService extends Service {
 				in = new Intent(this, BattleActivity.class);
 				in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				startActivity(in);
+				findingBattle = false;
 			}
-			findingBattle = false;
 			break;
 		case Login:
 			mePlayer = new PlayerInfo(msg);
@@ -319,7 +317,8 @@ public class NetworkService extends Service {
 	}
 	
     public void disconnect() {
-    	socket.close();
+    	if (socket.isConnected())
+    		socket.close();
     	this.stopForeground(true);
     	this.stopSelf();
     }

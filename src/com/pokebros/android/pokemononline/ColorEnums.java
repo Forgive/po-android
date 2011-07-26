@@ -48,7 +48,7 @@ public class ColorEnums {
 	public static class StatusColor {
 		private static String color;
 		public StatusColor(int status) {
-			switch (Status.values()[status]) {
+			switch (Status.poValues()[status]) {
 			case Koed: color = "#171ba>"; break;
 			case Fine: color = TypeColor.Normal.toString(); break;
 			case Paralysed: color = TypeColor.Electric.toString(); break;

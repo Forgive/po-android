@@ -80,9 +80,8 @@ public class ChatActivity extends Activity {
 		});
 
         
-        Intent intent = new Intent(ChatActivity.this, NetworkService.class);
-        bindService(intent, connection, Context.BIND_AUTO_CREATE);
-        //startService(intent);//new Intent(this, NetworkService.class));
+        bindService(new Intent(ChatActivity.this, NetworkService.class), connection,
+        		Context.BIND_AUTO_CREATE);
         chatInput = (EditText) findViewById(R.id.chatInput);
         chatInput.setOnKeyListener(new OnKeyListener() {
             public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -103,13 +102,20 @@ public class ChatActivity extends Activity {
             }
         });
 	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		if (netServ != null && (!netServ.hasBattle() || netServ.battle.isOver))
+			netServ.showNotification(ChatActivity.class, "Chat");
+	}
 
 	private ServiceConnection connection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			netServ = ((NetworkService.LocalBinder)service).getService();
 			Toast.makeText(ChatActivity.this, "Service connected",
                     Toast.LENGTH_SHORT).show();
-			if (!netServ.hasBattle())
+			if (!netServ.hasBattle() || netServ.battle.isOver)
 				netServ.showNotification(ChatActivity.class, "Chat");
 			
 			netServ.chatActivity = ChatActivity.this;
@@ -131,7 +137,8 @@ public class ChatActivity extends Activity {
         	Bundle extras = intent.getExtras();
         	showDialog(extras.getInt("dialog"), extras);
         	netServ.noteMan.cancel(extras.getInt("note"));
-    		getIntent().removeExtra("dialog");
+    		intent.removeExtra("dialog");
+    		setIntent(intent);
         }
 	}
 	
@@ -148,6 +155,11 @@ public class ChatActivity extends Activity {
 					playerAdapter.sortByNick();
 					//Load scrollback	
 					chatBox.setText(netServ.currentChannel.hist);
+					chatScroll.post(new Runnable() {
+						public void run() {
+							chatScroll.smoothScrollTo(0, chatBox.getMeasuredHeight());
+						}
+					});
 					updateChat();
 				}
 			}});
@@ -332,8 +344,6 @@ public class ChatActivity extends Activity {
 	
     @Override
     public void onDestroy() {
-    	if (netServ != null)
-    		netServ.chatActivity = null;
     	unbindService(connection);
     	super.onDestroy();
     }

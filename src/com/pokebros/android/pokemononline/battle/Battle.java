@@ -49,7 +49,9 @@ public class Battle {
 	public int bID = 0;
 	private static NetworkService netServ;
 	public BattleTeam myTeam;
-	public boolean clickable = true;
+	public boolean isOver = false, gotEnd = false;
+	public boolean allowSwitch, allowAttack;
+	public boolean[] allowAttacks = new boolean[4];
 	
 	ShallowBattlePoke[][] pokes = new ShallowBattlePoke[2][6];
 	ArrayList<Boolean> pokeAlive = new ArrayList<Boolean>();
@@ -144,6 +146,7 @@ public class Battle {
 		messCurs.moveToFirst();
 		String s = messCurs.getString(0);
 		messCurs.close();
+		mess.close();
 		datHelp.close();
 		
 		return s;
@@ -247,12 +250,12 @@ public class Battle {
 			};
 			byte status = msg.readByte();
 			boolean multipleTurns = msg.readBool();
-			if (status > Status.Fine.ordinal() && status < Status.Confused.ordinal()) {
+			if (status > Status.Fine.poValue() && status <= Status.Poisoned.poValue()) {
 				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(status) + 
 						currentPoke(player).nick + statusChangeMessages[status-1 +
-                        (status == Status.Poisoned.ordinal() && multipleTurns ? 1 : 0)] + "</font>"));
+                        (status == Status.Poisoned.poValue() && multipleTurns ? 1 : 0)] + "</font>"));
 			}
-			else if(status == Status.Confused.ordinal()){
+			else if(status == Status.Confused.poValue()){
 				/* The reason we need to handle confusion separately is because 
 				 * poisoned and badly poisoned are not separate values in the Status
 				 * enum, so confusion does not correspond to the same value in the above
@@ -262,12 +265,22 @@ public class Battle {
 			}
 			break;
 		case AbsStatusChange:
-			// TODO
+			byte poke = msg.readByte();
+			status = msg.readByte();
+			
+			if (poke < 0 || poke >= 6)
+				break;
+			
+			if (status != Status.Confused.poValue()) {
+				myTeam.pokes[poke].changeStatus(status);
+				// XXX PO updates mouseover here if poke is out
+			}
+			// XXX PO updates pokeballs here
 			break;
 		case AlreadyStatusMessage:
 			status = msg.readByte();
 			histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(status) +
-					currentPoke(player).nick + " is already " + Status.values()[status] +
+					currentPoke(player).nick + " is already " + Status.poValues()[status] +
 					".</font>"));
 			break;
 		case StatusMessage:
@@ -286,31 +299,31 @@ public class Battle {
 						currentPoke(player).nick + " snapped out of its confusion!</font>"));
 				break;
 			case PrevParalysed:
-				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Paralysed.ordinal())+
+				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Paralysed.poValue())+
 						currentPoke(player).nick + " is paralyzed! It can't move!</font>"));
 				break;
 			case FeelAsleep:
-				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Asleep.ordinal()) +
+				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Asleep.poValue()) +
 						currentPoke(player).nick + " is fast asleep!</font>"));
 				break;
 			case FreeAsleep:
-				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Asleep.ordinal()) +
+				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Asleep.poValue()) +
 						currentPoke(player).nick + " woke up!</font>"));
 				break;
 			case HurtBurn:
-				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Burnt.ordinal()) +
+				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Burnt.poValue()) +
 						currentPoke(player).nick + " is hurt by its burn!</font>"));
 				break;
 			case HurtPoison:
-				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Poisoned.ordinal()) +
+				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Poisoned.poValue()) +
 						currentPoke(player).nick + " is hurt by poison!</font>"));
 				break;
 			case PrevFrozen:
-				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Frozen.ordinal())+
+				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Frozen.poValue())+
 						currentPoke(player).nick + " is frozen solid!</font>"));
 				break;
 			case FreeFrozen:
-				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Frozen.ordinal()) +
+				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Frozen.poValue()) +
 						currentPoke(player).nick + " thawed out!</font>"));
 				break;
 			}
@@ -451,6 +464,8 @@ public class Battle {
 			else
 				histDelta.append(Html.fromHtml("<br><b><font color =" + QtColor.Blue +
 						players[player].nick() +" won the battle!</b></font>"));
+			gotEnd = true;
+			isOver = true;
 			break;
 		case BlankMessage:
 			// XXX This prints out a lot of extra space
@@ -473,20 +488,37 @@ public class Battle {
 		case TempPokeChange:
 			// TODO
 			break;
+		case MakeYourChoice:
+			// XXX is this correct behavior?
+			allowSwitch = true;
+			allowAttack = true;
+			if (netServ.battleActivity != null)
+				netServ.battleActivity.updateButtons(allowSwitch, allowAttack, allowAttacks);
+			break;
+		case OfferChoice:
+			byte numSlot = msg.readByte(); // XXX what is this?
+			allowSwitch = msg.readBool();
+			allowAttack = msg.readBool();
+			for (int i = 0; i < 4; i++) {
+					allowAttacks[i] = msg.readBool();
+					System.out.print("Allow attack " + i + ": ");
+					System.out.println(allowAttacks[i]);
+			}
+			if (netServ.battleActivity != null)
+				netServ.battleActivity.updateButtons(allowSwitch, allowAttack, allowAttacks);
+			break;
+		case CancelMove:
+			if (netServ.battleActivity != null)
+				netServ.battleActivity.updateButtons(allowSwitch, allowAttack, allowAttacks);
+			break;
 		case ClockStart:
 			remainingTime[player % 2] = msg.readShort();
 			startingTime[player % 2] = SystemClock.uptimeMillis();
 			ticking[player % 2] = true;
-			clickable = true;
-			if (netServ.battleActivity != null)
-				netServ.battleActivity.updateButtons(clickable);
 			break;
 		case ClockStop:
 			remainingTime[player % 2] = msg.readShort();
 			ticking[player % 2] = false;
-			clickable = false;
-			if (netServ.battleActivity != null)
-				netServ.battleActivity.updateButtons(clickable);
 			break;
 		case ChangeHp:
 			short newHP = msg.readShort();

@@ -76,4 +76,9 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 		return this;
 	}
 
+	public void close() {
+		myDB.close();
+		super.close();
+	}
+
 }

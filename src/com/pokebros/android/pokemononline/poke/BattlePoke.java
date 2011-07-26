@@ -4,6 +4,7 @@ import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
 import com.pokebros.android.pokemononline.SerializeBytes;
 import com.pokebros.android.pokemononline.battle.BattleMove;
+import com.pokebros.android.pokemononline.poke.PokeEnums.Status;
 
 // This class represents your poke during a battle.
 public class BattlePoke extends SerializeBytes {
@@ -78,5 +79,24 @@ public class BattlePoke extends SerializeBytes {
 		for(int i = 0; i < 6; i++)
 			b.write(DVs[i]);
 		return b;
+	}
+	
+	public void changeStatus(byte status) {
+		/* Clears past status */
+		fullStatus = fullStatus & ~( (1 << Status.Koed.poValue()) | 0x3F);
+		/* Adds new status */
+		fullStatus = fullStatus | ( 1 << status);
+	}
+	
+	public final int status() {
+		if ((fullStatus & (1 << Status.Koed.poValue())) != 0)
+			return Status.Koed.poValue();
+		// intlog2(fullStatus & 0x3F)
+		int x = fullStatus & 0x3F;
+		int i;
+		for (i = 0; x > 1; i++) {
+			x/=2;
+		}
+		return i;
 	}
 }

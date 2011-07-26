@@ -9,8 +9,8 @@ import com.pokebros.android.pokemononline.SerializeBytes;
 import com.pokebros.android.pokemononline.ColorEnums.TypeColor;
 
 public class BattleMove extends SerializeBytes {
-	byte currentPP = 0;
-	byte totalPP = 0;
+	public byte currentPP = 0;
+	public byte totalPP = 0;
 	short num = 0;
 	
 	public String toString() {
