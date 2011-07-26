@@ -48,7 +48,7 @@ public class ChatActivity extends Activity {
 	
 	/** Called when the activity is first created. */
 	@Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) { //TODO: Implement a Loading Screen
 		System.out.println("CREATED CHAT ACTIVITY");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat);
