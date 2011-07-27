@@ -51,6 +51,93 @@ public class BattleActivity extends Activity {
 	private NetworkService netServ = null;
 	int me, opp;
 	
+	class HpAnimator implements Runnable {
+		int i, goal;
+		boolean finished;
+
+		public void setGoal(int i, int goal) {
+			this.i = i;
+			this.goal = goal;
+			finished = false;
+		}
+		
+		public void run() {
+			while(goal < hpBars[i].getProgress()) {
+				runOnUiThread(new Runnable() {
+					public void run() {
+						hpBars[i].incrementProgressBy(-1);
+						hpBars[i].setText(hpBars[i].getProgress() + "%");
+						checkHpColor();
+					}
+				});
+				try {
+					Thread.sleep(40);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+				}
+			}
+			while(goal > hpBars[i].getProgress()) {
+				runOnUiThread(new Runnable() {
+					public void run() {
+						hpBars[i].incrementProgressBy(1);
+						hpBars[i].setText(hpBars[i].getProgress() + "%");
+						checkHpColor();
+					}
+				});
+				try {
+					Thread.sleep(40);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+				}
+			}
+		}
+
+		public void setHpBarToGoal() {
+			runOnUiThread(new Runnable() {
+				public void run() {
+					hpBars[i].setProgress(goal);
+					hpBars[i].setText(hpBars[i].getProgress() + "%");
+					checkHpColor();
+				}
+			});
+		}
+		
+		void checkHpColor() {
+			runOnUiThread(new Runnable() {
+				public void run() {
+					int progress = hpBars[i].getProgress();
+					Rect bounds = hpBars[i].getProgressDrawable().getBounds();
+					if(progress > 50)
+						hpBars[i].setProgressDrawable(getResources().getDrawable(R.drawable.green_progress));
+					else if(progress <= 50 && progress > 20)
+						hpBars[i].setProgressDrawable(getResources().getDrawable(R.drawable.yellow_progress));
+					else
+						hpBars[i].setProgressDrawable(getResources().getDrawable(R.drawable.red_progress));
+					hpBars[i].getProgressDrawable().setBounds(bounds);
+					hpUpdateHack(i);
+				}
+			});
+		}
+		
+		void hpUpdateHack(int i) {
+			int increment = (hpBars[i].getProgress() == 100) ? -1 : 1;
+			hpBars[i].incrementProgressBy(increment);
+			hpBars[i].incrementProgressBy(-1 * increment);
+		}
+		
+		boolean checkHpAnimationFinished(final int lifePercent) {
+			runOnUiThread(new Runnable() {
+				public void run() {
+					finished = (hpBars[i].getProgress() == lifePercent);
+				}
+			});
+			
+			return finished;
+		}
+	};
+	
+	public HpAnimator hpAnimator = new HpAnimator();
+	
 	 /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -146,56 +233,20 @@ public class BattleActivity extends Activity {
 			handler.postDelayed(this, 200);
 		}
 	};
-    
-	void hpUpdateHack(int i) {
-		hpBars[i].incrementProgressBy(1);
-		hpBars[i].incrementProgressBy(-1);
+
+	public boolean CheckHpAnimationFinished(final int player) {
+		return hpAnimator.checkHpAnimationFinished(netServ.battle.currentPoke(player).lifePercent);
 	}
 	
-	public Runnable animateHPBars = new Runnable() {
-		public void run() {
-			for(int i = 0; i < 2; i++) {
-				ShallowBattlePoke poke = netServ.battle.currentPoke(i);
-				if(poke != null) {
-					// Update the bars to reflect the current life percentage
-					if(hpBars[i].getProgress() > poke.lifePercent)
-						hpBars[i].incrementProgressBy(-1);
-					else if(hpBars[i].getProgress() < poke.lifePercent) {
-						hpBars[i].incrementProgressBy(1);
-					}
-					int progress = hpBars[i].getProgress();
-					
-					// Check to see if the bars need to change color, and do it
-					Rect bounds = hpBars[i].getProgressDrawable().getBounds();
-					if(progress > 50 && (lastHPs[i] <= 50)) {
-						hpBars[i].setProgressDrawable(getResources().getDrawable(R.drawable.green_progress));
-						hpUpdateHack(i);
-					}
-					else if((progress <= 50 && progress > 20) && (lastHPs[i] <= 20 || lastHPs[i] > 50)) {
-						hpBars[i].setProgressDrawable(getResources().getDrawable(R.drawable.yellow_progress));
-						hpUpdateHack(i);
-					}
-					else if((progress <= 20) && (lastHPs[i] > 20)) {
-						hpBars[i].setProgressDrawable(getResources().getDrawable(R.drawable.red_progress));
-						hpUpdateHack(i);
-					}
-					hpBars[i].getProgressDrawable().setBounds(bounds);
-					
-					// Update the percentage display on the hp bar
-					hpBars[i].setText(progress + "%");
-					lastHPs[i] = progress;
-				}
-			}
-			// See if the animation has finished yet
-			for(int i = 0; i < 2; i++) {
-				ShallowBattlePoke poke = netServ.battle.currentPoke(i);
-				if(poke != null) {
-					if(hpBars[i].getProgress() != poke.lifePercent)
-						handler.postDelayed(this, 100);
-				}
-			}
-		}
-	};
+	public void setHpBarTo(final int i, final int goal) {
+		hpAnimator.setGoal(i, goal);
+		hpAnimator.setHpBarToGoal();
+	}
+	
+	public void animateHpBarTo(final int i, final int goal) {
+		hpAnimator.setGoal(i, goal);
+		new Thread(hpAnimator).start();
+	}
 	
 	public void updateBattleInfo() {
 		runOnUiThread(new Runnable() {
@@ -225,7 +276,7 @@ public class BattleActivity extends Activity {
 				// Load correct moveset and name
 				if(poke != null) {
 					currentPokeNames[me].setText(poke.rnick);
-					hpBars[me].setProgress(netServ.battle.currentPoke(me).lifePercent);
+					setHpBarTo(me, poke.lifePercent);
 					BattlePoke battlePoke = netServ.battle.myTeam.pokes[0];
 			        for(int i = 0; i < 4; i++) {
 			        	attack[i].setText(battlePoke.moves[i].toString());
@@ -255,7 +306,7 @@ public class BattleActivity extends Activity {
 				// Load correct moveset and name
 				if(poke != null) {
 					currentPokeNames[opp].setText(poke.rnick);
-					hpBars[opp].setProgress(netServ.battle.currentPoke(opp).lifePercent);
+					setHpBarTo(opp, poke.lifePercent);
 					int resID;
 					if (poke.sub)
 						resID = getResources().getIdentifier("sub_front", "drawable", "com.pokebros.android.pokemononline");

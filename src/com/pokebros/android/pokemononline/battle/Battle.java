@@ -531,6 +531,17 @@ public class Battle {
 				currentPoke(player).lastKnownPercent = (byte)newHP;
 				currentPoke(player).lifePercent = (byte)newHP;
 			}
+			if(netServ.battleActivity != null) {
+				netServ.battleActivity.animateHpBarTo(player, currentPoke(player).lifePercent);
+			}
+			//Block until the hp animation has finished
+			while(!netServ.battleActivity.CheckHpAnimationFinished(player)) {
+				try {
+					Thread.sleep(20);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+				}
+			}
 			break;
 		case SpotShifts:
 			// TODO
