@@ -15,7 +15,6 @@ import android.text.SpannableStringBuilder;
 import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
 import com.pokebros.android.pokemononline.DataBaseHelper;
-import com.pokebros.android.pokemononline.EscapeHtml;
 import com.pokebros.android.pokemononline.NetworkService;
 import com.pokebros.android.pokemononline.ColorEnums.*;
 import com.pokebros.android.pokemononline.player.PlayerInfo;
@@ -56,10 +55,12 @@ public class Battle {
 	ShallowBattlePoke[][] pokes = new ShallowBattlePoke[2][6];
 	ArrayList<Boolean> pokeAlive = new ArrayList<Boolean>();
 	
-	public SpannableStringBuilder hist = new SpannableStringBuilder();
-	public SpannableStringBuilder histDelta = new SpannableStringBuilder();
+	public SpannableStringBuilder hist; //= new SpannableStringBuilder();
+	public SpannableStringBuilder histDelta; //= new SpannableStringBuilder();
 	
 	public Battle(BattleConf conf, BattleTeam team, PlayerInfo p1, PlayerInfo p2, int meID, int bID, NetworkService ns) {
+		hist = new SpannableStringBuilder();
+		histDelta = new SpannableStringBuilder();
 		netServ = ns;
 		mode = conf.mode; // singles, doubles, triples
 		this.bID = bID;
@@ -209,8 +210,8 @@ public class Battle {
 					"Start of turn " + turn + "</font></b>"));
 			break;
 		case Ko:
-			histDelta.append(Html.fromHtml("<br><b>" + new EscapeHtml(currentPoke(player).nick) +
-					" fainted!</b>"));
+			histDelta.append(Html.fromHtml("<br><b>" + NetworkService.escapeHtml((currentPoke(player).nick) +
+					" fainted!</b>")));
 			break;
 		case Hit:
 			byte number = msg.readByte();
@@ -350,8 +351,8 @@ public class Battle {
 			if (message.equals(""))
 				break;
 			histDelta.append(Html.fromHtml("<br><font color=" + (player !=0 ? "#5811b1>" : QtColor.Green) +
-					"<b>" + new EscapeHtml(players[player].nick()) + ": </b></font>" +
-					new EscapeHtml(message)));
+					"<b>" + NetworkService.escapeHtml(players[player].nick()) + ": </b></font>" +
+					NetworkService.escapeHtml(message)));
 			break;
 		case Spectating:
 			boolean come = msg.readBool();
@@ -363,7 +364,7 @@ public class Battle {
 			id = msg.readInt();
 			message = msg.readQString();
 			histDelta.append(Html.fromHtml("<br><font color=" + QtColor.Blue + netServ.players.get(id) + 
-					": " + new EscapeHtml(message)));
+					": " + NetworkService.escapeHtml(message)));
 			break;
 		case MoveMessage:
 			// TODO
@@ -375,19 +376,17 @@ public class Battle {
 			String q = msg.readQString();
 			
 			String s = queryDB("SELECT EFFECT" + part + " FROM [Move_message] WHERE _id = " + move);
-			String mmove = queryDB("SELECT name FROM [Moves] WHERE _id = " + move);
-			System.out.println("MOVE IS " + move + " WHICH MEANS " + mmove);
 			s = s.replaceAll("%s", currentPoke(player).nick);
 			s = s.replaceAll("%ts", players[me].nick());
 			s = s.replaceAll("%tf", players[opp].nick());
 			if(type  != -1) s = s.replaceAll("%t", Type.values()[type].toString());
 			if(foe   != -1) s = s.replaceAll("%f", currentPoke(foe).nick);
-			if(move  != -1) s = s.replaceAll("%m", mmove);//queryDB("SELECT name FROM [Moves] WHERE _id = " + move));
+			if(other  != -1) s = s.replaceAll("%m", queryDB("SELECT name FROM [Moves] WHERE _id = " + other));
 			s = s.replaceAll("%d", new Short(other).toString());
 			s = s.replaceAll("%q", q);
-			//s = s.replaceAll("%i", other);
-			//s = s.replaceAll("%a", );
-			//s = s.replaceAll("%p", replacement);
+			//s = s.replaceAll("%i", ItemName(other));
+			//s = s.replaceAll("%a", AbilityName(other));
+			//s = s.replaceAll("%p", PokemonName(other));
 			
 			histDelta.append("\n" + s);
 			break;
@@ -546,16 +545,13 @@ public class Battle {
 			}
 			if(netServ.battleActivity != null) {
 				netServ.battleActivity.animateHpBarTo(player, currentPoke(player).lifePercent);
-				
-				//Block until the hp animation has finished
-				while(!netServ.battleActivity.CheckHpAnimationFinished(player)) {
-					try {
-						Thread.sleep(20);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
+				// Block until the hp animation has finished
+				// Timeout after 10s
+				try {
+					synchronized (this) {
+						wait(10000);
 					}
-				netServ.battleActivity.updateCurrentPokeListEntry();
-				}
+				} catch (InterruptedException e) {}
 			}
 			break;
 		case SpotShifts:

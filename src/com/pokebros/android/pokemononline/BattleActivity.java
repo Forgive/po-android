@@ -93,6 +93,10 @@ public class BattleActivity extends Activity {
 					// TODO Auto-generated catch block
 				}
 			}
+			
+			synchronized (netServ.battle) {
+				netServ.battle.notify();
+			}
 		}
 
 		public void setHpBarToGoal() {
@@ -128,7 +132,7 @@ public class BattleActivity extends Activity {
 			hpBars[i].incrementProgressBy(-1 * increment);
 		}
 		
-		boolean checkHpAnimationFinished(final int lifePercent) {
+/*		boolean checkHpAnimationFinished(final int lifePercent) {
 			runOnUiThread(new Runnable() {
 				public void run() {
 					finished = (hpBars[i].getProgress() == lifePercent);
@@ -136,7 +140,7 @@ public class BattleActivity extends Activity {
 			});
 			
 			return finished;
-		}
+		}*/
 	};
 	
 	public HpAnimator hpAnimator = new HpAnimator();
@@ -237,9 +241,9 @@ public class BattleActivity extends Activity {
 		}
 	};
 
-	public boolean CheckHpAnimationFinished(final int player) {
+/*	public boolean CheckHpAnimationFinished(final int player) {
 		return hpAnimator.checkHpAnimationFinished(netServ.battle.currentPoke(player).lifePercent);
-	}
+	}*/
 	
 	public void setHpBarTo(final int i, final int goal) {
 		hpAnimator.setGoal(i, goal);

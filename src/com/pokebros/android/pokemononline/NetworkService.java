@@ -27,6 +27,13 @@ import android.os.RemoteException;
 import android.widget.Toast;
 
 public class NetworkService extends Service {
+	public static String escapeHtml(String toEscape) {
+		toEscape.replaceAll("&", "&amp;");
+		toEscape.replaceAll("<", "&lt;");
+		toEscape.replaceAll(">", "&gt;");
+		return toEscape;
+	}
+
 	private final IBinder binder = new LocalBinder();
 	protected int NOTIFICATION = 4356;
 	protected NotificationManager noteMan;
