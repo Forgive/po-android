@@ -289,7 +289,7 @@ public class BattleActivity extends Activity {
         if (poke.status() == Status.Koed.poValue())
         	res = "empty_sprite";
         else if (poke.sub)
-        	res = "sub_back";
+        	res = (front ? "sub_front" : "sub_back");
         else {
         	res = "p" + poke.uID.pokeNum + (poke.uID.subNum == 0 ? "" : "_" + poke.uID.subNum) +
         			(front ? "_front" : "_back");
