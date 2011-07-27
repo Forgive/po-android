@@ -1,6 +1,7 @@
 package com.pokebros.android.pokemononline;
 
 import com.pokebros.android.pokemononline.poke.BattlePoke;
+import com.pokebros.android.pokemononline.poke.PokeEnums.Gender;
 import com.pokebros.android.pokemononline.poke.ShallowBattlePoke;
 import com.pokebros.android.pokemononline.poke.PokeEnums.Status;
 
@@ -11,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -269,6 +271,37 @@ public class BattleActivity extends Activity {
 		});
 	}
 	
+	public void updatePokes(byte player) {
+		if (player == me)
+			updateMyPoke();
+		else
+			updateOppPoke();
+	}
+
+	private Drawable getSprite(ShallowBattlePoke poke, boolean front) {
+        String res;
+
+        if (poke.status() == Status.Koed.poValue())
+        	res = "empty_sprite";
+        else if (poke.sub)
+        	res = "sub_back";
+        else {
+        	res = "p" + poke.uID.pokeNum + (poke.uID.subNum == 0 ? "" : "_" + poke.uID.subNum) +
+        			(front ? "_front" : "_back");
+        	if (poke.gender != Gender.Female.ordinal())
+        		res = res + (poke.shiny ? "s" : "");
+        	else {
+        		if (getResources().getIdentifier(res + "f", "drawable", "com.pokebros.android.pokemononline") == 0)
+        			// No special female sprite
+        			res = res + (poke.shiny ? "s" : "");
+        		else
+        			res = res + "f" + (poke.shiny ? "s" : "");
+        	}
+        }
+        System.out.println("SPRITE: " + res);
+        return getResources().getDrawable(getResources().getIdentifier(res, "drawable", "com.pokebros.android.pokemononline"));
+	}
+
 	public void updateCurrentPokeListEntry() {
 		runOnUiThread(new Runnable() {
 			public void run() {
@@ -279,6 +312,7 @@ public class BattleActivity extends Activity {
 			}
 		});
 	}
+
 	public void updateMyPoke() {
 		runOnUiThread(new Runnable() {
 			public void run() {
@@ -296,13 +330,7 @@ public class BattleActivity extends Activity {
 					        		"drawable", "com.pokebros.android.pokemononline");
 			        	attack[i].setBackgroundResource(resID);
 			        }
-			        int resID;
-			        if (poke.sub)
-			        	resID = getResources().getIdentifier("sub_back", "drawable", "com.pokebros.android.pokemononline");
-			        else
-				        resID = getResources().getIdentifier("p" + poke.uID.pokeNum + "_back",
-				        		"drawable", "com.pokebros.android.pokemononline");
-					pokeSprites[me].setImageDrawable(getResources().getDrawable(resID));
+		        	pokeSprites[me].setImageDrawable(getSprite(poke, false));
 				}
 			}
 		});
@@ -317,13 +345,7 @@ public class BattleActivity extends Activity {
 				if(poke != null) {
 					currentPokeNames[opp].setText(poke.rnick);
 					setHpBarTo(opp, poke.lifePercent);
-					int resID;
-					if (poke.sub)
-						resID = getResources().getIdentifier("sub_front", "drawable", "com.pokebros.android.pokemononline");
-					else
-						resID = getResources().getIdentifier("p" + poke.uID.pokeNum + "_front",
-			        		"drawable", "com.pokebros.android.pokemononline");
-			        pokeSprites[opp].setImageDrawable(getResources().getDrawable(resID));
+		        	pokeSprites[opp].setImageDrawable(getSprite(poke, true));
 				}
 			}
 		});		
@@ -467,6 +489,10 @@ public class BattleActivity extends Activity {
     public void onBackPressed() {
     	if(netServ != null && !netServ.battle.isOver)
     		netServ.socket.sendMessage(netServ.battle.constructCancel(), Command.BattleMessage);
+    	else {
+    		startActivity(new Intent(BattleActivity.this, ChatActivity.class));
+    		finish();
+    	}
     }
     
     @Override

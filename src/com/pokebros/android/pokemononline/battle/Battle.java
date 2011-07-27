@@ -84,6 +84,12 @@ public class Battle {
 		
 		histDelta.append("Battle between " + players[me].nick() + 
 						" and " + players[opp].nick() + " started!");
+		
+		for (int i = 0; i < 2; i++) {
+			for (int j = 0; j < 6; j++) {
+				pokes[i][j] = new ShallowBattlePoke();
+			}
+		}
 	}
 	
 	public Boolean isMyTimerTicking() {
@@ -108,6 +114,10 @@ public class Battle {
 	
 	public ShallowBattlePoke currentPoke(int player) {
 		return pokes[player][0];
+	}
+	
+	public boolean isOut(Byte poke) {
+		return poke < numberOfSlots / 2;
 	}
 	
 	public Baos constructCancel() {
@@ -272,8 +282,11 @@ public class Battle {
 				break;
 			
 			if (status != Status.Confused.poValue()) {
-				myTeam.pokes[poke].changeStatus(status);
-				// XXX PO updates mouseover here if poke is out
+				pokes[player][poke].changeStatus(status);
+				if (player == me)
+					myTeam.pokes[poke].changeStatus(status);
+				if (isOut(poke) && netServ.battleActivity != null)
+					netServ.battleActivity.updatePokes(player);
 			}
 			// XXX PO updates pokeballs here
 			break;

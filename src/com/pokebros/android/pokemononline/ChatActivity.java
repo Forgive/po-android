@@ -215,6 +215,8 @@ public class ChatActivity extends Activity {
 	
 	@Override
 	public void onNewIntent(Intent intent) {
+		System.out.println("GOT INTENT AND IT HAS DIALOG");
+		System.out.println(intent.hasExtra("dialog"));
 		setIntent(intent);
 		if (netServ != null) // We are already connected to the service
 			handleDialogs(); // so handle dialogs here instead of onServiceConnected
