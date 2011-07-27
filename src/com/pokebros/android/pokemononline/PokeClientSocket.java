@@ -15,6 +15,7 @@ public class PokeClientSocket {
 	private ByteBuffer currentData = ByteBuffer.allocate(4096);
 	private LinkedList<Baos> msgs = new LinkedList<Baos>();
 	int remaining = 0, dataLen = 0;
+	private boolean isReadingLength = false;
 
 	public PokeClientSocket(String inIpAddr, int inPortNum)
 	{	
@@ -89,18 +90,32 @@ public class PokeClientSocket {
 		currentData.flip();
 		// Loop while there's still data in the buffer.
 		while(dataLen > 0) {
-			System.out.println("BROKEN?"); //TODO: ERIC: Make not broken please. This is cause of issue 3.
-			//System.out.println("dataLen: " + dataLen);
-			// If we're at the start of a new message,
-			// and the buffer has at least the size of the
-			// next message in it, start reading it in.
-			if(remaining == 0 && dataLen >= 2) {
-				remaining = currentData.getShort();
-				dataLen -= 2;
-				//System.out.println("Length: " + remaining);
+			// Read in the message's length.
+			if(isReadingLength) {
+				// If we're in the middle of reading length,
+				// read in the rest.
+				remaining |= currentData.get();
+				isReadingLength = false;
+				dataLen--;
 			}
-			// There's enough data in the buffer to finish the current message.
+			else {
+				// If we're at the start of a new message,
+				// and the buffer has at least the size of the
+				// next message in it, start reading it in.
+				if(remaining == 0 && dataLen >= 2) {
+					remaining = currentData.getShort();
+					dataLen -= 2;
+				}
+				else if(remaining == 0 && dataLen == 1) {
+					// If there's only one byte left, read in
+					// the top byte of the message length.
+					remaining = (((int)currentData.get()) << 8);
+					isReadingLength = true;
+					return;
+				}
+			}
 			if(remaining <= dataLen) {
+				// There's enough data in the buffer to finish the current message.
 				byte[] bytes = new byte[remaining];
 				currentData.get(bytes, 0, remaining);
 				thisMsg.write(bytes);
