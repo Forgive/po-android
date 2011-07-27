@@ -27,6 +27,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,7 +46,7 @@ public class BattleActivity extends Activity {
 	TextView[] pokeListAbilities = new TextView[6];
 	TextView[] pokeListHPs = new TextView[6];
 	ImageView[] pokeListIcons = new ImageView[6];
-	LinearLayout[] pokeListButtons = new LinearLayout[6];
+	RelativeLayout[] pokeListButtons = new RelativeLayout[6];
 	public TextView infoView;
 	public ScrollView infoScroll;
 	TextView[] names = new TextView[2];
@@ -185,12 +186,12 @@ public class BattleActivity extends Activity {
         pokeListAbilities[4] = (TextView)findViewById(R.id.ability5);
         pokeListAbilities[5] = (TextView)findViewById(R.id.ability6);
         
-        pokeListButtons[0] = (LinearLayout)findViewById(R.id.pokeViewLayout1);
-        pokeListButtons[1] = (LinearLayout)findViewById(R.id.pokeViewLayout2);
-        pokeListButtons[2] = (LinearLayout)findViewById(R.id.pokeViewLayout3);
-        pokeListButtons[3] = (LinearLayout)findViewById(R.id.pokeViewLayout4);
-        pokeListButtons[4] = (LinearLayout)findViewById(R.id.pokeViewLayout5);
-        pokeListButtons[5] = (LinearLayout)findViewById(R.id.pokeViewLayout6);
+        pokeListButtons[0] = (RelativeLayout)findViewById(R.id.pokeViewLayout1);
+        pokeListButtons[1] = (RelativeLayout)findViewById(R.id.pokeViewLayout2);
+        pokeListButtons[2] = (RelativeLayout)findViewById(R.id.pokeViewLayout3);
+        pokeListButtons[3] = (RelativeLayout)findViewById(R.id.pokeViewLayout4);
+        pokeListButtons[4] = (RelativeLayout)findViewById(R.id.pokeViewLayout5);
+        pokeListButtons[5] = (RelativeLayout)findViewById(R.id.pokeViewLayout6);
         
         pokeListIcons[0] = (ImageView)findViewById(R.id.pokeViewIcon1);
         pokeListIcons[1] = (ImageView)findViewById(R.id.pokeViewIcon2);
