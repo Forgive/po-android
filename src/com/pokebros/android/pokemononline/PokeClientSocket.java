@@ -89,6 +89,7 @@ public class PokeClientSocket {
 		currentData.flip();
 		// Loop while there's still data in the buffer.
 		while(dataLen > 0) {
+			System.out.println("BROKEN?"); //TODO: ERIC: Make not broken please. This is cause of issue 3.
 			//System.out.println("dataLen: " + dataLen);
 			// If we're at the start of a new message,
 			// and the buffer has at least the size of the
@@ -96,13 +97,6 @@ public class PokeClientSocket {
 			if(remaining == 0 && dataLen >= 2) {
 				remaining = currentData.getShort();
 				dataLen -= 2;
-
-				/* Java has only signed data types. We get around
-				 * this by shifting the most significant bits 8 places left
-				 * and then OR'ing it with the 8 least significant bits.
-				 * We need to AND the LSBs with 0xff to get rid of the
-				 * 1's of two's complement (sign is preserved when casting).
-				 */
 				//System.out.println("Length: " + remaining);
 			}
 			// There's enough data in the buffer to finish the current message.

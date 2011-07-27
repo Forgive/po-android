@@ -71,7 +71,7 @@ public class Battle {
 		players[0] = p1;
 		players[1] = p2;
 		// Figure out who's who
-		if(players[0].id() == meID) {
+		if(players[0].id == meID) {
 			me = 0;
 			opp = 1;
 		}

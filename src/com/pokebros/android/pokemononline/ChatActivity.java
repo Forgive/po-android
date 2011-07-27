@@ -1,6 +1,8 @@
 package com.pokebros.android.pokemononline;
 
 import java.util.Enumeration;
+
+import com.pokebros.android.pokemononline.player.BasicPlayerInfo;
 import com.pokebros.android.pokemononline.player.PlayerInfo;
 import com.pokebros.android.pokemononline.battle.ChallengeEnums.*;
 import de.marcreichelt.android.ChatRealViewSwitcher;
@@ -67,7 +69,7 @@ public class ChatActivity extends Activity {
 					long id) {
 				if (netServ.socket.isConnected())
 					netServ.socket.sendMessage(constructChallenge(ChallengeDesc.Sent.ordinal(), 
-							((PlayerListAdapter)parent.getAdapter()).getItem(position).id(), 
+							((PlayerListAdapter)parent.getAdapter()).getItem(position).id, 
 							Clauses.SleepClause.ordinal(), Mode.Singles.ordinal()), Command.ChallengeStuff);
 			}        	
 		});
@@ -168,10 +170,11 @@ public class ChatActivity extends Activity {
 			public void run() {
 				if (netServ.currentChannel != null) {
 					// Populate the player list
-					Enumeration<PlayerInfo> e = netServ.currentChannel.players.elements();
+					Enumeration<BasicPlayerInfo> e = netServ.currentChannel.players.elements();
 					playerAdapter.setNotifyOnChange(false);
-					while(e.hasMoreElements())
+					while(e.hasMoreElements()) {
 						playerAdapter.addPlayer(e.nextElement());
+					}
 					playerAdapter.setNotifyOnChange(true);
 					playerAdapter.sortByNick();
 					//Populate the Channel list
@@ -356,7 +359,7 @@ public class ChatActivity extends Activity {
 		return find;
     }
 
-	public void removePlayer(final PlayerInfo pi){
+	public void removePlayer(final BasicPlayerInfo pi){
 		runOnUiThread(new Runnable() {
 			public void run() {
             	playerAdapter.removePlayer(pi);
@@ -364,7 +367,7 @@ public class ChatActivity extends Activity {
 		});
 	}
 	
-	public void addPlayer(final PlayerInfo pi) {
+	public void addPlayer(final BasicPlayerInfo pi) {
 		runOnUiThread(new Runnable() {
 			public void run() {
             	playerAdapter.addPlayer(pi);

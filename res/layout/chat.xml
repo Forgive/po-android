@@ -54,9 +54,10 @@
   android:orientation="vertical"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
-  			android:background="@drawable/battle_border_dark">
-    <TextView android:layout_height="wrap_content" android:textSize="15sp" android:layout_width="wrap_content" android:layout_gravity="left" android:id="@+id/channellisttitle" android:text="@string/channel_list" android:textStyle="bold"></TextView>
+  android:background="@drawable/battle_border_dark">
+    <TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_gravity="left" android:id="@+id/channellisttitle" android:text="@string/channel_list" android:textStyle="bold" android:textSize="15sp"></TextView>
     <ListView android:layout_height="wrap_content" android:layout_width="match_parent" android:layout_gravity="left" android:id="@+id/channellisting"></ListView>
+    
 </LinearLayout>
 <!-- End Page 3 -->
 </de.marcreichelt.android.ChatRealViewSwitcher>

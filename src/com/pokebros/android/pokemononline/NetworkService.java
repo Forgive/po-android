@@ -9,6 +9,7 @@ import com.pokebros.android.pokemononline.battle.Battle;
 import com.pokebros.android.pokemononline.battle.BattleConf;
 import com.pokebros.android.pokemononline.battle.BattleTeam;
 import com.pokebros.android.pokemononline.battle.ChallengeEnums.ChallengeDesc;
+import com.pokebros.android.pokemononline.player.BasicPlayerInfo;
 import com.pokebros.android.pokemononline.player.FullPlayerInfo;
 import com.pokebros.android.pokemononline.player.PlayerInfo;
 
@@ -49,7 +50,7 @@ public class NetworkService extends Service {
 	}
 	
 	private FullPlayerInfo meLoginPlayer = new FullPlayerInfo();
-	private PlayerInfo mePlayer = new PlayerInfo();
+	public PlayerInfo mePlayer = new PlayerInfo();
 	protected Battle battle = null;// = new Battle();
 	
 	protected Hashtable<Integer, Channel> channels = new Hashtable<Integer, Channel>();
@@ -135,12 +136,9 @@ public class NetworkService extends Service {
     }
 	
 	public void handleMsg(Bais msg) {
-		/* Completely obvious way to "convert"
-		 * a byte into a value in an enum.
-		 */
-		int i = msg.read();
+		byte i = msg.readByte();
 		Command c = Command.values()[i];
-		System.out.println("Received: " + c.toString());
+		System.out.println("Received: " + c);
 		switch(c) {
 		case BattleList:
 		case JoinChannel:
@@ -162,7 +160,6 @@ public class NetworkService extends Service {
 				msg.read();
 				list.add(msg.readQString());
 			}
-			System.out.println(list.toString());
 			break;
 		case ChallengeStuff:
 			byte desc, mode;
@@ -196,11 +193,11 @@ public class NetworkService extends Service {
 		case ChannelsList:
 			int numChannels = msg.readInt();
 			for(int k = 0; k < numChannels; k++) {
-				int chanID = msg.readInt();
-				channels.put(chanID, new Channel(chanID, msg.readQString(), this));
+				int chanId = msg.readInt();
+				addChannel(msg.readQString(),chanId);
 			}
 			System.out.println(channels.toString());
-			currentChannel = channels.get(0);
+			//currentChannel = channels.get(0);
 			break;
 		case ChannelPlayers:
 			Channel ch = channels.get(msg.readInt());
@@ -208,7 +205,7 @@ public class NetworkService extends Service {
 			if(ch != null) {
 				for(int k = 0; k < numPlayers; k++) {
 					int id = msg.readInt();
-					ch.addPlayer(players.get(id));
+					ch.addPlayer(new BasicPlayerInfo(players.get(id)));
 				}
 			}
 			else
@@ -245,7 +242,7 @@ public class NetworkService extends Service {
 			default:
 				outcome = " had no idea against ";
 			}
-			if (id1 == mePlayer.id() || id2 == mePlayer.id()) {
+			if (id1 == mePlayer.id || id2 == mePlayer.id) {
 				if (players.get(id1) != null && players.get(id2) != null && battleDesc < 3)
 					currentChannel.histDelta.append("\n" + players.get(id1).nick() + outcome + players.get(id2).nick() + ".");
 				if (!battle.gotEnd) {
@@ -265,12 +262,9 @@ public class NetworkService extends Service {
 			socket.sendMessage(bb, Command.SendPM);
 			break;
 		case PlayersList:
-			while(msg.available() > 0) {
-				PlayerInfo p = new PlayerInfo(msg);
-				if(!players.containsKey(p.id()))
-					players.put(p.id(), p);
-			}
-			System.out.println("Trainer list: " + players.toString());
+			PlayerInfo p = new PlayerInfo(msg);
+			if(!players.containsKey(p.id))
+				players.put(p.id, p);
 			break;
 		case BattleMessage:
 			msg.readInt(); // currently support only one battle, unneeded
@@ -286,7 +280,7 @@ public class NetworkService extends Service {
 				BattleTeam team = new BattleTeam(msg);
 				// Start the battle
 				battle = new Battle(conf, team, players.get(conf.id(0)),
-					players.get(conf.id(1)), mePlayer.id(), bID, this);
+					players.get(conf.id(1)), mePlayer.id, bID, this);
 				currentChannel.histDelta.append("\nBattle between " + mePlayer.nick() + 
 					" and " + players.get(pID2).nick() + " started!");
 				Intent in;
@@ -298,7 +292,7 @@ public class NetworkService extends Service {
 			break;
 		case Login:
 			mePlayer = new PlayerInfo(msg);
-			players.put(mePlayer.id(), mePlayer);
+			players.put(mePlayer.id, mePlayer);
 			break;
 		case AskForPass:
 			// TODO
@@ -311,13 +305,10 @@ public class NetworkService extends Service {
 			}
 			break;
 		case AddChannel:
-			String chanName = msg.readQString();
-			int chanId = msg.readInt();
-			channels.put(chanId, new Channel(chanId, chanName, this));
-			chatActivity.addChannel(channels.get(chanId));
+			addChannel(msg.readQString(),msg.readInt());
 			break;
 		case RemoveChannel:
-			chanId = msg.readInt();
+			int chanId = msg.readInt();
 			chatActivity.removeChannel(channels.get(chanId));
 			channels.remove(chanId);
 			break;
@@ -337,6 +328,13 @@ public class NetworkService extends Service {
 	
 	protected void herp() {
 		System.out.println("HERP");
+	}
+	
+	protected void addChannel(String chanName, int chanId) {
+		Channel c = new Channel(chanId, chanName, this);
+		channels.put(chanId, c);
+		if(chatActivity != null)
+			chatActivity.addChannel(c);
 	}
 	
     public void disconnect() {

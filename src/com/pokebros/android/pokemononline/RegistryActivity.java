@@ -57,6 +57,8 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 	        }
         }
         
+        this.stopService(new Intent(RegistryActivity.this, NetworkService.class));
+        
         setContentView(R.layout.main);
          
 		ip = (EditText)RegistryActivity.this.findViewById(R.id.ipedit);

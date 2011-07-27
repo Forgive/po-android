@@ -292,6 +292,10 @@
 				android:layout_width="wrap_content"
 				android:layout_below="@id/item1"
 				android:layout_toRightOf="@id/pokeViewIcon1"/>
+			<TextView android:text="TextView" android:textColor="#000000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_alignParentRight="true" android:layout_alignParentTop="true" android:layout_marginRight="15dp" android:layout_marginTop="15dp" android:id="@+id/p1_attack2"></TextView>
+			<TextView android:text="TextView" android:textColor="#000000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_alignParentRight="true" android:layout_marginRight="15dp" android:layout_below="@+id/p1_attack1" android:layout_marginTop="5dp" android:id="@+id/p1_attack4"></TextView>
+			<TextView android:text="TextView" android:textColor="#000000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_toLeftOf="@+id/p1_attack2" android:layout_marginRight="10dp" android:layout_marginTop="15dp" android:id="@+id/p1_attack1"></TextView>
+			<TextView android:text="TextView" android:textColor="#000000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_below="@+id/p1_attack1" android:layout_toLeftOf="@+id/p1_attack4" android:layout_marginRight="10dp" android:layout_marginTop="5dp" android:id="@+id/p1_attack3"></TextView>
 	</RelativeLayout>
 	<RelativeLayout android:background="@drawable/battle_border_button"
 		android:layout_height="wrap_content" android:layout_weight="16"
@@ -343,6 +347,10 @@
 				android:textSize="11sp"
 				android:layout_width="wrap_content"
 				android:layout_below="@id/item2"/>
+			<TextView android:text="TextView" android:textColor="#000000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_alignParentRight="true" android:layout_alignParentTop="true" android:layout_marginRight="15dp" android:layout_marginTop="15dp" android:id="@+id/p2_attack2"></TextView>
+			<TextView android:text="TextView" android:textColor="#000000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_alignParentRight="true" android:layout_marginRight="15dp" android:layout_below="@+id/p2_attack1" android:layout_marginTop="5dp" android:id="@+id/p2_attack4"></TextView>
+			<TextView android:text="TextView" android:textColor="#000000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_toLeftOf="@+id/p2_attack2" android:layout_marginRight="10dp" android:layout_marginTop="15dp" android:id="@+id/p2_attack1"></TextView>
+			<TextView android:text="TextView" android:textColor="#000000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_below="@+id/p2_attack1" android:layout_toLeftOf="@+id/p2_attack4" android:layout_marginRight="10dp" android:layout_marginTop="5dp" android:id="@+id/p2_attack3"></TextView>
 	</RelativeLayout>
 	<RelativeLayout android:background="@drawable/battle_border_button"
 		android:layout_height="wrap_content" android:layout_weight="16"
@@ -394,6 +402,10 @@
 				android:textSize="11sp"
 				android:layout_width="wrap_content"
 				android:layout_below="@id/item3"/>
+			<TextView android:text="TextView" android:textColor="#000000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_alignParentRight="true" android:layout_alignParentTop="true" android:layout_marginRight="15dp" android:layout_marginTop="15dp" android:id="@+id/p3_attack2"></TextView>
+			<TextView android:text="TextView" android:textColor="#000000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_alignParentRight="true" android:layout_marginRight="15dp" android:layout_below="@+id/p3_attack1" android:layout_marginTop="5dp" android:id="@+id/p3_attack4"></TextView>
+			<TextView android:text="TextView" android:textColor="#000000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_toLeftOf="@+id/p3_attack2" android:layout_marginRight="10dp" android:layout_marginTop="15dp" android:id="@+id/p3_attack1"></TextView>
+			<TextView android:text="TextView" android:textColor="#000000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_below="@+id/p3_attack1" android:layout_toLeftOf="@+id/p3_attack4" android:layout_marginRight="10dp" android:layout_marginTop="5dp" android:id="@+id/p3_attack3"></TextView>
 	</RelativeLayout>
 	<RelativeLayout android:background="@drawable/battle_border_button"
 		android:layout_height="wrap_content" android:layout_weight="16"
@@ -445,6 +457,10 @@
 				android:textSize="11sp"
 				android:layout_width="wrap_content"
 				android:layout_below="@id/item4"/>
+			<TextView android:text="TextView" android:textColor="#000000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_alignParentRight="true" android:layout_alignParentTop="true" android:layout_marginRight="15dp" android:layout_marginTop="15dp" android:id="@+id/p4_attack2"></TextView>
+			<TextView android:text="TextView" android:textColor="#000000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_alignParentRight="true" android:layout_marginRight="15dp" android:layout_below="@+id/p4_attack1" android:layout_marginTop="5dp" android:id="@+id/p4_attack4"></TextView>
+			<TextView android:text="TextView" android:textColor="#000000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_toLeftOf="@+id/p4_attack2" android:layout_marginRight="10dp" android:layout_marginTop="15dp" android:id="@+id/p4_attack1"></TextView>
+			<TextView android:text="TextView" android:textColor="#000000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_below="@+id/p4_attack1" android:layout_toLeftOf="@+id/p4_attack4" android:layout_marginRight="10dp" android:layout_marginTop="5dp" android:id="@+id/p4_attack3"></TextView>
 	</RelativeLayout>
 	<RelativeLayout android:background="@drawable/battle_border_button"
 		android:layout_height="wrap_content" android:layout_weight="16"
@@ -496,6 +512,10 @@
 				android:textSize="11sp"
 				android:layout_width="wrap_content"
 				android:layout_below="@id/item5"/>
+			<TextView android:text="TextView" android:textColor="#000000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_alignParentRight="true" android:layout_alignParentTop="true" android:layout_marginRight="15dp" android:layout_marginTop="15dp" android:id="@+id/p5_attack2"></TextView>
+			<TextView android:text="TextView" android:textColor="#000000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_alignParentRight="true" android:layout_marginRight="15dp" android:layout_below="@+id/p5_attack1" android:layout_marginTop="5dp" android:id="@+id/p5_attack4"></TextView>
+			<TextView android:text="TextView" android:textColor="#000000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_toLeftOf="@+id/p5_attack2" android:layout_marginRight="10dp" android:layout_marginTop="15dp" android:id="@+id/p5_attack1"></TextView>
+			<TextView android:text="TextView" android:textColor="#000000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_below="@+id/p5_attack1" android:layout_toLeftOf="@+id/p5_attack4" android:layout_marginRight="10dp" android:layout_marginTop="5dp" android:id="@+id/p5_attack3"></TextView>
 	</RelativeLayout>
 	<RelativeLayout android:background="@drawable/battle_border_button"
 		android:layout_height="wrap_content" android:layout_weight="16"
@@ -547,6 +567,10 @@
 				android:textSize="11sp"
 				android:layout_width="wrap_content"
 				android:layout_below="@id/item6"/>
+			<TextView android:text="TextView" android:textColor="#000000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_alignParentRight="true" android:layout_alignParentTop="true" android:layout_marginRight="15dp" android:layout_marginTop="15dp" android:id="@+id/p6_attack2"></TextView>
+			<TextView android:text="TextView" android:textColor="#000000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_alignParentRight="true" android:layout_marginRight="15dp" android:layout_below="@+id/p6_attack1" android:layout_marginTop="5dp" android:id="@+id/p6_attack4"></TextView>
+			<TextView android:text="TextView" android:textColor="#000000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_toLeftOf="@+id/p6_attack2" android:layout_marginRight="10dp" android:layout_marginTop="15dp" android:id="@+id/p6_attack1"></TextView>
+			<TextView android:text="TextView" android:textColor="#000000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_below="@+id/p6_attack1" android:layout_toLeftOf="@+id/p6_attack4" android:layout_marginRight="10dp" android:layout_marginTop="5dp" android:id="@+id/p6_attack3"></TextView>
 	</RelativeLayout>
 </LinearLayout>
 <!-- END Page 2 -->
