@@ -2,7 +2,6 @@ package com.pokebros.android.pokemononline;
 
 import java.util.Enumeration;
 
-import com.pokebros.android.pokemononline.player.BasicPlayerInfo;
 import com.pokebros.android.pokemononline.player.PlayerInfo;
 import com.pokebros.android.pokemononline.battle.ChallengeEnums.*;
 import de.marcreichelt.android.ChatRealViewSwitcher;
@@ -170,7 +169,7 @@ public class ChatActivity extends Activity {
 			public void run() {
 				if (netServ.currentChannel != null) {
 					// Populate the player list
-					Enumeration<BasicPlayerInfo> e = netServ.currentChannel.players.elements();
+					Enumeration<PlayerInfo> e = netServ.currentChannel.players.elements();
 					playerAdapter.setNotifyOnChange(false);
 					while(e.hasMoreElements()) {
 						playerAdapter.addPlayer(e.nextElement());
@@ -359,7 +358,7 @@ public class ChatActivity extends Activity {
 		return find;
     }
 
-	public void removePlayer(final BasicPlayerInfo pi){
+	public void removePlayer(final PlayerInfo pi){
 		runOnUiThread(new Runnable() {
 			public void run() {
             	playerAdapter.removePlayer(pi);
@@ -367,7 +366,7 @@ public class ChatActivity extends Activity {
 		});
 	}
 	
-	public void addPlayer(final BasicPlayerInfo pi) {
+	public void addPlayer(final PlayerInfo pi) {
 		runOnUiThread(new Runnable() {
 			public void run() {
             	playerAdapter.addPlayer(pi);

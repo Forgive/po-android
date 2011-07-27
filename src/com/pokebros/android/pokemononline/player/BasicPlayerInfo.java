@@ -7,13 +7,6 @@ import com.pokebros.android.pokemononline.SerializeBytes;
 // Short version of a player, only nick and info
 public class BasicPlayerInfo extends SerializeBytes {
 	public String nick = "", info = "";
-	public int id;
-	
-	public BasicPlayerInfo(PlayerInfo p) {
-		nick = p.nick;
-		info = p.info;
-		id = p.id;
-	}
 	
 	public BasicPlayerInfo(Bais msg) {
 		nick = msg.readQString();

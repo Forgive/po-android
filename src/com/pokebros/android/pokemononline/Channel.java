@@ -5,7 +5,6 @@ import java.util.Hashtable;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 
-import com.pokebros.android.pokemononline.player.BasicPlayerInfo;
 import com.pokebros.android.pokemononline.player.PlayerInfo;
 
 public class Channel {
@@ -14,7 +13,7 @@ public class Channel {
 	protected int events = 0;
 	protected boolean isReadyToQuit = false;
 	
-	public Hashtable<Integer, BasicPlayerInfo> players = new Hashtable<Integer, BasicPlayerInfo>();
+	public Hashtable<Integer, PlayerInfo> players = new Hashtable<Integer, PlayerInfo>();
 	
 	public SpannableStringBuilder hist = new SpannableStringBuilder();
 	public SpannableStringBuilder histDelta = new SpannableStringBuilder();
@@ -34,7 +33,7 @@ public class Channel {
 		histDelta.append(Html.fromHtml("<i>Joined channel: <b>" + name + "</b></i>"));
 	}
 
-	public void addPlayer(BasicPlayerInfo p) {
+	public void addPlayer(PlayerInfo p) {
 		if(p != null) {
 			players.put(p.id, p);
 			
@@ -46,7 +45,7 @@ public class Channel {
 					"to channel " + name + ", ignoring");
 	}
 	
-	public void removePlayer(BasicPlayerInfo p){
+	public void removePlayer(PlayerInfo p){
 		if(p != null){
 			players.remove(p.id);
 			
@@ -62,7 +61,7 @@ public class Channel {
 			switch(c) {
 			case JoinChannel: {
 				PlayerInfo p = netServ.players.get(msg.readInt());
-				addPlayer(new BasicPlayerInfo(p));
+				addPlayer(p);
 				if (p.id == netServ.mePlayer.id) // We joined the channel
 					netServ.currentChannel = this;
 				break;
@@ -78,7 +77,7 @@ public class Channel {
 				break;
 			case LeaveChannel:
 				PlayerInfo p = netServ.players.get(msg.readInt());
-				removePlayer(new BasicPlayerInfo(p));
+				removePlayer(p);
 				break;
 			default:
 				break;

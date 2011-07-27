@@ -205,7 +205,7 @@ public class NetworkService extends Service {
 			if(ch != null) {
 				for(int k = 0; k < numPlayers; k++) {
 					int id = msg.readInt();
-					ch.addPlayer(new BasicPlayerInfo(players.get(id)));
+					ch.addPlayer(players.get(id));
 				}
 			}
 			else
