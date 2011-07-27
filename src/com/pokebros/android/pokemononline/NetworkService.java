@@ -337,6 +337,10 @@ public class NetworkService extends Service {
 			chatActivity.addChannel(c);
 	}
 	
+	protected void openRearrangeTeamDialog(){
+		
+	}
+	
     public void disconnect() {
     	if (socket.isConnected())
     		socket.close();

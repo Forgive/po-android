@@ -7,6 +7,8 @@ import com.pokebros.android.pokemononline.poke.PokeEnums.Status;
 
 import de.marcreichelt.android.RealViewSwitcher;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -19,10 +21,12 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.SystemClock;
 import android.text.SpannableStringBuilder;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -34,6 +38,8 @@ import android.widget.Toast;
 
 public class BattleActivity extends Activity {
 	public final static int SWIPE_TIME_THRESHOLD = 100;
+	
+	final int DIALOG_REARRANGE_TEAM_ID = 0;
 	
 	RealViewSwitcher realViewSwitcher;
 	TextProgressBar[] hpBars = new TextProgressBar[2];
@@ -526,8 +532,35 @@ public class BattleActivity extends Activity {
     	case R.id.forfeit_no:
     		break;
     	case R.id.draw:
+    		//TODO: Offer Draw
+    		showRearrangeTeamDialog();
     		break;
         }
         return true;
     }
+    
+    protected Dialog onCreateDialog(int id) {
+        AlertDialog dialog;
+        AlertDialog.Builder builder;
+        LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
+        switch(id) {
+        case DIALOG_REARRANGE_TEAM_ID:
+        	View layout = inflater.inflate(R.layout.rearrange_team_dialog, (LinearLayout)findViewById(R.id.rearrange_team_dialog));
+            builder = new AlertDialog.Builder(this);
+            builder.setView(layout);
+            dialog = builder.create();
+            break;
+        //case DIALOG_GAMEOVER_ID:
+            // do the work to define the another Dialog
+           // break;
+        default:
+            dialog = null;
+        }
+        return dialog;
+    }
+    
+    protected void showRearrangeTeamDialog() {
+    	showDialog(DIALOG_REARRANGE_TEAM_ID);
+    }
+    
 }

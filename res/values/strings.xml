@@ -29,4 +29,8 @@
     <string name="stat_speed">Speed</string>
     <string name="stat_accuracy">Accuracy</string>
     <string name="stat_evasion">Evasion</string>
+    <string name="rearrange_team_description">You can rearrange your team by dragging your Pokémon before the battle.</string>
+    <string name="rearrange_team_title">Rearrange Your Team</string>
+    <string name="foes_team">Foe\'s Team:</string>
+    <string name="your_team">Your Team:</string>
 </resources>

@@ -558,7 +558,7 @@ public class Battle {
 			// TODO
 			break;
 		default:
-			System.out.println("Battle command unimplemented");
+			System.out.println("Battle command unimplemented -- " + bc);
 			break;
 			
 		}
