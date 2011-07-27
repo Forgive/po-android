@@ -533,13 +533,15 @@ public class Battle {
 			}
 			if(netServ.battleActivity != null) {
 				netServ.battleActivity.animateHpBarTo(player, currentPoke(player).lifePercent);
-			}
-			//Block until the hp animation has finished
-			while(!netServ.battleActivity.CheckHpAnimationFinished(player)) {
-				try {
-					Thread.sleep(20);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
+				
+				//Block until the hp animation has finished
+				while(!netServ.battleActivity.CheckHpAnimationFinished(player)) {
+					try {
+						Thread.sleep(20);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+					}
+				netServ.battleActivity.updateCurrentPokeListEntry();
 				}
 			}
 			break;

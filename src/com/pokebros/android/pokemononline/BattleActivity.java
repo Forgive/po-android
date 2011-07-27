@@ -269,6 +269,16 @@ public class BattleActivity extends Activity {
 		});
 	}
 	
+	public void updateCurrentPokeListEntry() {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				BattlePoke battlePoke = netServ.battle.myTeam.pokes[0];
+				pokeListHPs[0].setText(battlePoke.currentHP +
+						"/" + battlePoke.totalHP);
+				// TODO: Status ailments and stuff
+			}
+		});
+	}
 	public void updateMyPoke() {
 		runOnUiThread(new Runnable() {
 			public void run() {
