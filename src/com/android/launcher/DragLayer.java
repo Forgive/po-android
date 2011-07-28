@@ -28,8 +28,6 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Paint;
-import android.graphics.PorterDuffColorFilter;
-import android.graphics.PorterDuff;
 import android.os.Debug;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -47,8 +45,6 @@ import android.widget.FrameLayout;
  */
 
 public class DragLayer extends FrameLayout implements DragController {
-    private static final int SCROLL_DELAY = 600;
-    private static final int SCROLL_ZONE = 20;
     private static final int ANIMATION_SCALE_UP_DURATION = 110;
 
     private static final boolean PROFILE_DRAWING_DURING_DRAG = false;
@@ -101,14 +97,6 @@ public class DragLayer extends FrameLayout implements DragController {
     // Faruq: utilize array list instead
     private ArrayList<DragListener> mListener = new ArrayList<DragListener>();
 
-    private static final int SCROLL_OUTSIDE_ZONE = 0;
-    private static final int SCROLL_WAITING_IN_ZONE = 1;
-
-    private static final int SCROLL_LEFT = 0;
-    private static final int SCROLL_RIGHT = 1;
-
-    private int mScrollState = SCROLL_OUTSIDE_ZONE;
-
     private View mIgnoredDropTarget;
 
     private RectF mDragRegion;
@@ -143,8 +131,6 @@ public class DragLayer extends FrameLayout implements DragController {
     int[] pids;
     Debug.MemoryInfo[] memoryInfoArray;
     float debugTextSize;
-    private float mOriginalX;
-    private float mOriginalY;
     
     /**
      * Used to create a new DragLayer from XML.
@@ -186,8 +172,6 @@ public class DragLayer extends FrameLayout implements DragController {
         }
         Rect r = mDragRect;
         r.set(v.getScrollX(), v.getScrollY(), 0, 0);
-        mOriginalX=mLastMotionX;
-        mOriginalY=mLastMotionY;
 
         offsetDescendantRectToMyCoords(v, r);
         mTouchOffsetX = mLastMotionX - r.left;
@@ -483,8 +467,7 @@ public class DragLayer extends FrameLayout implements DragController {
             invalidate(rect);
 
             mLastDropTarget = dropTarget;
-            
-            boolean inDragRegion = false;
+
             if (mDragRegion != null) {
                 final RectF region = mDragRegion;
                 final boolean inRegion = region.contains(ev.getRawX(), ev.getRawY());
@@ -492,7 +475,6 @@ public class DragLayer extends FrameLayout implements DragController {
                     mDragPaint = mTrashPaint;
                     mRectPaint.setColor(COLOR_TRASH);
                     mEnteredRegion = true;
-                    inDragRegion = true;
                 } else if (mEnteredRegion && !inRegion) {
                     mDragPaint = null;
                     mRectPaint.setColor(COLOR_NORMAL);

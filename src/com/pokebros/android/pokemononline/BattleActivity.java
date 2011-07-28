@@ -5,7 +5,7 @@ import java.util.Random;
 import com.android.launcher.DragController;
 import com.android.launcher.DragLayer;
 import com.android.launcher.DragSource;
-import com.android.launcher.DragSourceTarget;
+import com.android.launcher.PokeDragIcon;
 import com.pokebros.android.pokemononline.poke.BattlePoke;
 import com.pokebros.android.pokemononline.poke.PokeEnums.Gender;
 import com.pokebros.android.pokemononline.poke.ShallowBattlePoke;
@@ -45,11 +45,11 @@ import android.widget.Toast;
 
 public class BattleActivity extends Activity {
 	public final static int SWIPE_TIME_THRESHOLD = 100;
-	
+    final String packName = "com.pokebros.android.pokemononline";
+    
 	final int DIALOG_REARRANGE_TEAM_ID = 0;
 	
 	DragLayer mDragLayer;
-	DragSourceTarget mDragSource = new DragSourceTarget();
 	
 	RealViewSwitcher realViewSwitcher;
 	RelativeLayout battleView;
@@ -63,7 +63,7 @@ public class BattleActivity extends Activity {
 	TextView[] pokeListHPs = new TextView[6];
 	ImageView[] pokeListIcons = new ImageView[6];
 	
-	ImageView[] arrangePokeIcons = new ImageView[6];
+	PokeDragIcon[] arrangePokeIcons = new PokeDragIcon[6];
 	
 	RelativeLayout[] pokeListButtons = new RelativeLayout[6];
 	TextView[][] pokeListMovePreviews = new TextView[6][4];
@@ -167,7 +167,6 @@ public class BattleActivity extends Activity {
         resources = getResources();
         realViewSwitcher = (RealViewSwitcher)findViewById(R.id.battlePokeSwitcher);
         
-        final String packName = "com.pokebros.android.pokemononline";
         for(int i = 0; i < 4; i++) {
         	attack[i] = (Button)findViewById(resources.getIdentifier("attack" + (i+1), "id", packName));
         	attack[i].setOnClickListener(battleListener);
@@ -455,11 +454,17 @@ public class BattleActivity extends Activity {
     	super.onDestroy();
     }
 
-    public OnLongClickListener battleLongListener = new OnLongClickListener() {
+    public OnLongClickListener dialogListener = new OnLongClickListener() {
     	public boolean onLongClick(View v) {
-    		Object dragInfo = v;
-    		System.out.println("LONGCLICKCKCKCKC");
-    	    mDragLayer.startDrag (v, mDragSource, dragInfo, DragController.DRAG_ACTION_MOVE);
+    		int id = v.getId();
+    		for(int i = 0; i < 6; i++) {
+    			if(id == arrangePokeIcons[i].getId()) {
+    				Object dragInfo = v;
+    				System.out.println("CLICKCKCKC");
+    				mDragLayer.startDrag(v, arrangePokeIcons[i], dragInfo, DragController.DRAG_ACTION_MOVE);
+    				break;
+    			}
+    		}
     		return true;
     	}
     };
@@ -467,10 +472,11 @@ public class BattleActivity extends Activity {
     public OnClickListener battleListener = new OnClickListener() {
     	public void onClick(View v) {
     		int id = v.getId();
-    		// Check for attacks
+    		// Check to see if click was on attack button
     		for(int i = 0; i < 4; i++)
     			if(id == attack[i].getId())
     				netServ.socket.sendMessage(netServ.battle.constructAttack((byte)i), Command.BattleMessage);
+    		// Check to see if click was on pokelist button
     		for(int i = 0; i < 6; i++) {
     			if(id == pokeListButtons[i].getId()) {
     				netServ.socket.sendMessage(netServ.battle.constructSwitch((byte)i), Command.BattleMessage);
@@ -542,9 +548,10 @@ public class BattleActivity extends Activity {
             dialog = builder.create();
             
         	mDragLayer = (DragLayer)layout.findViewById(R.id.drag_my_poke);
-            
-            arrangePokeIcons[0] = (ImageView)layout.findViewById(R.id.my_arrange_poke1);
-            arrangePokeIcons[0].setOnLongClickListener(battleLongListener);
+            for(int i = 0; i < 6; i++){
+            	arrangePokeIcons[i] = (PokeDragIcon)layout.findViewById(resources.getIdentifier("my_arrange_poke" + (i+1), "id", packName));
+            	arrangePokeIcons[i].setOnLongClickListener(dialogListener);
+            }
             break;
         //case DIALOG_GAMEOVER_ID:
             // do the work to define the another Dialog
