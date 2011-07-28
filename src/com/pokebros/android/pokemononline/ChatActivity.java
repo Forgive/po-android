@@ -15,10 +15,12 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.InputType;
 import android.text.SpannableStringBuilder;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnKeyListener;
 import android.widget.AdapterView;
@@ -105,6 +107,15 @@ public class ChatActivity extends Activity {
         bindService(new Intent(ChatActivity.this, NetworkService.class), connection,
         		Context.BIND_AUTO_CREATE);
         chatInput = (EditText) findViewById(R.id.chatInput);
+		// Hide the soft-keyboard when the activity is created
+        chatInput.setInputType(InputType.TYPE_NULL);
+        chatInput.setOnTouchListener(new View.OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+				chatInput.setInputType(InputType.TYPE_CLASS_TEXT);
+				chatInput.onTouchEvent(event);
+				return true;
+			}
+		});
         chatInput.setOnKeyListener(new OnKeyListener() {
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 // If the event is a key-down event on the "enter" button

@@ -15,10 +15,12 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -62,9 +64,18 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
         setContentView(R.layout.main);
          
 		ip = (EditText)RegistryActivity.this.findViewById(R.id.ipedit);
+		// Hide the soft-keyboard when the activity is created
+		ip.setInputType(InputType.TYPE_NULL);
+		ip.setOnTouchListener(new View.OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+				ip.setInputType(InputType.TYPE_CLASS_TEXT);
+				ip.onTouchEvent(event);
+				return true;
+			}
+		});
 		port = (EditText)RegistryActivity.this.findViewById(R.id.portedit);
-		ip.setText("141.212.112.54");
-		port.setText("5080");
+		ip.append("141.212.112.54");
+		port.append("5080");
 		
 		//Capture out button from layout
         Button conbutton = (Button)findViewById(R.id.connectbutton);
@@ -81,8 +92,10 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 			public void onItemClick(AdapterView<?> parent, View view, int position,
 					long id) {
 				Server server = (Server)parent.getItemAtPosition(position);
-				ip.setText(server.ip);
-				port.setText(String.valueOf(server.port));
+				ip.setText("");
+				port.setText("");
+				ip.append(server.ip);
+				port.append(String.valueOf(server.port));
 			}        	
 		});
         
