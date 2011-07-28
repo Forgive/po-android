@@ -1,6 +1,10 @@
 package com.pokebros.android.pokemononline;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedList;
@@ -285,11 +289,23 @@ public class NetworkService extends Service {
 		case AskForPass:
 			// TODO
 			String salt = msg.readQString();
-			// XXX not sure what the point of the second half is supposed to check
+			// XXX not sure what the second half is supposed to check
 			// from analyze.cpp : 265 of PO's code
 			if (salt.length() < 6) { //  || strlen((" " + salt).toUtf8().data()) < 7)
 				System.out.println("Protocol Error: The server requires insecure authentication");
 				break;
+			}
+			String s = new String("derp"); // Get from dialog
+			MessageDigest md5;
+			try {
+				md5 = MessageDigest.getInstance("MD5");
+				Baos hashPass = new Baos();
+				hashPass.putString(toHex(md5.digest((toHex(md5.digest(s.getBytes("ISO-8859-1"))) + salt).getBytes("ISO-8859-1"))));
+				socket.sendMessage(hashPass, Command.AskForPass);
+			} catch (NoSuchAlgorithmException nsae) {
+				System.out.println("Attempting authentication threw an exception: " + nsae);
+			} catch (UnsupportedEncodingException uee) {
+				System.out.println("Attempting authentication threw an exception: " + uee);
 			}
 			break;
 		case AddChannel:
@@ -312,6 +328,10 @@ public class NetworkService extends Service {
 			battleActivity.updateBattleInfo();
 		if (chatActivity != null && currentChannel != null && currentChannel.histDelta.length() != 0)
 			chatActivity.updateChat();
+	}
+	
+	private String toHex(byte[] b) {
+		return String.format("%x", new BigInteger(b));
 	}
 	
 	protected void herp() {
