@@ -1,5 +1,9 @@
 package com.pokebros.android.pokemononline;
 
+import com.android.launcher.DragController;
+import com.android.launcher.DragLayer;
+import com.android.launcher.DragSource;
+import com.android.launcher.DragSourceTarget;
 import com.pokebros.android.pokemononline.poke.BattlePoke;
 import com.pokebros.android.pokemononline.poke.PokeEnums.Gender;
 import com.pokebros.android.pokemononline.poke.ShallowBattlePoke;
@@ -28,6 +32,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -41,6 +46,9 @@ public class BattleActivity extends Activity {
 	
 	final int DIALOG_REARRANGE_TEAM_ID = 0;
 	
+	DragLayer mDragLayer;
+	DragSourceTarget mDragSource = new DragSourceTarget();
+	
 	RealViewSwitcher realViewSwitcher;
 	TextProgressBar[] hpBars = new TextProgressBar[2];
 	int[] lastHPs = new int[2];
@@ -52,6 +60,9 @@ public class BattleActivity extends Activity {
 	TextView[] pokeListAbilities = new TextView[6];
 	TextView[] pokeListHPs = new TextView[6];
 	ImageView[] pokeListIcons = new ImageView[6];
+	
+	ImageView[] arrangePokeIcons = new ImageView[6];
+	
 	RelativeLayout[] pokeListButtons = new RelativeLayout[6];
 	public TextView infoView;
 	public ScrollView infoScroll;
@@ -138,7 +149,7 @@ public class BattleActivity extends Activity {
 			hpBars[i].incrementProgressBy(-1 * increment);
 		}
 		
-/*		boolean checkHpAnimationFinished(final int lifePercent) {
+/*		boolean checkHpAnimationFinished(final int lifePercent) { //XXX comment block
 			runOnUiThread(new Runnable() {
 				public void run() {
 					finished = (hpBars[i].getProgress() == lifePercent);
@@ -338,7 +349,7 @@ public class BattleActivity extends Activity {
 			        	String type = battlePoke.moves[i].getTypeString();
 			        	type = type.toLowerCase();
 			        	int resID = getResources().getIdentifier(type + "_type_button",
-					        		"drawable", "com.pokebros.android.pokemononline");
+					      		"drawable", "com.pokebros.android.pokemononline");
 			        	attack[i].setBackgroundResource(resID);
 			        }
 		        	pokeSprites[me].setImageDrawable(getSprite(poke, false));
@@ -478,6 +489,15 @@ public class BattleActivity extends Activity {
     	super.onDestroy();
     }
 
+    public OnLongClickListener battleLongListener = new OnLongClickListener() {
+    	public boolean onLongClick(View v) {
+    		Object dragInfo = v;
+    		System.out.println("LONGCLICKCKCKCKC");
+    	    mDragLayer.startDrag (v, mDragSource, dragInfo, DragController.DRAG_ACTION_MOVE);
+    		return true;
+    	}
+    };
+    
     public OnClickListener battleListener = new OnClickListener() {
     	public void onClick(View v) {
     		int id = v.getId();
@@ -543,15 +563,22 @@ public class BattleActivity extends Activity {
     }
     
     protected Dialog onCreateDialog(int id) {
-        AlertDialog dialog;
+    	AlertDialog dialog;
         AlertDialog.Builder builder;
         LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
         switch(id) {
         case DIALOG_REARRANGE_TEAM_ID:
         	View layout = inflater.inflate(R.layout.rearrange_team_dialog, (LinearLayout)findViewById(R.id.rearrange_team_dialog));
-            builder = new AlertDialog.Builder(this);
+
+        	
+        	builder = new AlertDialog.Builder(this); 
             builder.setView(layout);
             dialog = builder.create();
+            
+        	mDragLayer = (DragLayer)layout.findViewById(R.id.drag_my_poke);
+            
+            arrangePokeIcons[0] = (ImageView)layout.findViewById(R.id.my_arrange_poke1);
+            arrangePokeIcons[0].setOnLongClickListener(battleLongListener);
             break;
         //case DIALOG_GAMEOVER_ID:
             // do the work to define the another Dialog

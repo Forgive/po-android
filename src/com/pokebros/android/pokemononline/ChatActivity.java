@@ -8,6 +8,7 @@ import de.marcreichelt.android.ChatRealViewSwitcher;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -43,6 +44,8 @@ public class ChatActivity extends Activity {
 	private PlayerListAdapter playerAdapter;
 	private ChannelListAdapter channelAdapter;
 	
+	//public ProgressDialog progressDialog;
+	
 	private NetworkService netServ = null;
 	private ScrollView chatScroll;
 	private TextView chatBox;
@@ -53,7 +56,11 @@ public class ChatActivity extends Activity {
 	@Override
     public void onCreate(Bundle savedInstanceState) { //TODO: Implement a Loading Screen
 		System.out.println("CREATED CHAT ACTIVITY");
-        super.onCreate(savedInstanceState);
+		
+		//progressDialog = ProgressDialog.show(ChatActivity.this, "","Loading. Please wait...", true);
+		//progressDialog.setCancelable(true);
+		
+		super.onCreate(savedInstanceState);
         setContentView(R.layout.chat);
         chatScroll = (ScrollView) findViewById(R.id.chatScroll);
     	chatBox = (TextView)findViewById(R.id.chatBox);
@@ -139,6 +146,7 @@ public class ChatActivity extends Activity {
 	@Override
 	public void onResume() {
 		super.onResume();
+		chatViewSwitcher.setCurrentScreen(1);
 		if (netServ != null && (!netServ.hasBattle() || netServ.battle.isOver))
 			netServ.showNotification(ChatActivity.class, "Chat");
 		checkChallenges();

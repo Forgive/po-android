@@ -8,4 +8,5 @@
 <color name="yellowStart">#ffffea00</color>  
 <color name="yellowMid">#ffe6d200</color>  
 <color name="yellowEnd">#ffc4b400</color>
+<color name="snag_callout_color">#808080</color>
 </resources>
