@@ -1,5 +1,7 @@
 package com.pokebros.android.pokemononline;
 
+import java.util.Random;
+
 import com.android.launcher.DragController;
 import com.android.launcher.DragLayer;
 import com.android.launcher.DragSource;
@@ -17,12 +19,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.Resources;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.os.SystemClock;
 import android.text.SpannableStringBuilder;
 import android.view.LayoutInflater;
@@ -30,7 +33,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.widget.Button;
@@ -50,11 +52,11 @@ public class BattleActivity extends Activity {
 	DragSourceTarget mDragSource = new DragSourceTarget();
 	
 	RealViewSwitcher realViewSwitcher;
+	RelativeLayout battleView;
 	TextProgressBar[] hpBars = new TextProgressBar[2];
-	int[] lastHPs = new int[2];
 	TextView[] currentPokeNames = new TextView[2];
-	public Button[] attack = new Button[4];
-	public TextView[] timers = new TextView[2];
+	Button[] attack = new Button[4];
+	TextView[] timers = new TextView[2];
 	TextView[] pokeListNames = new TextView[6];
 	TextView[] pokeListItems = new TextView[6];
 	TextView[] pokeListAbilities = new TextView[6];
@@ -64,10 +66,12 @@ public class BattleActivity extends Activity {
 	ImageView[] arrangePokeIcons = new ImageView[6];
 	
 	RelativeLayout[] pokeListButtons = new RelativeLayout[6];
-	public TextView infoView;
-	public ScrollView infoScroll;
+	TextView[][] pokeListMovePreviews = new TextView[6][4];
+	TextView infoView;
+	ScrollView infoScroll;
 	TextView[] names = new TextView[2];
 	ImageView[] pokeSprites = new ImageView[2];
+	Resources resources;
 	private NetworkService netServ = null;
 	int me, opp;
 	
@@ -132,32 +136,20 @@ public class BattleActivity extends Activity {
 					int progress = hpBars[i].getProgress();
 					Rect bounds = hpBars[i].getProgressDrawable().getBounds();
 					if(progress > 50)
-						hpBars[i].setProgressDrawable(getResources().getDrawable(R.drawable.green_progress));
+						hpBars[i].setProgressDrawable(resources.getDrawable(R.drawable.green_progress));
 					else if(progress <= 50 && progress > 20)
-						hpBars[i].setProgressDrawable(getResources().getDrawable(R.drawable.yellow_progress));
+						hpBars[i].setProgressDrawable(resources.getDrawable(R.drawable.yellow_progress));
 					else
-						hpBars[i].setProgressDrawable(getResources().getDrawable(R.drawable.red_progress));
+						hpBars[i].setProgressDrawable(resources.getDrawable(R.drawable.red_progress));
 					hpBars[i].getProgressDrawable().setBounds(bounds);
-					hpUpdateHack(i);
+					// XXX the hp bars won't display properly unless I do this. Spent many hours trying
+					// to figure out why
+					int increment = (hpBars[i].getProgress() == 100) ? -1 : 1;
+					hpBars[i].incrementProgressBy(increment);
+					hpBars[i].incrementProgressBy(-1 * increment);
 				}
 			});
 		}
-		
-		void hpUpdateHack(int i) {
-			int increment = (hpBars[i].getProgress() == 100) ? -1 : 1;
-			hpBars[i].incrementProgressBy(increment);
-			hpBars[i].incrementProgressBy(-1 * increment);
-		}
-		
-/*		boolean checkHpAnimationFinished(final int lifePercent) { //XXX comment block
-			runOnUiThread(new Runnable() {
-				public void run() {
-					finished = (hpBars[i].getProgress() == lifePercent);
-				}
-			});
-			
-			return finished;
-		}*/
 	};
 	
 	public HpAnimator hpAnimator = new HpAnimator();
@@ -172,63 +164,30 @@ public class BattleActivity extends Activity {
         bindService(new Intent(BattleActivity.this, NetworkService.class), connection,
         		Context.BIND_AUTO_CREATE);
         
+        resources = getResources();
         realViewSwitcher = (RealViewSwitcher)findViewById(R.id.battlePokeSwitcher);
-        //Capture out button from layout
-        attack[0] = (Button)findViewById(R.id.attack1);
-        attack[1] = (Button)findViewById(R.id.attack2);
-        attack[2] = (Button)findViewById(R.id.attack3);
-        attack[3] = (Button)findViewById(R.id.attack4);
         
-        pokeListNames[0] = (TextView)findViewById(R.id.pokename1);
-        pokeListNames[1] = (TextView)findViewById(R.id.pokename2);
-        pokeListNames[2] = (TextView)findViewById(R.id.pokename3);
-        pokeListNames[3] = (TextView)findViewById(R.id.pokename4);
-        pokeListNames[4] = (TextView)findViewById(R.id.pokename5);
-        pokeListNames[5] = (TextView)findViewById(R.id.pokename6);
-
-        pokeListHPs[0] = (TextView)findViewById(R.id.hp1);
-        pokeListHPs[1] = (TextView)findViewById(R.id.hp2);
-        pokeListHPs[2] = (TextView)findViewById(R.id.hp3);
-        pokeListHPs[3] = (TextView)findViewById(R.id.hp4);
-        pokeListHPs[4] = (TextView)findViewById(R.id.hp5);
-        pokeListHPs[5] = (TextView)findViewById(R.id.hp6);
-
-        pokeListItems[0] = (TextView)findViewById(R.id.item1);
-        pokeListItems[1] = (TextView)findViewById(R.id.item2);
-        pokeListItems[2] = (TextView)findViewById(R.id.item3);
-        pokeListItems[3] = (TextView)findViewById(R.id.item4);
-        pokeListItems[4] = (TextView)findViewById(R.id.item5);
-        pokeListItems[5] = (TextView)findViewById(R.id.item6);
-
-        pokeListAbilities[0] = (TextView)findViewById(R.id.ability1);
-        pokeListAbilities[1] = (TextView)findViewById(R.id.ability2);
-        pokeListAbilities[2] = (TextView)findViewById(R.id.ability3);
-        pokeListAbilities[3] = (TextView)findViewById(R.id.ability4);
-        pokeListAbilities[4] = (TextView)findViewById(R.id.ability5);
-        pokeListAbilities[5] = (TextView)findViewById(R.id.ability6);
-        
-        pokeListButtons[0] = (RelativeLayout)findViewById(R.id.pokeViewLayout1);
-        pokeListButtons[1] = (RelativeLayout)findViewById(R.id.pokeViewLayout2);
-        pokeListButtons[2] = (RelativeLayout)findViewById(R.id.pokeViewLayout3);
-        pokeListButtons[3] = (RelativeLayout)findViewById(R.id.pokeViewLayout4);
-        pokeListButtons[4] = (RelativeLayout)findViewById(R.id.pokeViewLayout5);
-        pokeListButtons[5] = (RelativeLayout)findViewById(R.id.pokeViewLayout6);
-        
-        pokeListIcons[0] = (ImageView)findViewById(R.id.pokeViewIcon1);
-        pokeListIcons[1] = (ImageView)findViewById(R.id.pokeViewIcon2);
-        pokeListIcons[2] = (ImageView)findViewById(R.id.pokeViewIcon3);
-        pokeListIcons[3] = (ImageView)findViewById(R.id.pokeViewIcon4);
-        pokeListIcons[4] = (ImageView)findViewById(R.id.pokeViewIcon5);
-        pokeListIcons[5] = (ImageView)findViewById(R.id.pokeViewIcon6);
+        final String packName = "com.pokebros.android.pokemononline";
+        for(int i = 0; i < 4; i++) {
+        	attack[i] = (Button)findViewById(resources.getIdentifier("attack" + (i+1), "id", packName));
+        	attack[i].setOnClickListener(battleListener);
+        }
+        for(int i = 0; i < 6; i++) {
+        	pokeListNames[i] = (TextView)findViewById(resources.getIdentifier("pokename" + (i+1), "id", packName));
+        	pokeListHPs[i] = (TextView)findViewById(resources.getIdentifier("hp" + (i+1), "id", packName));
+        	pokeListItems[i] = (TextView)findViewById(resources.getIdentifier("item" + (i+1), "id", packName));
+        	pokeListAbilities[i] = (TextView)findViewById(resources.getIdentifier("ability" + (i+1), "id", packName));
+        	pokeListButtons[i] = (RelativeLayout)findViewById(resources.getIdentifier("pokeViewLayout" + (i+1), "id", packName));
+        	pokeListButtons[i].setOnClickListener(battleListener);
+        	pokeListIcons[i] = (ImageView)findViewById(resources.getIdentifier("pokeViewIcon" + (i+1), "id", packName));
+        	
+        	for(int j = 0; j < 4; j++)
+        		pokeListMovePreviews[i][j] = (TextView)findViewById(resources.getIdentifier("p" + (i+1) + "_attack" + (j+1), "id", packName));
+        }
         
         infoView = (TextView)findViewById(R.id.infoWindow);
         infoScroll = (ScrollView)findViewById(R.id.infoScroll);
-        //Register the onCLick listener with the implementation above
-        for(int i = 0; i < 4; i++) {
-        	attack[i].setOnClickListener(battleListener);
-        }
-        for(int i = 0; i < 6; i++)
-        	pokeListButtons[i].setOnClickListener(battleListener);
+        battleView = (RelativeLayout)findViewById(R.id.battleScreen);
     }
 	
 	private Handler handler = new Handler();
@@ -257,10 +216,6 @@ public class BattleActivity extends Activity {
 			handler.postDelayed(this, 200);
 		}
 	};
-
-/*	public boolean CheckHpAnimationFinished(final int player) {
-		return hpAnimator.checkHpAnimationFinished(netServ.battle.currentPoke(player).lifePercent);
-	}*/
 	
 	public void setHpBarTo(final int i, final int goal) {
 		hpAnimator.setGoal(i, goal);
@@ -313,7 +268,7 @@ public class BattleActivity extends Activity {
         	if (poke.gender != Gender.Female.ordinal())
         		res = res + (poke.shiny ? "s" : "");
         	else {
-        		if (getResources().getIdentifier(res + "f", "drawable", "com.pokebros.android.pokemononline") == 0)
+        		if (resources.getIdentifier(res + "f", "drawable", "com.pokebros.android.pokemononline") == 0)
         			// No special female sprite
         			res = res + (poke.shiny ? "s" : "");
         		else
@@ -321,7 +276,7 @@ public class BattleActivity extends Activity {
         	}
         }
         System.out.println("SPRITE: " + res);
-        return getResources().getDrawable(getResources().getIdentifier(res, "drawable", "com.pokebros.android.pokemononline"));
+        return resources.getDrawable(resources.getIdentifier(res, "drawable", "com.pokebros.android.pokemononline"));
 	}
 
 	public void updateCurrentPokeListEntry() {
@@ -348,7 +303,7 @@ public class BattleActivity extends Activity {
 			        	attack[i].setText(battlePoke.moves[i].toString());
 			        	String type = battlePoke.moves[i].getTypeString();
 			        	type = type.toLowerCase();
-			        	int resID = getResources().getIdentifier(type + "_type_button",
+			        	int resID = resources.getIdentifier(type + "_type_button",
 					      		"drawable", "com.pokebros.android.pokemononline");
 			        	attack[i].setBackgroundResource(resID);
 			        }
@@ -397,17 +352,29 @@ public class BattleActivity extends Activity {
 			public void run() {
 				for (int i = 0; i < 6; i++) {
 					BattlePoke poke = netServ.battle.myTeam.pokes[i];
-					int resID = getResources().getIdentifier("pi" + poke.uID.pokeNum +
+					int resID = resources.getIdentifier("pi" + poke.uID.pokeNum +
 							(poke.uID.subNum == 0 ? "" : "_" + poke.uID.subNum) +
 							"_icon", "drawable", "com.pokebros.android.pokemononline");
 					if (resID == 0)
-						resID = getResources().getIdentifier("pi" + poke.uID.pokeNum + "_icon",
+						resID = resources.getIdentifier("pi" + poke.uID.pokeNum + "_icon",
 								"drawable", "com.pokebros.android.pokemononline");
 					pokeListIcons[i].setImageResource(resID);
 					pokeListNames[i].setText(poke.nick);
 					pokeListHPs[i].setText(poke.currentHP +
 							"/" + poke.totalHP);
+					for (int j = 0; j < 4; j++) {
+						pokeListMovePreviews[i][j].setText(poke.moves[j].toString());
+						pokeListMovePreviews[i][j].getBackground().setColorFilter(poke.moves[j].getColor(), PorterDuff.Mode.DARKEN);
+					}
 				}
+			}
+		});
+	}
+
+	public void switchToPokeViewer() {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				realViewSwitcher.snapToScreen(1);
 			}
 		});
 	}
@@ -425,6 +392,8 @@ public class BattleActivity extends Activity {
 			netServ.showNotification(BattleActivity.class, "Battle");
 			Toast.makeText(BattleActivity.this, "Service connected",
                     Toast.LENGTH_SHORT).show();
+
+			battleView.setBackgroundResource(resources.getIdentifier("bg" + netServ.battle.background, "drawable", "com.pokebros.android.pokemononline"));
 			
 			// Set the UI to display the correct info
 	        me = netServ.battle.me;
@@ -447,9 +416,6 @@ public class BattleActivity extends Activity {
 	        
 	        pokeSprites[me] = (ImageView)findViewById(R.id.pokeSpriteB);
 	        pokeSprites[opp] = (ImageView)findViewById(R.id.pokeSpriteA);
-	        
-	        for(int i = 0; i < 2; i++)
-	        	lastHPs[i] = netServ.battle.currentPoke(i).lifePercent;
 	        
 	        // Load scrollback
 	        infoView.setText(netServ.battle.hist);

@@ -2,6 +2,7 @@ package com.pokebros.android.pokemononline.battle;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 import java.lang.Math;
 
 
@@ -51,6 +52,7 @@ public class Battle {
 	public boolean isOver = false, gotEnd = false;
 	public boolean allowSwitch, allowAttack;
 	public boolean[] allowAttacks = new boolean[4];
+	public int background;
 	
 	ShallowBattlePoke[][] pokes = new ShallowBattlePoke[2][6];
 	ArrayList<Boolean> pokeAlive = new ArrayList<Boolean>();
@@ -82,6 +84,8 @@ public class Battle {
 		
 		remainingTime[0] = remainingTime[1] = 5*60;
 		ticking[0] = ticking[1] = false;
+		
+		background = new Random().nextInt(11) + 1;
 		
 		histDelta.append("Battle between " + players[me].nick() + 
 						" and " + players[opp].nick() + " started!");
@@ -212,6 +216,8 @@ public class Battle {
 		case Ko:
 			histDelta.append(Html.fromHtml("<br><b>" + NetworkService.escapeHtml((currentPoke(player).nick) +
 					" fainted!</b>")));
+			if(netServ.battleActivity != null && player == me)
+				netServ.battleActivity.switchToPokeViewer();
 			break;
 		case Hit:
 			byte number = msg.readByte();
