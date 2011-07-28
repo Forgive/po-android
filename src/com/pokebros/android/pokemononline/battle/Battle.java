@@ -373,6 +373,7 @@ public class Battle {
 			byte type = msg.readByte();
 			byte foe = msg.readByte();
 			short other = msg.readShort();
+			System.out.println("OTHER IS: " + other);
 			String q = msg.readQString();
 			
 			String s = queryDB("SELECT EFFECT" + part + " FROM [Move_message] WHERE _id = " + move);
@@ -386,7 +387,7 @@ public class Battle {
 			s = s.replaceAll("%q", q);
 			//s = s.replaceAll("%i", ItemName(other));
 			//s = s.replaceAll("%a", AbilityName(other));
-			//s = s.replaceAll("%p", PokemonName(other));
+			if(other !=-1) s = s.replaceAll("%p", queryDB("SELECT name FROM [Pokemons] WHERE Num = " + other));
 			
 			histDelta.append("\n" + s);
 			break;
@@ -557,6 +558,9 @@ public class Battle {
 		case SpotShifts:
 			// TODO
 			break;
+		case RearrangeTeam:
+			// TODO
+			ShallowShownTeam t = new ShallowShownTeam(msg);
 		default:
 			System.out.println("Battle command unimplemented -- " + bc);
 			break;

@@ -389,6 +389,9 @@ public class BattleActivity extends Activity {
 					int resID = getResources().getIdentifier("pi" + poke.uID.pokeNum +
 							(poke.uID.subNum == 0 ? "" : "_" + poke.uID.subNum) +
 							"_icon", "drawable", "com.pokebros.android.pokemononline");
+					if (resID == 0)
+						resID = getResources().getIdentifier("pi" + poke.uID.pokeNum + "_icon",
+								"drawable", "com.pokebros.android.pokemononline");
 					pokeListIcons[i].setImageResource(resID);
 					pokeListNames[i].setText(poke.nick);
 					pokeListHPs[i].setText(poke.currentHP +
