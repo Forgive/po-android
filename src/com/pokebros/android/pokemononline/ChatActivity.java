@@ -130,6 +130,7 @@ public class ChatActivity extends Activity {
 		super.onResume();
 		if (netServ != null && (!netServ.hasBattle() || netServ.battle.isOver))
 			netServ.showNotification(ChatActivity.class, "Chat");
+		checkChallenges();
 	}
 
 	private ServiceConnection connection = new ServiceConnection() {
@@ -144,7 +145,7 @@ public class ChatActivity extends Activity {
 			
 			populateUI();
 
-	        handleDialogs();
+	        checkChallenges();
         }
 		
 		public void onServiceDisconnected(ComponentName className) {
@@ -152,17 +153,6 @@ public class ChatActivity extends Activity {
 			netServ = null;
 		}
 	};
-	
-	public void handleDialogs() {
-		Intent intent = getIntent();
-        if (intent.hasExtra("dialog")) {
-        	Bundle extras = intent.getExtras();
-        	showDialog(extras.getInt("dialog"), extras);
-        	netServ.noteMan.cancel(extras.getInt("note"));
-    		intent.removeExtra("dialog");
-    		setIntent(intent);
-        }
-	}
 	
 	public void populateUI() {
 		runOnUiThread(new Runnable() {
@@ -215,21 +205,18 @@ public class ChatActivity extends Activity {
 			}});
 	}
 	
-	@Override
-	public void onNewIntent(Intent intent) {
-		System.out.println("GOT INTENT AND IT HAS DIALOG");
-		System.out.println(intent.hasExtra("dialog"));
-		setIntent(intent);
-		if (netServ != null) // We are already connected to the service
-			handleDialogs(); // so handle dialogs here instead of onServiceConnected
+	public void notifyChallenge() {
+		runOnUiThread(new Runnable() { public void run() { checkChallenges(); } } );
 	}
 	
-	public void showDialogFromService(ChatDialog id, final Bundle args) {
-		runOnUiThread(new Runnable() {
-			public void run() {
-				showDialog(0, args);
+	private void checkChallenges() {
+		if (netServ != null) {
+			IncomingChallenge challenge = netServ.challenges.poll();
+			if (challenge != null) {
+				ChatActivity.this.showDialog(ChatDialog.Challenge.ordinal(), challenge.toBundle());
+				netServ.noteMan.cancel(IncomingChallenge.note);
 			}
-		});
+		}
 	}
 	
 	@Override
@@ -255,6 +242,7 @@ public class ChatActivity extends Activity {
 					// onPrepareDialog() but we should use it if we have complex
 					// dialogs that only need to change a little
 					removeDialog(ChatDialog.Challenge.ordinal());
+					checkChallenges();
 				}
 			})
 			.setNegativeButton(this.getString(R.string.decline), new DialogInterface.OnClickListener() {
@@ -268,6 +256,7 @@ public class ChatActivity extends Activity {
 										args.getByte("mode")),
 										Command.ChallengeStuff);
 					removeDialog(ChatDialog.Challenge.ordinal());
+					checkChallenges();
 				}
 			});
 			break;

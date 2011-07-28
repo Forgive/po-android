@@ -3,6 +3,7 @@ package com.pokebros.android.pokemononline;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.LinkedList;
 
 import com.pokebros.android.pokemononline.ChatActivity.ChatDialog;
 import com.pokebros.android.pokemononline.battle.Battle;
@@ -44,6 +45,7 @@ public class NetworkService extends Service {
 	boolean findingBattle = false;
 	public ChatActivity chatActivity = null;
 	public BattleActivity battleActivity = null;
+	public LinkedList<IncomingChallenge> challenges = new LinkedList<IncomingChallenge>();
 	
 	public boolean hasBattle() {
 		return battle != null;
@@ -162,31 +164,17 @@ public class NetworkService extends Service {
 			}
 			break;
 		case ChallengeStuff:
-			byte desc, mode;
-			int opponent, clauses;
-			desc = msg.readByte();
-			opponent = msg.readInt();
-			clauses = msg.readInt();
-			mode = msg.readByte();
-			System.out.println("Desc: " + desc + " Opponent: " + opponent + " Clauses: " + clauses + " Mode: " + mode);
-			if (desc == ChallengeDesc.Sent.ordinal() && players.get(opponent) != null) {
-				// XXX this currently only supports one challenge at a time
-				String oppName = players.get(opponent).nick();
-				Intent intent = new Intent(this, ChatActivity.class);
-				intent.putExtra("dialog", ChatDialog.Challenge.ordinal());
-				intent.putExtra("note", NOTIFICATION+1);
-				intent.putExtra("opponent", opponent);
-				intent.putExtra("oppName", oppName);
-				intent.putExtra("clauses", clauses);
-				intent.putExtra("mode", mode);
-				System.out.println("OPP " + opponent + " WHO IS " + oppName);
+			IncomingChallenge challenge = new IncomingChallenge(msg);
+			if (challenge.validate(players)) {
+				challenges.addFirst(challenge);
 				if (chatActivity != null && chatActivity.hasWindowFocus()) {
-					chatActivity.showDialogFromService(ChatDialog.Challenge, intent.getExtras());
+					chatActivity.notifyChallenge();
 				} else {
-					Notification note = new Notification(R.drawable.icon, "You've been challenged by " + oppName + "!", System.currentTimeMillis());
+					Notification note = new Notification(R.drawable.icon, "You've been challenged by " + challenge.oppName + "!", System.currentTimeMillis());
 			        note.setLatestEventInfo(this, "POAndroid", "You've been challenged!", PendingIntent.getActivity(this, 0,
-			                intent, Intent.FLAG_ACTIVITY_NEW_TASK));
-					noteMan.notify(NOTIFICATION+1, note);
+			                new Intent(NetworkService.this, ChatActivity.class), Intent.FLAG_ACTIVITY_NEW_TASK));
+			        noteMan.cancel(IncomingChallenge.note);
+					noteMan.notify(IncomingChallenge.note, note);
 				}
 			}
 			break;
