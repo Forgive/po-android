@@ -249,7 +249,7 @@ public class DragLayer extends FrameLayout implements DragController {
             mBitmapOffsetY = (mDrawHeight-height) / 2;
         }
         if (dragAction == DRAG_ACTION_MOVE) {
-            v.setVisibility(GONE);
+            v.setVisibility(INVISIBLE);
         }
 
         mDragPaint = null;
@@ -505,17 +505,18 @@ public class DragLayer extends FrameLayout implements DragController {
         DropTarget dropTarget = findDropTarget((int) x, (int) y, coordinates);
 
         if (dropTarget != null) {
-            dropTarget.onDragExit(mDragSource, coordinates[0], coordinates[1],
-                    (int) mTouchOffsetX, (int) mTouchOffsetY, mDragInfo);
-            if (dropTarget.acceptDrop(mDragSource, coordinates[0], coordinates[1],
-                    (int) mTouchOffsetX, (int) mTouchOffsetY, mDragInfo)) {
-                boolean success = false;
-                mDragSource.onDropCompleted((View) dropTarget, success);
-                return true;
-            } else {
-                mDragSource.onDropCompleted((View) dropTarget, false);
-                return true;
-            }
+        	dropTarget.onDragExit(mDragSource, coordinates[0], coordinates[1],
+        			(int) mTouchOffsetX, (int) mTouchOffsetY, mDragInfo);
+        	if (dropTarget.acceptDrop(mDragSource, coordinates[0], coordinates[1],
+        			(int) mTouchOffsetX, (int) mTouchOffsetY, mDragInfo)) {
+        		dropTarget.onDrop(mDragSource, coordinates[0], coordinates[1],
+        				(int) mTouchOffsetX, (int) mTouchOffsetY, mDragInfo);
+        		mDragSource.onDropCompleted((View) dropTarget, true);
+        		return true;
+        	} else {
+        		mDragSource.onDropCompleted((View) dropTarget, false);
+        		return true;
+        	}
         }
         return false;
     }

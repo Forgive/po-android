@@ -6,21 +6,21 @@ import com.pokebros.android.pokemononline.SerializeBytes;
 import com.pokebros.android.pokemononline.poke.ShallowShownPoke;
 
 public class ShallowShownTeam extends SerializeBytes {
-	ShallowShownPoke[] pokemons = new ShallowShownPoke[6];
+	public ShallowShownPoke[] pokes = new ShallowShownPoke[6];
 	
 	public ShallowShownTeam(Bais msg) {
 		for (int i = 0; i < 6; i++)
-			pokemons[i] = new ShallowShownPoke(msg);
+			pokes[i] = new ShallowShownPoke(msg);
 	}
 	
 	public ShallowShownPoke poke(int index) {
-		return pokemons[index];
+		return pokes[index];
 	}
 
 	public Baos serializeBytes() {
 		Baos b = new Baos();
 		for(int i = 0; i < 6; i++)
-			b.putBaos(pokemons[i]);
+			b.putBaos(pokes[i]);
 		return b;
 	}
 }

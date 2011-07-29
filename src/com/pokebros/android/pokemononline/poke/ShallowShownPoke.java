@@ -15,11 +15,6 @@ public class ShallowShownPoke extends SerializeBytes {
 		level = msg.readByte();
 		gender = msg.readByte();
 		item = msg.readBool();
-
-		/*item = b.item != 0;
-		uID = b.uID;
-		level = b.level;
-		gender = b.gender;*/
 	}
 	
 	public Baos serializeBytes() {

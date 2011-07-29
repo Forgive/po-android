@@ -14,8 +14,10 @@ public class BattleTeam extends SerializeBytes {
 	int[] indexes = new int[6];
 	
 	public BattleTeam(Bais msg) {
-		for(int i = 0; i < 6; i++)
+		for(int i = 0; i < 6; i++) {
 			pokes[i] = new BattlePoke(msg);
+			pokes[i].teamNum = (byte)i;
+		}
 	}
 	
 	public Baos serializeBytes() {

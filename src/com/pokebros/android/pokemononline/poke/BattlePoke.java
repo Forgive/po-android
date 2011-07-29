@@ -18,6 +18,7 @@ public class BattlePoke extends ShallowBattlePoke {
 	byte originalStatusCount = 0;
 	byte nature = 0;
 	byte happiness = 0;
+	public byte teamNum;
 	
 	short[] stats = new short[5];
 	public BattleMove[] moves = new BattleMove[4];

@@ -7,6 +7,8 @@ import com.android.launcher.DragLayer;
 import com.android.launcher.DragSource;
 import com.android.launcher.PokeDragIcon;
 import com.pokebros.android.pokemononline.poke.BattlePoke;
+import com.pokebros.android.pokemononline.poke.ShallowShownPoke;
+import com.pokebros.android.pokemononline.poke.UniqueID;
 import com.pokebros.android.pokemononline.poke.PokeEnums.Gender;
 import com.pokebros.android.pokemononline.poke.ShallowBattlePoke;
 import com.pokebros.android.pokemononline.poke.PokeEnums.Status;
@@ -32,9 +34,11 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -63,7 +67,8 @@ public class BattleActivity extends Activity {
 	TextView[] pokeListHPs = new TextView[6];
 	ImageView[] pokeListIcons = new ImageView[6];
 	
-	PokeDragIcon[] arrangePokeIcons = new PokeDragIcon[6];
+	PokeDragIcon[] myArrangePokeIcons = new PokeDragIcon[6];
+	ImageView[] oppArrangePokeIcons = new ImageView[6];
 	
 	RelativeLayout[] pokeListButtons = new RelativeLayout[6];
 	TextView[][] pokeListMovePreviews = new TextView[6][4];
@@ -72,7 +77,7 @@ public class BattleActivity extends Activity {
 	TextView[] names = new TextView[2];
 	ImageView[] pokeSprites = new ImageView[2];
 	Resources resources;
-	private NetworkService netServ = null;
+	public NetworkService netServ = null;
 	int me, opp;
 	
 	class HpAnimator implements Runnable {
@@ -346,18 +351,22 @@ public class BattleActivity extends Activity {
 		});
 	}
 	
+	private Drawable getIcon(UniqueID uid) {
+		int resID = resources.getIdentifier("pi" + uid.pokeNum +
+				(uid.subNum == 0 ? "" : "_" + uid.subNum) +
+				"_icon", "drawable", "com.pokebros.android.pokemononline");
+		if (resID == 0)
+			resID = resources.getIdentifier("pi" + uid.pokeNum + "_icon",
+					"drawable", "com.pokebros.android.pokemononline");
+		return resources.getDrawable(resID);
+	}
+	
 	public void updateTeam() {
 		runOnUiThread(new Runnable() {
 			public void run() {
 				for (int i = 0; i < 6; i++) {
 					BattlePoke poke = netServ.battle.myTeam.pokes[i];
-					int resID = resources.getIdentifier("pi" + poke.uID.pokeNum +
-							(poke.uID.subNum == 0 ? "" : "_" + poke.uID.subNum) +
-							"_icon", "drawable", "com.pokebros.android.pokemononline");
-					if (resID == 0)
-						resID = resources.getIdentifier("pi" + poke.uID.pokeNum + "_icon",
-								"drawable", "com.pokebros.android.pokemononline");
-					pokeListIcons[i].setImageResource(resID);
+					pokeListIcons[i].setImageDrawable(getIcon(poke.uID));
 					pokeListNames[i].setText(poke.nick);
 					pokeListHPs[i].setText(poke.currentHP +
 							"/" + poke.totalHP);
@@ -434,6 +443,11 @@ public class BattleActivity extends Activity {
 	        // getting UI elements. Otherwise there's a race condition if Battle
 	        // wants to update one of our UI elements we haven't gotten yet.
 			netServ.battleActivity = BattleActivity.this;
+
+			if(netServ.battle.shouldShowPreview) {//XXX should probably do this better
+				showRearrangeTeamDialog();
+				netServ.battle.shouldShowPreview = false;
+			}
 		}
 		
 		public void onServiceDisconnected(ComponentName className) {
@@ -454,14 +468,14 @@ public class BattleActivity extends Activity {
     	super.onDestroy();
     }
 
-    public OnLongClickListener dialogListener = new OnLongClickListener() {
-    	public boolean onLongClick(View v) {
+    public OnTouchListener dialogListener = new OnTouchListener() {
+    	public boolean onTouch(View v, MotionEvent e) {
     		int id = v.getId();
     		for(int i = 0; i < 6; i++) {
-    			if(id == arrangePokeIcons[i].getId()) {
+    			if(id == myArrangePokeIcons[i].getId() && e.getAction() == MotionEvent.ACTION_DOWN) {
     				Object dragInfo = v;
     				System.out.println("CLICKCKCKC");
-    				mDragLayer.startDrag(v, arrangePokeIcons[i], dragInfo, DragController.DRAG_ACTION_MOVE);
+    				mDragLayer.startDrag(v, myArrangePokeIcons[i], dragInfo, DragController.DRAG_ACTION_MOVE);
     				break;
     			}
     		}
@@ -528,14 +542,14 @@ public class BattleActivity extends Activity {
     		break;
     	case R.id.draw:
     		//TODO: Offer Draw
-    		showRearrangeTeamDialog();
+    		//showRearrangeTeamDialog();
     		break;
         }
         return true;
     }
     
-    protected Dialog onCreateDialog(int id) {
-    	AlertDialog dialog;
+    protected Dialog onCreateDialog(final int id) {
+    	final AlertDialog dialog;
         AlertDialog.Builder builder;
         LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
         switch(id) {
@@ -549,9 +563,23 @@ public class BattleActivity extends Activity {
             
         	mDragLayer = (DragLayer)layout.findViewById(R.id.drag_my_poke);
             for(int i = 0; i < 6; i++){
-            	arrangePokeIcons[i] = (PokeDragIcon)layout.findViewById(resources.getIdentifier("my_arrange_poke" + (i+1), "id", packName));
-            	arrangePokeIcons[i].setOnLongClickListener(dialogListener);
+            	BattlePoke poke = netServ.battle.myTeam.pokes[i];
+            	myArrangePokeIcons[i] = (PokeDragIcon)layout.findViewById(resources.getIdentifier("my_arrange_poke" + (i+1), "id", packName));
+            	myArrangePokeIcons[i].setOnTouchListener(dialogListener);
+            	myArrangePokeIcons[i].setImageDrawable(getIcon(poke.uID));
+            	myArrangePokeIcons[i].num = i;
+            	myArrangePokeIcons[i].battleActivity = this;
+            	
+            	ShallowShownPoke oppPoke = netServ.battle.oppTeam.pokes[i];
+            	oppArrangePokeIcons[i] = (ImageView)layout.findViewById(resources.getIdentifier("foe_arrange_poke" + (i+1), "id", packName));
+            	oppArrangePokeIcons[i].setImageDrawable(getIcon(oppPoke.uID));
             }
+            layout.findViewById(R.id.button_done).setOnClickListener(new OnClickListener() {
+            	public void onClick(View v) {
+            		netServ.socket.sendMessage(netServ.battle.constructRearrange(), Command.BattleMessage);
+            		removeDialog(id);
+            	}
+            });
             break;
         //case DIALOG_GAMEOVER_ID:
             // do the work to define the another Dialog
@@ -562,7 +590,7 @@ public class BattleActivity extends Activity {
         return dialog;
     }
     
-    protected void showRearrangeTeamDialog() {
+    public void showRearrangeTeamDialog() {
     	showDialog(DIALOG_REARRANGE_TEAM_ID);
     }
     

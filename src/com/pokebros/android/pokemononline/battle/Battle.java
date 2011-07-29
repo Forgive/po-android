@@ -49,10 +49,12 @@ public class Battle {
 	public int bID = 0;
 	private static NetworkService netServ;
 	public BattleTeam myTeam;
+	public ShallowShownTeam oppTeam;
 	public boolean isOver = false, gotEnd = false;
 	public boolean allowSwitch, allowAttack;
 	public boolean[] allowAttacks = new boolean[4];
 	public int background;
+	public boolean shouldShowPreview = false;
 	
 	ShallowBattlePoke[][] pokes = new ShallowBattlePoke[2][6];
 	ArrayList<Boolean> pokeAlive = new ArrayList<Boolean>();
@@ -145,6 +147,14 @@ public class Battle {
 		b.putInt(bID);
 		SwitchChoice sc = new SwitchChoice(toSpot);
 		b.putBaos(new BattleChoice(me, sc, ChoiceType.SwitchType));
+		return b;
+	}
+	
+	public Baos constructRearrange() {
+		Baos b = new Baos();
+		b.putInt(bID);
+		RearrangeChoice rc = new RearrangeChoice(myTeam);
+		b.putBaos(new BattleChoice(me, rc, ChoiceType.RearrangeType));
 		return b;
 	}
 	
@@ -566,7 +576,11 @@ public class Battle {
 			break;
 		case RearrangeTeam:
 			// TODO
-			ShallowShownTeam t = new ShallowShownTeam(msg);
+			oppTeam = new ShallowShownTeam(msg);
+			shouldShowPreview = true;
+			if(netServ.battleActivity != null)
+				netServ.battleActivity.showRearrangeTeamDialog();
+			break;
 		default:
 			System.out.println("Battle command unimplemented -- " + bc);
 			break;

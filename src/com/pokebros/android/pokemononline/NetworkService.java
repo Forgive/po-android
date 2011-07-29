@@ -59,7 +59,7 @@ public class NetworkService extends Service {
 	
 	private FullPlayerInfo meLoginPlayer = new FullPlayerInfo();
 	public PlayerInfo mePlayer = new PlayerInfo();
-	protected Battle battle = null;// = new Battle();
+	public Battle battle = null;// = new Battle();
 	
 	protected Hashtable<Integer, Channel> channels = new Hashtable<Integer, Channel>();
 	public Hashtable<Integer, PlayerInfo> players = new Hashtable<Integer, PlayerInfo>();

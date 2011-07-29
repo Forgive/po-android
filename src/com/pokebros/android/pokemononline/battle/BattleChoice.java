@@ -68,6 +68,11 @@ class RearrangeChoice extends Choice {
 		}
 	}
 	
+	public RearrangeChoice(BattleTeam team) {
+		for(int i = 0; i < 6; i++)
+			pokeIndexes[i] = team.pokes[i].teamNum;
+	}
+
 	public Baos serializeBytes() {
 		Baos b = new Baos();
 		try {
