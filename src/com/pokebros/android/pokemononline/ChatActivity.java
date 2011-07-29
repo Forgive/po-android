@@ -157,13 +157,12 @@ public class ChatActivity extends Activity {
 			netServ.showNotification(ChatActivity.class, "Chat");
 		checkChallenges();
 		checkAskForPass();
+		checkFailedConnection();
 	}
 
 	private ServiceConnection connection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			netServ = ((NetworkService.LocalBinder)service).getService();
-			Toast.makeText(ChatActivity.this, "Service connected",
-                    Toast.LENGTH_SHORT).show();
 			if (!netServ.hasBattle() || netServ.battle.isOver)
 				netServ.showNotification(ChatActivity.class, "Chat");
 			
@@ -172,6 +171,7 @@ public class ChatActivity extends Activity {
 			populateUI();
 	        checkChallenges();
 	        checkAskForPass();
+	        checkFailedConnection();
         }
 		
 		public void onServiceDisconnected(ComponentName className) {
@@ -253,6 +253,17 @@ public class ChatActivity extends Activity {
 	private void checkAskForPass() {
 		if (netServ != null && netServ.askedForPass)
 			showDialog(ChatDialog.AskForPass.ordinal());
+	}
+	
+	public void notifyFailedConnection() {
+		disconnect();
+	}
+	
+	private void checkFailedConnection() {
+		if(netServ != null && netServ.socket == null) {
+			Toast.makeText(this, "OH GOD WHY", Toast.LENGTH_LONG);
+			disconnect();
+		}
 	}
 	
 	@Override
@@ -410,6 +421,9 @@ public class ChatActivity extends Activity {
 		Intent intent = new Intent(this, RegistryActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		intent.putExtra("sticky", true);
+		
+		if(netServ == null || netServ.socket == null)
+			intent.putExtra("failedConnect", true);
 		startActivity(intent);
 		ChatActivity.this.finish();
     }

@@ -1,6 +1,8 @@
 package com.pokebros.android.pokemononline;
 
 import java.io.IOException;
+import java.nio.channels.UnresolvedAddressException;
+import java.util.concurrent.TimeoutException;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -8,6 +10,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.widget.Toast;
 
 public class RegistryConnectionService extends Service {
 	
@@ -26,7 +29,7 @@ public class RegistryConnectionService extends Service {
 	private RegistryCommandListener listener = null;
 	
 	Thread sThread, rThread;
-	PokeClientSocket socket;
+	PokeClientSocket socket = null;
 	private Bais msg;
 
 	public class LocalBinder extends Binder {
@@ -55,33 +58,38 @@ public class RegistryConnectionService extends Service {
 	private void connect() {
 		// XXX This should probably have a timeout
 		new Thread(new Runnable() {
-        	public void run() {
-        		socket = new PokeClientSocket("pokemon-online.dynalias.net", 5081);
-        		socket.waitConnect();		
-        		while(true) {
-        			try {
-        				socket.recvMessagePoll();
-        			} catch (IOException e) {
-        				// disconnected
-        				break;
-        			}
-        			Baos tmp = socket.getMsg();
-        			if(tmp != null) {
-        				msg = new Bais(tmp.toByteArray());
-        				handleMsg();
-        			} else {
-        				// don't use all CPU when no message
-        				try {
-        					Thread.sleep(10);
-        				} catch (InterruptedException e) {
-        					// no action
-        				}
-        			}
-        		}
-        	}
-        }).start();
+			public void run() {
+				try {
+					socket = new PokeClientSocket("pokemon-online.dynalias.net", 5081);
+					while(true) {
+						try {
+							socket.recvMessagePoll();
+						} catch (IOException e) {
+							// disconnected
+							break;
+						}
+						Baos tmp = socket.getMsg();
+						if(tmp != null) {
+							msg = new Bais(tmp.toByteArray());
+							handleMsg();
+						} else {
+							// don't use all CPU when no message
+							try {
+								Thread.sleep(10);
+							} catch (InterruptedException e) {
+								// no action
+							}
+						}
+					}
+				}
+				catch (IOException e) {
+					System.out.println("Registry connection failed");
+				} catch (UnresolvedAddressException e) {
+					System.out.println("Unable to resolve address for registry");
+				}
+			}}).start();
 	}
-	
+
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		super.onStartCommand(intent, flags, startId);

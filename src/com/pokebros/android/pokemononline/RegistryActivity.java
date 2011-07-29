@@ -1,6 +1,8 @@
 package com.pokebros.android.pokemononline;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
+import java.nio.channels.UnresolvedAddressException;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -57,6 +59,9 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 	            	return;
 	            }
 	        }
+        }
+        if (getIntent().hasExtra("failedConnect")) {
+        	Toast.makeText(this, "Server connection failed", Toast.LENGTH_LONG).show();
         }
         
         this.stopService(new Intent(RegistryActivity.this, NetworkService.class));
@@ -194,6 +199,14 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 		service.setListener(this);
 	}
 	
+	public void printToast(final String s, final int len) {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				Toast.makeText(RegistryActivity.this, s, len).show();
+			}
+		});
+	}
+
 	public void onServiceDisconnected(ComponentName name) {
 		bound = false;
 		unbindService(this);

@@ -3,6 +3,7 @@ package com.pokebros.android.pokemononline;
 import static java.lang.System.out;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.SocketChannel;
@@ -16,16 +17,14 @@ public class PokeClientSocket {
 	private LinkedList<Baos> msgs = new LinkedList<Baos>();
 	int remaining = 0, dataLen = 0;
 	private boolean isReadingLength = false;
+	public final static int CONNECT_TIMEOUT=10000;
 
-	public PokeClientSocket(String inIpAddr, int inPortNum)
-	{	
-		try {
-			schan = SocketChannel.open();
-			schan.connect(new InetSocketAddress(inIpAddr, inPortNum));
-			schan.configureBlocking(false);
-		} catch (IOException e) {	
-			System.exit(-1);
-		}
+	public PokeClientSocket(String inIpAddr, int inPortNum) throws SocketTimeoutException, IOException
+	{
+		schan = SocketChannel.open();
+		//schan.connect(new InetSocketAddress(inIpAddr, inPortNum));
+		schan.socket().connect(new InetSocketAddress(inIpAddr, inPortNum), CONNECT_TIMEOUT);
+		schan.configureBlocking(false);
 	}
 
 	public boolean isConnected() { 
@@ -36,17 +35,6 @@ public class PokeClientSocket {
 			System.exit(-1);
 		}
 		return ret;
-	}
-
-	// This function blocks until the connection is ready to use.
-	public void waitConnect() {
-		try {
-			while(!schan.finishConnect()) {}
-		} catch (IOException ioe) {
-			out.println("ERROR: Unable to connect - " +
-			"is the server running?");
-			System.exit(10);
-		}
 	}
 
 	public boolean sendMessage(Baos msgToSend, Command msgType) {

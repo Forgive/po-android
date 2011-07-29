@@ -4,6 +4,7 @@ import java.io.IOException;
 //import org.apache.commons.collections.list;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.net.SocketTimeoutException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -95,8 +96,21 @@ public class NetworkService extends Service {
 		// XXX This should probably have a timeout
 		new Thread(new Runnable() {
 			public void run() {
-        		socket = new PokeClientSocket(ip, port);
-				socket.waitConnect();
+				try {
+					socket = new PokeClientSocket(ip, port);
+				} catch (IOException e) {
+					if(chatActivity != null) {
+						System.out.println("NUUUULLLLL");
+						chatActivity.notifyFailedConnection();
+					}
+					/*else {
+						Intent intent = new Intent(NetworkService.this, RegistryActivity.class);
+						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+						startActivity(intent);
+						disconnect();
+					}*/
+					return;
+				}
 				socket.sendMessage(meLoginPlayer.serializeBytes(), Command.Login);
 				if (chatActivity != null)
 					chatActivity.populateUI();
@@ -365,7 +379,7 @@ public class NetworkService extends Service {
 	}
 	
     public void disconnect() {
-    	if (socket.isConnected()) {
+    	if (socket != null && socket.isConnected()) {
     		socket.close();
     		socket.remaining = 0;
     	}
