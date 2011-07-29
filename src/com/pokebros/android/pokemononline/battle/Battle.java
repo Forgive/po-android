@@ -578,8 +578,8 @@ public class Battle {
 			// TODO
 			oppTeam = new ShallowShownTeam(msg);
 			shouldShowPreview = true;
-			if(netServ.battleActivity != null)
-				netServ.battleActivity.showRearrangeTeamDialog();
+			if(netServ.battleActivity != null && netServ.battleActivity.hasWindowFocus())
+				netServ.battleActivity.notifyRearrangeTeamDialog();
 			break;
 		default:
 			System.out.println("Battle command unimplemented -- " + bc);

@@ -1,5 +1,7 @@
 package com.pokebros.android.pokemononline.player;
 
+import java.util.Comparator;
+
 import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
 import com.pokebros.android.pokemononline.QColor;
@@ -56,5 +58,16 @@ public class PlayerInfo extends SerializeBytes {
 		b.putBaos(color);
 		b.write(gen);
 		return b;
+	}
+
+	static public class ComparePlayerInfos implements Comparator<PlayerInfo> {
+		public int compare(PlayerInfo p1, PlayerInfo p2) {
+			return p1.nick.compareTo(p2.nick);
+		}
+	}
+
+	
+	public boolean equals(PlayerInfo p) {
+		return nick.equals(p);
 	}
 }

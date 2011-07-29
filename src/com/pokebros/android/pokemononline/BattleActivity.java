@@ -6,6 +6,7 @@ import com.android.launcher.DragController;
 import com.android.launcher.DragLayer;
 import com.android.launcher.DragSource;
 import com.android.launcher.PokeDragIcon;
+import com.pokebros.android.pokemononline.ChatActivity.ChatDialog;
 import com.pokebros.android.pokemononline.poke.BattlePoke;
 import com.pokebros.android.pokemononline.poke.ShallowShownPoke;
 import com.pokebros.android.pokemononline.poke.UniqueID;
@@ -19,6 +20,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Resources;
@@ -48,11 +50,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class BattleActivity extends Activity {
+	public enum BattleDialog {
+		RearrangeTeam,
+		ConfirmForfeit
+	}
+
 	public final static int SWIPE_TIME_THRESHOLD = 100;
     final String packName = "com.pokebros.android.pokemononline";
     
-	final int DIALOG_REARRANGE_TEAM_ID = 0;
-	
 	DragLayer mDragLayer;
 	
 	RealViewSwitcher realViewSwitcher;
@@ -261,8 +266,8 @@ public class BattleActivity extends Activity {
 
 	private Drawable getSprite(ShallowBattlePoke poke, boolean front) {
         String res;
-
-        if (poke.status() == Status.Koed.poValue())
+        
+        if (poke.uID.pokeNum == -1 || poke.status() == Status.Koed.poValue())
         	res = "empty_sprite";
         else if (poke.sub)
         	res = (front ? "sub_front" : "sub_back");
@@ -387,9 +392,15 @@ public class BattleActivity extends Activity {
 		});
 	}
 	
+	public void onResume() {
+		// XXX we might want more stuff here
+		super.onResume();
+		checkRearrangeTeamDialog();
+	}
+	
 	private ServiceConnection connection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
-			netServ =	((NetworkService.LocalBinder)service).getService();
+			netServ = ((NetworkService.LocalBinder)service).getService();
 			netServ.herp();
 			if (netServ.battle.isOver) {
 	    		startActivity(new Intent(BattleActivity.this, ChatActivity.class));
@@ -444,10 +455,7 @@ public class BattleActivity extends Activity {
 	        // wants to update one of our UI elements we haven't gotten yet.
 			netServ.battleActivity = BattleActivity.this;
 
-			if(netServ.battle.shouldShowPreview) {//XXX should probably do this better
-				showRearrangeTeamDialog();
-				netServ.battle.shouldShowPreview = false;
-			}
+			checkRearrangeTeamDialog();
 		}
 		
 		public void onServiceDisconnected(ComponentName className) {
@@ -531,14 +539,8 @@ public class BattleActivity extends Activity {
     		startActivity(new Intent(this, ChatActivity.class));
     		finish();
     		break;
-    	case R.id.forfeit_yes:
-    		if (netServ != null && !netServ.battle.isOver) {
-	    		Baos forfeit = new Baos();
-	    		forfeit.putInt(netServ.battle.bID);
-	    		netServ.socket.sendMessage(forfeit, Command.BattleFinished);
-    		}
-    		break;
-    	case R.id.forfeit_no:
+    	case R.id.forfeit:
+    		showDialog(BattleDialog.ConfirmForfeit.ordinal());
     		break;
     	case R.id.draw:
     		//TODO: Offer Draw
@@ -547,18 +549,40 @@ public class BattleActivity extends Activity {
         }
         return true;
     }
+
+	public void notifyRearrangeTeamDialog() {
+		runOnUiThread(new Runnable() { public void run() { checkRearrangeTeamDialog(); } } );
+	}
+	
+	private void checkRearrangeTeamDialog() {
+		if (netServ != null && netServ.hasBattle() && netServ.battle.shouldShowPreview) {
+			showDialog(BattleDialog.RearrangeTeam.ordinal());
+		}
+	}
     
+	private void forfeit() {
+		if (netServ != null && !netServ.battle.isOver) {
+    		Baos forfeit = new Baos();
+    		forfeit.putInt(netServ.battle.bID);
+    		netServ.socket.sendMessage(forfeit, Command.BattleFinished);
+		}
+	}
+	
     protected Dialog onCreateDialog(final int id) {
     	final AlertDialog dialog;
-        AlertDialog.Builder builder;
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
-        switch(id) {
-        case DIALOG_REARRANGE_TEAM_ID:
+        switch(BattleDialog.values()[id]) {
+        case RearrangeTeam:
         	View layout = inflater.inflate(R.layout.rearrange_team_dialog, (LinearLayout)findViewById(R.id.rearrange_team_dialog));
-
-        	
-        	builder = new AlertDialog.Builder(this); 
-            builder.setView(layout);
+            builder.setView(layout)
+            .setPositiveButton("Done", new DialogInterface.OnClickListener(){
+            	public void onClick(DialogInterface dialog, int which) {
+            		netServ.socket.sendMessage(netServ.battle.constructRearrange(), Command.BattleMessage);
+        			netServ.battle.shouldShowPreview = false;
+            		removeDialog(id);
+            	}})
+            .setCancelable(false);
             dialog = builder.create();
             
         	mDragLayer = (DragLayer)layout.findViewById(R.id.drag_my_poke);
@@ -574,24 +598,24 @@ public class BattleActivity extends Activity {
             	oppArrangePokeIcons[i] = (ImageView)layout.findViewById(resources.getIdentifier("foe_arrange_poke" + (i+1), "id", packName));
             	oppArrangePokeIcons[i].setImageDrawable(getIcon(oppPoke.uID));
             }
-            layout.findViewById(R.id.button_done).setOnClickListener(new OnClickListener() {
-            	public void onClick(View v) {
-            		netServ.socket.sendMessage(netServ.battle.constructRearrange(), Command.BattleMessage);
-            		removeDialog(id);
-            	}
-            });
-            break;
+            return dialog;
+        case ConfirmForfeit:
+			builder.setMessage("Really Forfeit?")
+			.setCancelable(true)
+			.setPositiveButton("Forfeit", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					forfeit();
+				}
+			})
+			.setNegativeButton("Cancel", null);
+			return builder.create();
         //case DIALOG_GAMEOVER_ID:
+            // TODO grammar
             // do the work to define the another Dialog
            // break;
         default:
-            dialog = null;
+            return new Dialog(this);
         }
-        return dialog;
-    }
-    
-    public void showRearrangeTeamDialog() {
-    	showDialog(DIALOG_REARRANGE_TEAM_ID);
     }
     
 }

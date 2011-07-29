@@ -1,13 +1,17 @@
 package com.pokebros.android.pokemononline;
 
 import java.io.IOException;
+//import org.apache.commons.collections.list;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.LinkedList;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import com.pokebros.android.pokemononline.ChatActivity.ChatDialog;
 import com.pokebros.android.pokemononline.battle.Battle;
@@ -63,6 +67,7 @@ public class NetworkService extends Service {
 	
 	protected Hashtable<Integer, Channel> channels = new Hashtable<Integer, Channel>();
 	public Hashtable<Integer, PlayerInfo> players = new Hashtable<Integer, PlayerInfo>();
+	//public SortedSet<PlayerInfo> players = Collections.synchronizedSortedSet(new TreeSet<PlayerInfo>(new PlayerInfo.ComparePlayerInfos()));
 	
 	int bID = -1;
 	public class LocalBinder extends Binder {
@@ -351,10 +356,6 @@ public class NetworkService extends Service {
 		channels.put(chanId, c);
 		if(chatActivity != null)
 			chatActivity.addChannel(c);
-	}
-	
-	protected void openRearrangeTeamDialog(){
-		
 	}
 	
     public void disconnect() {

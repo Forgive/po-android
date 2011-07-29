@@ -2,12 +2,7 @@
 <menu
   xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:title="@string/return_to_chat" android:id="@+id/to_chat"></item>
-    <item android:title="@string/forfeit" android:id="@+id/forfeit">
-        <menu>
-            <item android:id="@+id/forfeit_yes" android:title="@string/ok" android:titleCondensed="@string/ok"></item>
-            <item android:title="@string/cancel" android:id="@+id/forfeit_no" android:titleCondensed="@string/no"></item>
-        </menu>
-    </item>
+    <item android:title="@string/forfeit" android:id="@+id/forfeit"></item>
     <item android:title="@string/suggest_draw" android:id="@+id/draw"></item>
     
 </menu>
