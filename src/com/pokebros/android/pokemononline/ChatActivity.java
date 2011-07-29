@@ -12,17 +12,20 @@ import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.InputType;
 import android.text.SpannableStringBuilder;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnKeyListener;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -36,7 +39,8 @@ import android.view.KeyEvent;
 
 public class ChatActivity extends Activity {
 	public enum ChatDialog {
-		Challenge
+		Challenge,
+		AskForPass
 	}
 	
 	public final static int SWIPE_TIME_THRESHOLD = 100;
@@ -150,6 +154,7 @@ public class ChatActivity extends Activity {
 		if (netServ != null && (!netServ.hasBattle() || netServ.battle.isOver))
 			netServ.showNotification(ChatActivity.class, "Chat");
 		checkChallenges();
+		checkAskForPass();
 	}
 
 	private ServiceConnection connection = new ServiceConnection() {
@@ -163,8 +168,8 @@ public class ChatActivity extends Activity {
 			netServ.chatActivity = ChatActivity.this;
 			
 			populateUI();
-
 	        checkChallenges();
+	        checkAskForPass();
         }
 		
 		public void onServiceDisconnected(ComponentName className) {
@@ -237,10 +242,20 @@ public class ChatActivity extends Activity {
 			}
 		}
 	}
+
+	public void notifyAskForPass() {
+		runOnUiThread(new Runnable() { public void run() { checkAskForPass(); } } );
+	}
+	
+	private void checkAskForPass() {
+		if (netServ != null && netServ.askedForPass)
+			showDialog(ChatDialog.AskForPass.ordinal());
+	}
 	
 	@Override
-	protected Dialog onCreateDialog(int id, final Bundle args) {
+	protected Dialog onCreateDialog(final int id, final Bundle args) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
 		switch (ChatDialog.values()[id]) {
 		case Challenge:
 			builder.setMessage(this.getString(R.string.accept_challenge) + " " + args.getString("oppName") + "?") // TODO add challenge info
@@ -260,7 +275,7 @@ public class ChatActivity extends Activity {
 					// so much that I doubt it's worth the code to deal with
 					// onPrepareDialog() but we should use it if we have complex
 					// dialogs that only need to change a little
-					removeDialog(ChatDialog.Challenge.ordinal());
+					removeDialog(id);
 					checkChallenges();
 				}
 			})
@@ -274,13 +289,42 @@ public class ChatActivity extends Activity {
 										args.getInt("clauses"),
 										args.getByte("mode")),
 										Command.ChallengeStuff);
-					removeDialog(ChatDialog.Challenge.ordinal());
+					removeDialog(id);
 					checkChallenges();
 				}
 			});
-			break;
+			return builder.create();
+		case AskForPass:
+        	//View layout = inflater.inflate(R.layout.ask_for_pass, null);
+        	final EditText passField = new EditText(this);
+        	passField.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        	//passField.setTransformationMethod(PasswordTransformationMethod.getInstance());
+			builder.setMessage("Please enter your password.")
+			.setCancelable(true)
+			.setView(passField)
+			.setPositiveButton("Done", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					if (netServ != null) {
+						netServ.sendPass(passField.getText().toString());
+					}
+				}
+			})
+			.setOnCancelListener(new OnCancelListener() {
+				public void onCancel(DialogInterface dialog) {
+					disconnect();
+				}
+			});
+			final AlertDialog dialog = builder.create();
+        	passField.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+				public void onFocusChange(View v, boolean hasFocus) {
+					if (hasFocus) {
+						dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+					}
+				}
+			});
+			return dialog;
 		}
-		return builder.create();
+		return new Dialog(this); // Should never get here but needed to run
 	}
 	
     @Override
@@ -318,12 +362,7 @@ public class ChatActivity extends Activity {
     			break;	
     		}
 		case R.id.chat_disconnect:
-    		netServ.disconnect();
-    		Intent intent = new Intent(this, RegistryActivity.class);
-    		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    		intent.putExtra("sticky", true);
-    		startActivity(intent);
-    		ChatActivity.this.finish();
+			disconnect();
     		break;
 		case R.id.findbattle:
 			if (netServ.socket.isConnected()) {
@@ -343,6 +382,16 @@ public class ChatActivity extends Activity {
 			break;
     	}
     	return true;
+    }
+    
+    private void disconnect() {
+		if (netServ != null)
+			netServ.disconnect();
+		Intent intent = new Intent(this, RegistryActivity.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		intent.putExtra("sticky", true);
+		startActivity(intent);
+		ChatActivity.this.finish();
     }
     
     private Baos constructChallenge(int desc, int opp, int clauses, int mode) {

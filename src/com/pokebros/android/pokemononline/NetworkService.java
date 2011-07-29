@@ -50,6 +50,8 @@ public class NetworkService extends Service {
 	public ChatActivity chatActivity = null;
 	public BattleActivity battleActivity = null;
 	public LinkedList<IncomingChallenge> challenges = new LinkedList<IncomingChallenge>();
+	public boolean askedForPass = false;
+	private String salt = null;
 	
 	public boolean hasBattle() {
 		return battle != null;
@@ -287,25 +289,16 @@ public class NetworkService extends Service {
 			players.put(mePlayer.id, mePlayer);
 			break;
 		case AskForPass:
-			// TODO
-			String salt = msg.readQString();
+			salt = msg.readQString();
 			// XXX not sure what the second half is supposed to check
 			// from analyze.cpp : 265 of PO's code
 			if (salt.length() < 6) { //  || strlen((" " + salt).toUtf8().data()) < 7)
 				System.out.println("Protocol Error: The server requires insecure authentication");
 				break;
 			}
-			String s = new String("derp"); // Get from dialog
-			MessageDigest md5;
-			try {
-				md5 = MessageDigest.getInstance("MD5");
-				Baos hashPass = new Baos();
-				hashPass.putString(toHex(md5.digest((toHex(md5.digest(s.getBytes("ISO-8859-1"))) + salt).getBytes("ISO-8859-1"))));
-				socket.sendMessage(hashPass, Command.AskForPass);
-			} catch (NoSuchAlgorithmException nsae) {
-				System.out.println("Attempting authentication threw an exception: " + nsae);
-			} catch (UnsupportedEncodingException uee) {
-				System.out.println("Attempting authentication threw an exception: " + uee);
+			askedForPass = true;
+			if (chatActivity != null && chatActivity.hasWindowFocus()) {
+				chatActivity.notifyAskForPass();
 			}
 			break;
 		case AddChannel:
@@ -328,6 +321,21 @@ public class NetworkService extends Service {
 			battleActivity.updateBattleInfo();
 		if (chatActivity != null && currentChannel != null && currentChannel.histDelta.length() != 0)
 			chatActivity.updateChat();
+	}
+
+	public void sendPass(String s) {
+		askedForPass = false;
+		MessageDigest md5;
+		try {
+			md5 = MessageDigest.getInstance("MD5");
+			Baos hashPass = new Baos();
+			hashPass.putString(toHex(md5.digest((toHex(md5.digest(s.getBytes("ISO-8859-1"))) + salt).getBytes("ISO-8859-1"))));
+			socket.sendMessage(hashPass, Command.AskForPass);
+		} catch (NoSuchAlgorithmException nsae) {
+			System.out.println("Attempting authentication threw an exception: " + nsae);
+		} catch (UnsupportedEncodingException uee) {
+			System.out.println("Attempting authentication threw an exception: " + uee);
+		}
 	}
 	
 	private String toHex(byte[] b) {
