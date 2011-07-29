@@ -64,6 +64,7 @@ public class ChatActivity extends Activity {
 		
 		//progressDialog = ProgressDialog.show(ChatActivity.this, "","Loading. Please wait...", true);
 		//progressDialog.setCancelable(true);
+
 		
 		super.onCreate(savedInstanceState);
         setContentView(R.layout.chat);
@@ -393,6 +394,11 @@ public class ChatActivity extends Activity {
 							Command.FindBattle);
 				}
 			}
+			break;
+		case R.id.preferences:
+			// Launch Preference activity
+			Toast.makeText(ChatActivity.this, "Preferences not Implemented Yet",
+                    Toast.LENGTH_SHORT).show();
 			break;
     	}
     	return true;
