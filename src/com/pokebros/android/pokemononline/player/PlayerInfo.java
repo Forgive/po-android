@@ -25,7 +25,8 @@ public class PlayerInfo extends SerializeBytes {
 	public String info() { return info; }
 	public String toString() { return nick; }
 	
-	public PlayerInfo() {}
+	public PlayerInfo(FullPlayerInfo player) { nick = player.nick(); }
+	
 	public PlayerInfo(Bais msg) {
 		id = msg.readInt();
 		nick = msg.readQString();

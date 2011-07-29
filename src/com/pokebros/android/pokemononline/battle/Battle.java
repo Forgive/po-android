@@ -62,6 +62,12 @@ public class Battle {
 	public SpannableStringBuilder hist; //= new SpannableStringBuilder();
 	public SpannableStringBuilder histDelta; //= new SpannableStringBuilder();
 	
+	public void writeToHist(CharSequence text) {
+		synchronized(histDelta) {
+			histDelta.append(text);
+		}
+	}
+	
 	public Battle(BattleConf conf, BattleTeam team, PlayerInfo p1, PlayerInfo p2, int meID, int bID, NetworkService ns) {
 		hist = new SpannableStringBuilder();
 		histDelta = new SpannableStringBuilder();
@@ -89,8 +95,10 @@ public class Battle {
 		
 		background = new Random().nextInt(11) + 1;
 		
-		histDelta.append("Battle between " + players[me].nick() + 
-						" and " + players[opp].nick() + " started!");
+		synchronized (histDelta) {
+			writeToHist("Battle between " + players[me].nick() + 
+							" and " + players[opp].nick() + " started!");
+		}
 		
 		for (int i = 0; i < 2; i++) {
 			for (int j = 0; j < 6; j++) {
@@ -205,64 +213,64 @@ public class Battle {
 				else netServ.battleActivity.updateOppPoke();
 			}
 			if(!isSilent)
-				histDelta.append("\n" + (players[player].nick() + " sent out " + 
+				writeToHist("\n" + (players[player].nick() + " sent out " + 
 						currentPoke(player).rnick + "!"));
 			break;
 		case SendBack:
-			histDelta.append("\n" + (players[player].nick() + " called " + 
+			writeToHist("\n" + (players[player].nick() + " called " + 
 					currentPoke(player).rnick + " back!"));
 			break;
 		case UseAttack:
 			short attack = msg.readShort();
-			histDelta.append(Html.fromHtml("<br>" + currentPoke(player).nick +
+			writeToHist(Html.fromHtml("<br>" + currentPoke(player).nick +
 					" used <font color =" + TypeColor.values()[new Integer(queryDB("SELECT type FROM [Moves] WHERE _id = " + attack))] +
 					queryDB("SELECT name FROM [Moves] WHERE _id = " + attack) + "</font>!"));
 			break;
 		case BeginTurn:
 			int turn = msg.readInt();
-			histDelta.append(Html.fromHtml("<br><b><font color=" + QtColor.Blue + 
+			writeToHist(Html.fromHtml("<br><b><font color=" + QtColor.Blue + 
 					"Start of turn " + turn + "</font></b>"));
 			break;
 		case Ko:
-			histDelta.append(Html.fromHtml("<br><b>" + NetworkService.escapeHtml((currentPoke(player).nick) +
+			writeToHist(Html.fromHtml("<br><b>" + NetworkService.escapeHtml((currentPoke(player).nick) +
 					" fainted!</b>")));
 			if(netServ.battleActivity != null && player == me)
 				netServ.battleActivity.switchToPokeViewer();
 			break;
 		case Hit:
 			byte number = msg.readByte();
-			histDelta.append("\nHit " + number + " time" + ((number > 1) ? "s!" : "!"));
+			writeToHist("\nHit " + number + " time" + ((number > 1) ? "s!" : "!"));
 			break;
 		case Effective:
 			byte eff = msg.readByte();
 			switch (eff) {
 			case 0:
-				histDelta.append("\nIt had no effect!");
+				writeToHist("\nIt had no effect!");
 				break;
 			case 1:
 			case 2:
-				histDelta.append(Html.fromHtml("<br><font color=" + QtColor.Gray +
+				writeToHist(Html.fromHtml("<br><font color=" + QtColor.Gray +
 						"It's not very effective...</font>"));
 				break;
 			case 8:
 			case 16:
-				histDelta.append(Html.fromHtml("<br><font color=" + QtColor.Blue +
+				writeToHist(Html.fromHtml("<br><font color=" + QtColor.Blue +
 						"It's super effective!</fontColor>"));
 				break;
 			}
 			break;
 		case CriticalHit:
-			histDelta.append(Html.fromHtml("<br><font color=#6b0000>A critical hit!</font>"));
+			writeToHist(Html.fromHtml("<br><font color=#6b0000>A critical hit!</font>"));
 			break;
 		case Miss:
-			histDelta.append("\nThe attack of " + currentPoke(player).nick + " missed!");
+			writeToHist("\nThe attack of " + currentPoke(player).nick + " missed!");
 			break;
 		case Avoid:
-			histDelta.append("\n" + currentPoke(player).nick + " avoided the attack!");
+			writeToHist("\n" + currentPoke(player).nick + " avoided the attack!");
 			break;
 		case StatChange:
 			byte stat = msg.readByte(), boost=msg.readByte();
-			histDelta.append("\n" + currentPoke(player).nick + "'s " +
+			writeToHist("\n" + currentPoke(player).nick + "'s " +
 					netServ.getString(Stat.values()[stat].rstring()) +
 					(Math.abs(boost) > 1 ? " sharply" : "") + (boost > 0 ? " rose!" : " fell!"));
 			break;
@@ -278,7 +286,7 @@ public class Battle {
 			byte status = msg.readByte();
 			boolean multipleTurns = msg.readBool();
 			if (status > Status.Fine.poValue() && status <= Status.Poisoned.poValue()) {
-				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(status) + 
+				writeToHist(Html.fromHtml("<br><font color=" + new StatusColor(status) + 
 						currentPoke(player).nick + statusChangeMessages[status-1 +
                         (status == Status.Poisoned.poValue() && multipleTurns ? 1 : 0)] + "</font>"));
 			}
@@ -287,7 +295,7 @@ public class Battle {
 				 * poisoned and badly poisoned are not separate values in the Status
 				 * enum, so confusion does not correspond to the same value in the above
 				 * string array as its enum value. */
-				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(status) + 
+				writeToHist(Html.fromHtml("<br><font color=" + new StatusColor(status) + 
 						currentPoke(player).nick + " became confused!</font>"));
 			}
 			break;
@@ -309,7 +317,7 @@ public class Battle {
 			break;
 		case AlreadyStatusMessage:
 			status = msg.readByte();
-			histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(status) +
+			writeToHist(Html.fromHtml("<br><font color=" + new StatusColor(status) +
 					currentPoke(player).nick + " is already " + Status.poValues()[status] +
 					".</font>"));
 			break;
@@ -317,56 +325,56 @@ public class Battle {
 			status = msg.readByte();
 			switch (StatusFeeling.values()[status]) {
 			case FeelConfusion:
-				histDelta.append(Html.fromHtml("<br><font color=" + TypeColor.Ghost +
+				writeToHist(Html.fromHtml("<br><font color=" + TypeColor.Ghost +
 						currentPoke(player).nick + " is confused!</font>"));
 				break;
 			case HurtConfusion:
-				histDelta.append(Html.fromHtml("<br><font color=" + TypeColor.Ghost +
+				writeToHist(Html.fromHtml("<br><font color=" + TypeColor.Ghost +
 						"It hurt itself in its confusion!</font>"));
 				break;
 			case FreeConfusion:
-				histDelta.append(Html.fromHtml("<br><font color=" + TypeColor.Dark +
+				writeToHist(Html.fromHtml("<br><font color=" + TypeColor.Dark +
 						currentPoke(player).nick + " snapped out of its confusion!</font>"));
 				break;
 			case PrevParalysed:
-				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Paralysed.poValue())+
+				writeToHist(Html.fromHtml("<br><font color=" + new StatusColor(Status.Paralysed.poValue())+
 						currentPoke(player).nick + " is paralyzed! It can't move!</font>"));
 				break;
 			case FeelAsleep:
-				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Asleep.poValue()) +
+				writeToHist(Html.fromHtml("<br><font color=" + new StatusColor(Status.Asleep.poValue()) +
 						currentPoke(player).nick + " is fast asleep!</font>"));
 				break;
 			case FreeAsleep:
-				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Asleep.poValue()) +
+				writeToHist(Html.fromHtml("<br><font color=" + new StatusColor(Status.Asleep.poValue()) +
 						currentPoke(player).nick + " woke up!</font>"));
 				break;
 			case HurtBurn:
-				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Burnt.poValue()) +
+				writeToHist(Html.fromHtml("<br><font color=" + new StatusColor(Status.Burnt.poValue()) +
 						currentPoke(player).nick + " is hurt by its burn!</font>"));
 				break;
 			case HurtPoison:
-				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Poisoned.poValue()) +
+				writeToHist(Html.fromHtml("<br><font color=" + new StatusColor(Status.Poisoned.poValue()) +
 						currentPoke(player).nick + " is hurt by poison!</font>"));
 				break;
 			case PrevFrozen:
-				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Frozen.poValue())+
+				writeToHist(Html.fromHtml("<br><font color=" + new StatusColor(Status.Frozen.poValue())+
 						currentPoke(player).nick + " is frozen solid!</font>"));
 				break;
 			case FreeFrozen:
-				histDelta.append(Html.fromHtml("<br><font color=" + new StatusColor(Status.Frozen.poValue()) +
+				writeToHist(Html.fromHtml("<br><font color=" + new StatusColor(Status.Frozen.poValue()) +
 						currentPoke(player).nick + " thawed out!</font>"));
 				break;
 			}
 			break;
 		case Failed:
-			histDelta.append("\nBut it failed!");
+			writeToHist("\nBut it failed!");
 			break;
 		case BattleChat:
 		case EndMessage:
 			String message = msg.readQString();
 			if (message.equals(""))
 				break;
-			histDelta.append(Html.fromHtml("<br><font color=" + (player !=0 ? "#5811b1>" : QtColor.Green) +
+			writeToHist(Html.fromHtml("<br><font color=" + (player !=0 ? "#5811b1>" : QtColor.Green) +
 					"<b>" + NetworkService.escapeHtml(players[player].nick()) + ": </b></font>" +
 					NetworkService.escapeHtml(message)));
 			break;
@@ -379,7 +387,7 @@ public class Battle {
 			// TODO if (ignoreSpecs) break;
 			id = msg.readInt();
 			message = msg.readQString();
-			histDelta.append(Html.fromHtml("<br><font color=" + QtColor.Blue + netServ.players.get(id) + 
+			writeToHist(Html.fromHtml("<br><font color=" + QtColor.Blue + netServ.players.get(id) + 
 					": " + NetworkService.escapeHtml(message)));
 			break;
 		case MoveMessage:
@@ -405,23 +413,23 @@ public class Battle {
 			//s = s.replaceAll("%a", AbilityName(other));
 			if(other !=-1) s = s.replaceAll("%p", queryDB("SELECT name FROM [Pokemons] WHERE Num = " + other));
 			
-			histDelta.append("\n" + s);
+			writeToHist("\n" + s);
 			break;
 		case NoOpponent:
-			histDelta.append("\nBut there was no target...");
+			writeToHist("\nBut there was no target...");
 			break;
 		case ItemMessage:
 			// TODO
 			break;
 		case Flinch:
-			histDelta.append("\n" + currentPoke(player).nick + " flinched!");
+			writeToHist("\n" + currentPoke(player).nick + " flinched!");
 			break;
 		case Recoil:
 			boolean damaging = msg.readBool();
 			if (damaging)
-				histDelta.append("\n" + currentPoke(player).nick + " is hit with recoil!");
+				writeToHist("\n" + currentPoke(player).nick + " is hit with recoil!");
 			else
-				histDelta.append("\n" + currentPoke(player).nick + " had its energy drained!");
+				writeToHist("\n" + currentPoke(player).nick + " had its energy drained!");
 			break;
 		case WeatherMessage:
 			byte wstatus = msg.readByte(), weather = msg.readByte();
@@ -438,7 +446,7 @@ public class Battle {
 				case Rain: message = "The rain stopped!"; break;
 				default: message = "";
 				}
-				histDelta.append(Html.fromHtml("<br><font color=" + color + message + "</font color"));
+				writeToHist(Html.fromHtml("<br><font color=" + color + message + "</font color"));
 				break;
 			case HurtWeather:
 				switch (Weather.values()[weather]) {
@@ -446,7 +454,7 @@ public class Battle {
 				case SandStorm: message = " is buffeted by the sandstorm!"; break;
 				default: message = "";
 				}
-				histDelta.append(Html.fromHtml("<br><font color=" + color +
+				writeToHist(Html.fromHtml("<br><font color=" + color +
 						currentPoke(player).nick + message + "</font>"));
 				break;
 			case ContinueWeather:
@@ -457,18 +465,18 @@ public class Battle {
 				case Rain: message = "Rain continues to fall!"; break;
 				default: message = "";
 				}
-				histDelta.append(Html.fromHtml("<br><font color=" + color + message + "</font color"));
+				writeToHist(Html.fromHtml("<br><font color=" + color + message + "</font color"));
 				break;
 			}
 			break;
 		case StraightDamage:
 			short damage = msg.readShort();
 			if(player == me) {
-				histDelta.append("\n" + currentPoke(player).nick + " lost " + damage + 
+				writeToHist("\n" + currentPoke(player).nick + " lost " + damage + 
 						" HP! (" + (damage * 100 / myTeam.pokes[0].totalHP) + "% of its health)");
 			}
 			else {
-				histDelta.append("\n" + currentPoke(player).nick + " lost " + damage + "% of its health!");
+				writeToHist("\n" + currentPoke(player).nick + " lost " + damage + "% of its health!");
 			}
 			break;
 		case AbilityMessage:
@@ -487,31 +495,31 @@ public class Battle {
 		case BattleEnd:
 			byte res = msg.readByte();
 			if (res == BattleResult.Tie.ordinal())
-				histDelta.append(Html.fromHtml("<br><b><font color =" + QtColor.Blue +
+				writeToHist(Html.fromHtml("<br><b><font color =" + QtColor.Blue +
 						"Tie between " + players[0].nick() + " and " + players[1].nick() +
 						"!</b></font>")); // XXX Personally I don't think this deserves !
 			else
-				histDelta.append(Html.fromHtml("<br><b><font color =" + QtColor.Blue +
+				writeToHist(Html.fromHtml("<br><b><font color =" + QtColor.Blue +
 						players[player].nick() +" won the battle!</b></font>"));
 			gotEnd = true;
 			isOver = true;
 			break;
 		case BlankMessage:
 			// XXX This prints out a lot of extra space
-			// histDelta.append("\n");
+			// writeToHist("\n");
 			break;
 		case Clause:
 			// TODO
 			break;
 		case Rated:
 			boolean rated = msg.readBool();
-			histDelta.append(Html.fromHtml("<br><b><font color =" + QtColor.Blue + 
+			writeToHist(Html.fromHtml("<br><b><font color =" + QtColor.Blue + 
 					(rated ? "Rated" : "Unrated") + "</b></font>"));
 			// TODO Print clauses
 			break;
 		case TierSection:
 			String tier = msg.readQString();
-			histDelta.append(Html.fromHtml("<br><b><font color =" + QtColor.Blue +
+			writeToHist(Html.fromHtml("<br><b><font color =" + QtColor.Blue +
 					"Tier: " + tier + "</b></font>"));
 			break;
 		case TempPokeChange:

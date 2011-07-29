@@ -18,6 +18,10 @@ public class Channel {
 	public SpannableStringBuilder hist = new SpannableStringBuilder();
 	public SpannableStringBuilder histDelta = new SpannableStringBuilder();
 	
+	public void writeToHist(CharSequence text) {
+		histDelta.append(text);
+	}
+	
 	private NetworkService netServ;
 	
 	public String name(){ return name; }
@@ -30,7 +34,7 @@ public class Channel {
 		id = i;
 		name = n;
 		netServ = net;
-		histDelta.append(Html.fromHtml("<i>Joined channel: <b>" + name + "</b></i>"));
+		writeToHist(Html.fromHtml("<i>Joined channel: <b>" + name + "</b></i>"));
 	}
 
 	public void addPlayer(PlayerInfo p) {
@@ -70,10 +74,10 @@ public class Channel {
 				//makes name bold since first occurrence of : marks end of name in msg.
 				 String message = "<br><b>" + msg.readQString();
 				 message = message.replaceFirst(":", ":</b>");
-				 histDelta.append(Html.fromHtml(message));
+				 writeToHist(Html.fromHtml(message));
 				break;
 			case HtmlChannel:
-				histDelta.append(Html.fromHtml(msg.readQString()));
+				writeToHist(Html.fromHtml(msg.readQString()));
 				break;
 			case LeaveChannel:
 				PlayerInfo p = netServ.players.get(msg.readInt());

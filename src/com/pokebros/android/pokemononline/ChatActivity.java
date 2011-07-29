@@ -213,10 +213,11 @@ public class ChatActivity extends Activity {
 	public void updateChat() {
 		runOnUiThread(new Runnable() {
 			public void run() {
-				if (netServ.currentChannel != null) {
-					SpannableStringBuilder delta = netServ.currentChannel.histDelta;
-					chatBox.append(delta);
-					if (delta.length() != 0) {
+				if (netServ.currentChannel == null)
+					return;
+				synchronized(netServ.currentChannel.histDelta) {
+					chatBox.append(netServ.currentChannel.histDelta);
+					if (netServ.currentChannel.histDelta.length() != 0) {
 						chatScroll.post(new Runnable() {
 							public void run() {						
 								if(!chatViewSwitcher.isPressed())
@@ -224,8 +225,8 @@ public class ChatActivity extends Activity {
 							}
 						});
 					}
-					netServ.currentChannel.hist.append(delta);
-					delta.clear();
+					netServ.currentChannel.hist.append(netServ.currentChannel.histDelta);
+					netServ.currentChannel.histDelta.clear();
 				}
 			}});
 	}
@@ -300,7 +301,7 @@ public class ChatActivity extends Activity {
         	final EditText passField = new EditText(this);
         	passField.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         	//passField.setTransformationMethod(PasswordTransformationMethod.getInstance());
-			builder.setMessage("Please enter your password.")
+			builder.setMessage("Please enter your password " + netServ.mePlayer.nick() + ".")
 			.setCancelable(true)
 			.setView(passField)
 			.setPositiveButton("Done", new DialogInterface.OnClickListener() {
@@ -308,10 +309,12 @@ public class ChatActivity extends Activity {
 					if (netServ != null) {
 						netServ.sendPass(passField.getText().toString());
 					}
+					removeDialog(id);
 				}
 			})
 			.setOnCancelListener(new OnCancelListener() {
 				public void onCancel(DialogInterface dialog) {
+					removeDialog(id);
 					disconnect();
 				}
 			});

@@ -241,18 +241,19 @@ public class BattleActivity extends Activity {
 			public void run() {
 				if (!netServ.hasBattle())
 					return;
-				SpannableStringBuilder delta = netServ.battle.histDelta;
-				infoView.append(delta);
-				if (delta.length() != 0) {
-			    	infoScroll.post(new Runnable() {
-			    		public void run() {
-			    			infoScroll.smoothScrollTo(0, infoView.getMeasuredHeight());
-			    		}
-			    	});
+				synchronized (netServ.battle.histDelta) {
+					infoView.append(netServ.battle.histDelta);
+					if (netServ.battle.histDelta.length() != 0) {
+						infoScroll.post(new Runnable() {
+							public void run() {
+								infoScroll.smoothScrollTo(0, infoView.getMeasuredHeight());
+							}
+						});
+					}
+					infoScroll.invalidate();
+					netServ.battle.hist.append(netServ.battle.histDelta);
+					netServ.battle.histDelta.clear();
 				}
-				infoScroll.invalidate();
-		    	netServ.battle.hist.append(delta);
-				delta.clear();
 			}
 		});
 	}

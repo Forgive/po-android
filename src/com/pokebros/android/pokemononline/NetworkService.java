@@ -62,7 +62,7 @@ public class NetworkService extends Service {
 	}
 	
 	private FullPlayerInfo meLoginPlayer = new FullPlayerInfo();
-	public PlayerInfo mePlayer = new PlayerInfo();
+	public PlayerInfo mePlayer = new PlayerInfo(meLoginPlayer);
 	public Battle battle = null;// = new Battle();
 	
 	protected Hashtable<Integer, Channel> channels = new Hashtable<Integer, Channel>();
@@ -243,7 +243,7 @@ public class NetworkService extends Service {
 			}
 			if (id1 == mePlayer.id || id2 == mePlayer.id) {
 				if (players.get(id1) != null && players.get(id2) != null && battleDesc < 3)
-					currentChannel.histDelta.append("\n" + players.get(id1).nick() + outcome + players.get(id2).nick() + ".");
+					currentChannel.writeToHist("\n" + players.get(id1).nick() + outcome + players.get(id2).nick() + ".");
 				if (!battle.gotEnd) {
 					battle.isOver = true;
 					if (battleActivity != null)
@@ -280,7 +280,7 @@ public class NetworkService extends Service {
 				// Start the battle
 				battle = new Battle(conf, team, players.get(conf.id(0)),
 					players.get(conf.id(1)), mePlayer.id, bID, this);
-				currentChannel.histDelta.append("\nBattle between " + mePlayer.nick() + 
+				currentChannel.writeToHist("\nBattle between " + mePlayer.nick() + 
 					" and " + players.get(pID2).nick() + " started!");
 				Intent in;
 				in = new Intent(this, BattleActivity.class);
@@ -319,6 +319,12 @@ public class NetworkService extends Service {
 			chatActivity.removeChannel(channels.get(chanId));
 			channels.remove(chanId);
 			channels.put(chanId, new Channel(chanId, msg.readQString(), this));
+			break;
+		case SendMessage: {
+			// TODO print this to the screen
+			System.out.println(msg.readQString());
+			break;
+		}
 		default:
 			System.out.println("Unimplented message");
 		}
