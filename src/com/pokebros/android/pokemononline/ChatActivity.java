@@ -40,7 +40,8 @@ import android.view.KeyEvent;
 public class ChatActivity extends Activity {
 	public enum ChatDialog {
 		Challenge,
-		AskForPass
+		AskForPass,
+		ConfirmDisconnect
 	}
 	
 	public final static int SWIPE_TIME_THRESHOLD = 100;
@@ -323,6 +324,16 @@ public class ChatActivity extends Activity {
 				}
 			});
 			return dialog;
+		case ConfirmDisconnect:
+			builder.setMessage("Really disconnect?")
+			.setCancelable(true)
+			.setPositiveButton("Disconnect", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					disconnect();
+				}
+			})
+			.setNegativeButton("Cancel", null);
+			return builder.create();
 		}
 		return new Dialog(this); // Should never get here but needed to run
 	}
@@ -362,7 +373,7 @@ public class ChatActivity extends Activity {
     			break;	
     		}
 		case R.id.chat_disconnect:
-			disconnect();
+			showDialog(ChatDialog.ConfirmDisconnect.ordinal());
     		break;
 		case R.id.findbattle:
 			if (netServ.socket.isConnected()) {
