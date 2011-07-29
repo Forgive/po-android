@@ -365,8 +365,10 @@ public class NetworkService extends Service {
 	}
 	
     public void disconnect() {
-    	if (socket.isConnected())
+    	if (socket.isConnected()) {
     		socket.close();
+    		socket.remaining = 0;
+    	}
     	this.stopForeground(true);
     	this.stopSelf();
     }
