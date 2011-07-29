@@ -19,10 +19,10 @@ public class UniqueID extends SerializeBytes {
 	}
 	
 	public UniqueID() {
-			pokeNum = -1;
+			pokeNum = 1;
 			subNum = 0;
 	}
-	
+
 	public Baos serializeBytes() {
 		Baos bytes = new Baos();
 		bytes.putShort(pokeNum);

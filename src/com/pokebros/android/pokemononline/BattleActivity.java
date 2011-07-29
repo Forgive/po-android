@@ -268,7 +268,7 @@ public class BattleActivity extends Activity {
 	private Drawable getSprite(ShallowBattlePoke poke, boolean front) {
         String res;
         
-        if (poke.uID.pokeNum == -1 || poke.status() == Status.Koed.poValue())
+        if (netServ.battle.shouldShowPreview || poke.status() == Status.Koed.poValue())
         	res = "empty_sprite";
         else if (poke.sub)
         	res = (front ? "sub_front" : "sub_back");
