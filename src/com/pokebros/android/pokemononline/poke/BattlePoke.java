@@ -48,7 +48,6 @@ public class BattlePoke extends ShallowBattlePoke {
 		//msg.readInt();
 		for(int i = 0; i < 6; i++) {
 			EVs[i] = msg.readInt();
-		System.out.println("THE IVS@#@#@#@: " + i + " " + EVs[i]);
 		//msg.readInt();
 		}for(int i = 0; i < 6; i++)
 			DVs[i] = msg.readInt();

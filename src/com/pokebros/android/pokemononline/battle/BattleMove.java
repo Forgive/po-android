@@ -30,6 +30,9 @@ public class BattleMove extends SerializeBytes {
 		String s = Type.values()[type].toString();
 		return s.replaceAll(">", "");
 	}
+	
+	public BattleMove() {}
+	
 	public BattleMove(Bais msg) {
 		num = msg.readShort();
 		currentPP = msg.readByte();

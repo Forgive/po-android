@@ -31,10 +31,6 @@ public class Battle {
 		Close
 	}
 	
-	ArrayList<Boolean> sub = new ArrayList<Boolean>();
-	ArrayList<UniqueID> specialSprite = new ArrayList<UniqueID>();
-	ArrayList<UniqueID> lastSeenSpecialSprite = new ArrayList<UniqueID>();
-	
 	// 0 = you, 1 = opponent
 	public PlayerInfo[] players = new PlayerInfo[2];
 	
@@ -54,6 +50,7 @@ public class Battle {
 	public boolean[] allowAttacks = new boolean[4];
 	public int background;
 	public boolean shouldShowPreview = false;
+	public BattleMove[] displayedMoves = new BattleMove[4];
 	
 	ShallowBattlePoke[][] pokes = new ShallowBattlePoke[2][6];
 	ArrayList<Boolean> pokeAlive = new ArrayList<Boolean>();
@@ -104,6 +101,9 @@ public class Battle {
 				pokes[i][j] = new ShallowBattlePoke();
 			}
 		}
+
+		for (int i = 0; i < 4; i++)
+			displayedMoves[i] = new BattleMove();
 	}
 	
 	public Boolean isMyTimerTicking() {
@@ -202,6 +202,8 @@ public class Battle {
 				
 				myTeam.pokes[0] = myTeam.pokes[fromSpot];
 				myTeam.pokes[fromSpot] = temp;
+				
+				displayedMoves = myTeam.pokes[0].moves;
 			}
 			
 			ShallowBattlePoke tempPoke = pokes[player][0];
@@ -212,8 +214,7 @@ public class Battle {
 				pokes[player][0] = new ShallowBattlePoke(msg, (player == me) ? true : false);
 			
 			if(netServ.battleActivity != null) {
-				if(player == me) netServ.battleActivity.updateMyPoke();
-				else netServ.battleActivity.updateOppPoke();
+				netServ.battleActivity.updatePokes(player);
 			}
 			if(!isSilent)
 				writeToHist("\n" + (players[player].nick() + " sent out " + 
@@ -526,29 +527,48 @@ public class Battle {
 					"Tier: " + tier + "</b></font>"));
 			break;
 		case TempPokeChange:
-			// TODO
-			type = msg.readByte();
-			if (type == TempPokeChange.TempSprite.ordinal()) {
-				UniqueID old = specialSprite.get(player);
-				specialSprite.set(player, new UniqueID(msg));
-				if (specialSprite.get(player).pokeNum == -1) {
-					lastSeenSpecialSprite.set(player, old);
-				} else if (specialSprite.get(player).pokeNum == 0) {
-					specialSprite.set(player, lastSeenSpecialSprite.get(player));
-				}
+			id = msg.readByte();
+			switch(TempPokeChange.values()[id]) {
+			case TempMove:
+			case DefMove:
+				byte slot = msg.readByte();
+				move = msg.readShort();
+				displayedMoves[slot].num = move;
+				if (id == TempPokeChange.DefMove.ordinal())
+					myTeam.pokes[0].moves[slot].num = move;
 				if (netServ.battleActivity !=null) {
 					netServ.battleActivity.updatePokes(player);
 				}
-			} else if (type == TempPokeChange.DefiniteForme.ordinal()) {
+				break;
+			case TempPP:
+				slot = msg.readByte();
+				byte PP = msg.readByte();
+				displayedMoves[slot].currentPP = PP;
+				// if netServ.battleActivity != null, netServ.battleActivity.updatePP;
+				break;
+			case TempSprite:
+				UniqueID sprite = new UniqueID(msg);
+				if (sprite.pokeNum != 0)
+					currentPoke(player).specialSprites.addFirst(sprite);
+				else
+					currentPoke(player).specialSprites.removeFirst();
+				if (netServ.battleActivity !=null) {
+					netServ.battleActivity.updatePokes(player);
+				}
+				break;
+			case DefiniteForme:
 				poke = msg.readByte();
 				short newForm = msg.readShort();
 				pokes[player][poke].uID.pokeNum = newForm;
 				if (isOut(poke)) {
 					currentPoke(slot(player, poke)).uID.pokeNum = newForm;
+					if (netServ.battleActivity !=null) {
+						netServ.battleActivity.updatePokes(player);
+					}
 				}
-				// XXX should update?
-			} else if (type == TempPokeChange.AestheticForme.ordinal()) {
-				short newForm = msg.readShort();
+				break;
+			case AestheticForme:
+				newForm = msg.readShort();
 				currentPoke(player).uID.subNum = (byte) newForm;
 				if (netServ.battleActivity !=null) {
 					netServ.battleActivity.updatePokes(player);

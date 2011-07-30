@@ -1,5 +1,6 @@
 package com.pokebros.android.pokemononline;
 
+import com.pokebros.android.pokemononline.battle.BattleMove;
 import com.pokebros.android.pokemononline.battle.Type;
 import java.util.Random;
 
@@ -269,21 +270,30 @@ public class BattleActivity extends Activity {
 	private Drawable getSprite(ShallowBattlePoke poke, boolean front) {
         String res;
         
-        if (netServ.battle.shouldShowPreview)
+        if (netServ.battle.shouldShowPreview || poke.status() == Status.Koed.ordinal())
         	res = "empty_sprite";
         else if (poke.sub)
         	res = (front ? "sub_front" : "sub_back");
         else {
-        	res = "p" + poke.uID.pokeNum + (poke.uID.subNum == 0 ? "" : "_" + poke.uID.subNum) +
-        			(front ? "_front" : "_back");
-        	if (poke.gender != Gender.Female.ordinal())
-        		res = res + (poke.shiny ? "s" : "");
+        	UniqueID uID;
+        	if (poke.specialSprites.isEmpty())
+        		uID = poke.uID;
+        	else
+        		uID = poke.specialSprites.peek();
+        	if (uID.pokeNum < 0)
+        		res = "empty_sprite";
         	else {
-        		if (resources.getIdentifier(res + "f", "drawable", "com.pokebros.android.pokemononline") == 0)
-        			// No special female sprite
-        			res = res + (poke.shiny ? "s" : "");
-        		else
-        			res = res + "f" + (poke.shiny ? "s" : "");
+	        	res = "p" + uID.pokeNum + (uID.subNum == 0 ? "" : "_" + uID.subNum) +
+	        			(front ? "_front" : "_back");
+	        	if (poke.gender != Gender.Female.ordinal())
+	        		res = res + (poke.shiny ? "s" : "");
+	        	else {
+	        		if (resources.getIdentifier(res + "f", "drawable", "com.pokebros.android.pokemononline") == 0)
+	        			// No special female sprite
+	        			res = res + (poke.shiny ? "s" : "");
+	        		else
+	        			res = res + "f" + (poke.shiny ? "s" : "");
+	        	}
         	}
         }
         System.out.println("SPRITE: " + res);
@@ -311,12 +321,13 @@ public class BattleActivity extends Activity {
 					setHpBarTo(me, poke.lifePercent);
 					BattlePoke battlePoke = netServ.battle.myTeam.pokes[0];
 			        for(int i = 0; i < 4; i++) {
-			        	attack[i].setText(battlePoke.moves[i].toString());
+			        	BattleMove move = netServ.battle.displayedMoves[i];
+			        	attack[i].setText(move.toString());
 			        	String type;
-			        	if (battlePoke.moves[i].num == 237)
+			        	if (move.num == 237)
 			        		type = Type.values()[battlePoke.hiddenPowerType()].toString();
 			        	else
-			        		type = battlePoke.moves[i].getTypeString();
+			        		type = move.getTypeString();
 			        	type = type.toLowerCase();
 			        	int resID = resources.getIdentifier(type + "_type_button",
 					      		"drawable", "com.pokebros.android.pokemononline");

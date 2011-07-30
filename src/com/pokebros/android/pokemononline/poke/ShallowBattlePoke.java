@@ -1,5 +1,7 @@
 package com.pokebros.android.pokemononline.poke;
 
+import java.util.LinkedList;
+
 import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
 import com.pokebros.android.pokemononline.SerializeBytes;
@@ -16,6 +18,7 @@ public class ShallowBattlePoke extends SerializeBytes {
 	byte level = 0;
 	public byte lastKnownPercent = 0;
 	public boolean sub = false;
+	public LinkedList<UniqueID> specialSprites = new LinkedList<UniqueID>();
 	
 	public ShallowBattlePoke() {}; // For pokes who have not been sent out;
 	
