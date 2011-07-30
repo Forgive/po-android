@@ -46,10 +46,11 @@ public class BattlePoke extends ShallowBattlePoke {
 		 * so we need to discard the int representing
 		 * the number of items in the list. */
 		//msg.readInt();
-		for(int i = 0; i < 6; i++)
+		for(int i = 0; i < 6; i++) {
 			EVs[i] = msg.readInt();
+		System.out.println("THE IVS@#@#@#@: " + i + " " + EVs[i]);
 		//msg.readInt();
-		for(int i = 0; i < 6; i++)
+		}for(int i = 0; i < 6; i++)
 			DVs[i] = msg.readInt();
 	}
 	
@@ -75,5 +76,9 @@ public class BattlePoke extends ShallowBattlePoke {
 		for(int i = 0; i < 6; i++)
 			b.write(DVs[i]);
 		return b;
+	}
+	
+	public int hiddenPowerType() {
+		return ( ( ( (DVs[0] & 1) + 2 * (DVs[1] & 1) + 4 * (DVs[2] & 1) + 8 * (DVs[5] & 1) + 16 * (DVs[3] & 1) + 32 * (DVs[4] & 1) ) * 15) / 63 ) + 1;
 	}
 }

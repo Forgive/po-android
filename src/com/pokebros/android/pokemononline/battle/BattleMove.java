@@ -11,7 +11,7 @@ import com.pokebros.android.pokemononline.ColorEnums.TypeColor;
 public class BattleMove extends SerializeBytes {
 	public byte currentPP = 0;
 	public byte totalPP = 0;
-	short num = 0;
+	public short num = 0;
 	
 	public String toString() {
 		return Battle.queryDB("SELECT name FROM [Moves] WHERE _id = " + num);	
@@ -25,7 +25,8 @@ public class BattleMove extends SerializeBytes {
 	}
 	
 	public String getTypeString() {
-		int type = new Integer(Battle.queryDB("SELECT type FROM [Moves] WHERE _id = " + num));
+		int type;
+		type = new Integer(Battle.queryDB("SELECT type FROM [Moves] WHERE _id = " + num));
 		String s = Type.values()[type].toString();
 		return s.replaceAll(">", "");
 	}

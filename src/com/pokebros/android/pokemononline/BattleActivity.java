@@ -1,5 +1,6 @@
 package com.pokebros.android.pokemononline;
 
+import com.pokebros.android.pokemononline.battle.Type;
 import java.util.Random;
 
 import com.android.launcher.DragController;
@@ -268,7 +269,7 @@ public class BattleActivity extends Activity {
 	private Drawable getSprite(ShallowBattlePoke poke, boolean front) {
         String res;
         
-        if (netServ.battle.shouldShowPreview || poke.status() == Status.Koed.poValue())
+        if (netServ.battle.shouldShowPreview)
         	res = "empty_sprite";
         else if (poke.sub)
         	res = (front ? "sub_front" : "sub_back");
@@ -311,7 +312,11 @@ public class BattleActivity extends Activity {
 					BattlePoke battlePoke = netServ.battle.myTeam.pokes[0];
 			        for(int i = 0; i < 4; i++) {
 			        	attack[i].setText(battlePoke.moves[i].toString());
-			        	String type = battlePoke.moves[i].getTypeString();
+			        	String type;
+			        	if (battlePoke.moves[i].num == 237)
+			        		type = Type.values()[battlePoke.hiddenPowerType()].toString();
+			        	else
+			        		type = battlePoke.moves[i].getTypeString();
 			        	type = type.toLowerCase();
 			        	int resID = resources.getIdentifier(type + "_type_button",
 					      		"drawable", "com.pokebros.android.pokemononline");
@@ -378,7 +383,12 @@ public class BattleActivity extends Activity {
 							"/" + poke.totalHP);
 					for (int j = 0; j < 4; j++) {
 						pokeListMovePreviews[i][j].setText(poke.moves[j].toString());
-						pokeListMovePreviews[i][j].getBackground().setColorFilter(poke.moves[j].getColor(), PorterDuff.Mode.DARKEN);
+						int color;
+						if (poke.moves[j].num == 237) // Hidden Power
+							color = poke.hiddenPowerType();
+						else
+							color = poke.moves[j].getColor();
+						pokeListMovePreviews[i][j].getBackground().setColorFilter(color, PorterDuff.Mode.DARKEN);
 					}
 				}
 			}

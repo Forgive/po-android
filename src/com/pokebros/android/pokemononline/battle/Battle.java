@@ -3,6 +3,7 @@ package com.pokebros.android.pokemononline.battle;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Vector;
 import java.lang.Math;
 
 import android.database.Cursor;
@@ -131,6 +132,10 @@ public class Battle {
 	
 	public boolean isOut(Byte poke) {
 		return poke < numberOfSlots / 2;
+	}
+	
+	public int slot(int player, int poke) {
+		return player + poke * 2;
 	}
 	
 	public Baos constructCancel() {
@@ -522,6 +527,33 @@ public class Battle {
 			break;
 		case TempPokeChange:
 			// TODO
+			type = msg.readByte();
+			if (type == TempPokeChange.TempSprite.ordinal()) {
+				UniqueID old = specialSprite.get(player);
+				specialSprite.set(player, new UniqueID(msg));
+				if (specialSprite.get(player).pokeNum == -1) {
+					lastSeenSpecialSprite.set(player, old);
+				} else if (specialSprite.get(player).pokeNum == 0) {
+					specialSprite.set(player, lastSeenSpecialSprite.get(player));
+				}
+				if (netServ.battleActivity !=null) {
+					netServ.battleActivity.updatePokes(player);
+				}
+			} else if (type == TempPokeChange.DefiniteForme.ordinal()) {
+				poke = msg.readByte();
+				short newForm = msg.readShort();
+				pokes[player][poke].uID.pokeNum = newForm;
+				if (isOut(poke)) {
+					currentPoke(slot(player, poke)).uID.pokeNum = newForm;
+				}
+				// XXX should update?
+			} else if (type == TempPokeChange.AestheticForme.ordinal()) {
+				short newForm = msg.readShort();
+				currentPoke(player).uID.subNum = (byte) newForm;
+				if (netServ.battleActivity !=null) {
+					netServ.battleActivity.updatePokes(player);
+				}
+			}
 			break;
 		case MakeYourChoice:
 			// XXX is this correct behavior?
@@ -592,5 +624,16 @@ public class Battle {
 			break;
 			
 		}
+	}
+	
+	enum TempPokeChange {
+		TempMove,
+		TempAbility,
+		TempItem,
+		TempSprite,
+		DefiniteForme,
+		AestheticForme,
+		DefMove,
+		TempPP
 	}
 }
