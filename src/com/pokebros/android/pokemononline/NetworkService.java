@@ -6,7 +6,6 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedList;
 
@@ -57,7 +56,7 @@ public class NetworkService extends Service {
 	
 	protected Hashtable<Integer, Channel> channels = new Hashtable<Integer, Channel>();
 	public Hashtable<Integer, PlayerInfo> players = new Hashtable<Integer, PlayerInfo>();
-	public ArrayList<ArrayList<Tier> > tiers = new ArrayList<ArrayList<Tier> >();
+	Tier superTier = new Tier();
 	
 	int bID = -1;
 	public class LocalBinder extends Binder {
@@ -167,13 +166,26 @@ public class NetworkService extends Service {
 		}
 		case TierSelection:
 			msg.readInt();
-			while(msg.available() != 0) {
-				Tier t = new Tier();
-				t.level = msg.read();
-				while(tiers.size() - 1 < t.level)
-					tiers.add(new ArrayList<Tier>());
-				t.name = msg.readQString();
-				tiers.get(t.level).add(t);
+			Tier prevTier = new Tier((byte)msg.read(), msg.readQString());
+			prevTier.parentTier = superTier;
+			superTier.subTiers.add(prevTier);
+			while(msg.available() != 0) { // While there's another tier available
+				Tier t = new Tier((byte)msg.read(), msg.readQString());
+				if(t.level == prevTier.level) { // Sibling case
+					prevTier.parentTier.subTiers.add(t);
+					t.parentTier = prevTier.parentTier;
+				}
+				else if(t.level < prevTier.level) { // Uncle case
+					while(t.level < prevTier.level)
+						prevTier = prevTier.parentTier;
+					prevTier.parentTier.subTiers.add(t);
+					t.parentTier = prevTier.parentTier;
+				}
+				else if(t.level > prevTier.level) { // Child case
+					prevTier.subTiers.add(t);
+					t.parentTier = prevTier;
+				}
+				prevTier = t;
 			}
 			break;
 		case ChallengeStuff:
