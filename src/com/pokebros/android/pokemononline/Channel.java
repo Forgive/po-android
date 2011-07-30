@@ -19,7 +19,9 @@ public class Channel {
 	public SpannableStringBuilder histDelta = new SpannableStringBuilder();
 	
 	public void writeToHist(CharSequence text) {
-		histDelta.append(text);
+		synchronized(histDelta) {
+			histDelta.append(text);
+		}
 	}
 	
 	private NetworkService netServ;
