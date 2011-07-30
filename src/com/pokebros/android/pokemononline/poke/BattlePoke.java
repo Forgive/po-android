@@ -2,6 +2,7 @@ package com.pokebros.android.pokemononline.poke;
 
 import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
+import com.pokebros.android.pokemononline.DataBaseHelper;
 import com.pokebros.android.pokemononline.SerializeBytes;
 import com.pokebros.android.pokemononline.battle.BattleMove;
 import com.pokebros.android.pokemononline.poke.PokeEnums.Status;
@@ -26,7 +27,7 @@ public class BattlePoke extends ShallowBattlePoke {
 	int[] DVs = new int[6];
 	int[] EVs = new int[6];
 	
-	public BattlePoke(Bais msg) {
+	public BattlePoke(Bais msg, DataBaseHelper db) {
 		uID = new UniqueID(msg);
 		nick = msg.readQString();
 		totalHP = msg.readShort();
@@ -41,7 +42,7 @@ public class BattlePoke extends ShallowBattlePoke {
 		for(int i = 0; i < 5; i++)
 			stats[i] = msg.readShort();
 		for(int i = 0; i < 4; i++)
-			moves[i] = new BattleMove(msg);
+			moves[i] = new BattleMove(msg, db);
 		/* EVs and DVs are QLists on the server end,
 		 * so we need to discard the int representing
 		 * the number of items in the list. */

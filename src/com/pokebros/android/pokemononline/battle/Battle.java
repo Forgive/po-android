@@ -103,7 +103,7 @@ public class Battle {
 		}
 
 		for (int i = 0; i < 4; i++)
-			displayedMoves[i] = new BattleMove();
+			displayedMoves[i] = new BattleMove(netServ.db);
 	}
 	
 	public Boolean isMyTimerTicking() {
@@ -169,7 +169,7 @@ public class Battle {
 		return b;
 	}
 	
-	public static String queryDB(String query) {
+/*	public static String queryDB(String query) {
 		DataBaseHelper datHelp = new DataBaseHelper(netServ);
 		try {
 			datHelp.createDatabase();
@@ -186,7 +186,7 @@ public class Battle {
 		datHelp.close();
 		
 		return s;
-	}
+	}*/
 	
 	public void receiveCommand(Bais msg)  {
 		BattleCommand bc = BattleCommand.values()[msg.readByte()];
@@ -227,8 +227,8 @@ public class Battle {
 		case UseAttack:
 			short attack = msg.readShort();
 			writeToHist(Html.fromHtml("<br>" + currentPoke(player).nick +
-					" used <font color =" + TypeColor.values()[new Integer(queryDB("SELECT type FROM [Moves] WHERE _id = " + attack))] +
-					queryDB("SELECT name FROM [Moves] WHERE _id = " + attack) + "</font>!"));
+					" used <font color =" + TypeColor.values()[new Integer(netServ.db.query("SELECT type FROM [Moves] WHERE _id = " + attack))] +
+					netServ.db.query("SELECT name FROM [Moves] WHERE _id = " + attack) + "</font>!"));
 			break;
 		case BeginTurn:
 			int turn = msg.readInt();
@@ -404,18 +404,18 @@ public class Battle {
 			System.out.println("OTHER IS: " + other);
 			String q = msg.readQString();
 			
-			String s = queryDB("SELECT EFFECT" + part + " FROM [Move_message] WHERE _id = " + move);
+			String s = netServ.db.query("SELECT EFFECT" + part + " FROM [Move_message] WHERE _id = " + move);
 			s = s.replaceAll("%s", currentPoke(player).nick);
 			s = s.replaceAll("%ts", players[me].nick());
 			s = s.replaceAll("%tf", players[opp].nick());
 			if(type  != -1) s = s.replaceAll("%t", Type.values()[type].toString());
 			if(foe   != -1) s = s.replaceAll("%f", currentPoke(foe).nick);
-			if(other  != -1) s = s.replaceAll("%m", queryDB("SELECT name FROM [Moves] WHERE _id = " + other));
+			if(other  != -1) s = s.replaceAll("%m", netServ.db.query("SELECT name FROM [Moves] WHERE _id = " + other));
 			s = s.replaceAll("%d", new Short(other).toString());
 			s = s.replaceAll("%q", q);
 			//s = s.replaceAll("%i", ItemName(other));
 			//s = s.replaceAll("%a", AbilityName(other));
-			if(other !=-1) s = s.replaceAll("%p", queryDB("SELECT name FROM [Pokemons] WHERE Num = " + other));
+			if(other !=-1) s = s.replaceAll("%p", netServ.db.query("SELECT name FROM [Pokemons] WHERE Num = " + other));
 			
 			writeToHist("\n" + s);
 			break;
