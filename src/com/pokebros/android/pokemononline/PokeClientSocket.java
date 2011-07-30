@@ -1,6 +1,5 @@
 package com.pokebros.android.pokemononline;
 
-import static java.lang.System.out;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;

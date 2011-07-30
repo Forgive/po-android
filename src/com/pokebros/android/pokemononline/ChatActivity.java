@@ -8,7 +8,6 @@ import de.marcreichelt.android.ChatRealViewSwitcher;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -18,8 +17,6 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.InputType;
-import android.text.SpannableStringBuilder;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -260,8 +257,8 @@ public class ChatActivity extends Activity {
 	}
 	
 	private void checkFailedConnection() {
-		if(netServ != null && netServ.socket == null) {
-			Toast.makeText(this, "OH GOD WHY", Toast.LENGTH_LONG);
+		if(netServ != null && netServ.failedConnect) {
+			Toast.makeText(this, "OH GOD WHY", Toast.LENGTH_LONG).show();
 			disconnect();
 		}
 	}
@@ -269,7 +266,6 @@ public class ChatActivity extends Activity {
 	@Override
 	protected Dialog onCreateDialog(final int id, final Bundle args) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
 		switch (ChatDialog.values()[id]) {
 		case Challenge:
 			builder.setMessage(this.getString(R.string.accept_challenge) + " " + args.getString("oppName") + "?") // TODO add challenge info

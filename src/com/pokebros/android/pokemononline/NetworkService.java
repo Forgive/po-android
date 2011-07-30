@@ -4,26 +4,18 @@ import java.io.IOException;
 //import org.apache.commons.collections.list;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.net.SocketTimeoutException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Hashtable;
 import java.util.LinkedList;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
-import com.pokebros.android.pokemononline.ChatActivity.ChatDialog;
 import com.pokebros.android.pokemononline.battle.Battle;
 import com.pokebros.android.pokemononline.battle.BattleConf;
 import com.pokebros.android.pokemononline.battle.BattleTeam;
-import com.pokebros.android.pokemononline.battle.ChallengeEnums.ChallengeDesc;
-import com.pokebros.android.pokemononline.player.BasicPlayerInfo;
 import com.pokebros.android.pokemononline.player.FullPlayerInfo;
 import com.pokebros.android.pokemononline.player.PlayerInfo;
 
-import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -32,10 +24,6 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
-import android.widget.Toast;
 
 public class NetworkService extends Service {
 	public static String escapeHtml(String toEscape) {
@@ -57,6 +45,7 @@ public class NetworkService extends Service {
 	public LinkedList<IncomingChallenge> challenges = new LinkedList<IncomingChallenge>();
 	public boolean askedForPass = false;
 	private String salt = null;
+	public boolean failedConnect = false;
 	
 	public boolean hasBattle() {
 		return battle != null;
@@ -68,7 +57,7 @@ public class NetworkService extends Service {
 	
 	protected Hashtable<Integer, Channel> channels = new Hashtable<Integer, Channel>();
 	public Hashtable<Integer, PlayerInfo> players = new Hashtable<Integer, PlayerInfo>();
-	//public SortedSet<PlayerInfo> players = Collections.synchronizedSortedSet(new TreeSet<PlayerInfo>(new PlayerInfo.ComparePlayerInfos()));
+	public ArrayList<ArrayList<Tier> > tiers = new ArrayList<ArrayList<Tier> >();
 	
 	int bID = -1;
 	public class LocalBinder extends Binder {
@@ -99,16 +88,11 @@ public class NetworkService extends Service {
 				try {
 					socket = new PokeClientSocket(ip, port);
 				} catch (IOException e) {
+					failedConnect = true;
 					if(chatActivity != null) {
 						System.out.println("NUUUULLLLL");
 						chatActivity.notifyFailedConnection();
 					}
-					/*else {
-						Intent intent = new Intent(NetworkService.this, RegistryActivity.class);
-						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-						startActivity(intent);
-						disconnect();
-					}*/
 					return;
 				}
 				socket.sendMessage(meLoginPlayer.serializeBytes(), Command.Login);
@@ -121,6 +105,7 @@ public class NetworkService extends Service {
 		        				socket.recvMessagePoll();
 		        			} catch (IOException e) {
 		        				// Disconnected
+		        				System.out.println("FUCK EVERYTHING");
 		        				break;
 		        			}
 		        			Baos tmp = socket.getMsg();
@@ -182,10 +167,13 @@ public class NetworkService extends Service {
 		}
 		case TierSelection:
 			msg.readInt();
-			ArrayList<String> list = new ArrayList<String>();
 			while(msg.available() != 0) {
-				msg.read();
-				list.add(msg.readQString());
+				Tier t = new Tier();
+				t.level = msg.read();
+				while(tiers.size() - 1 < t.level)
+					tiers.add(new ArrayList<Tier>());
+				t.name = msg.readQString();
+				tiers.get(t.level).add(t);
 			}
 			break;
 		case ChallengeStuff:

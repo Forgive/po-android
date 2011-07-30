@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.lang.Math;
 
-
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.SystemClock;
