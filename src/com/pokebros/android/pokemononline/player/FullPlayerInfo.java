@@ -13,8 +13,8 @@ import com.pokebros.android.pokemononline.SerializeBytes;
 public class FullPlayerInfo extends SerializeBytes {
 	protected PlayerTeam playerTeam;
 		
-	protected boolean ladderEnabled = false;
-	protected boolean showTeam = true;
+	protected boolean ladderEnabled = true;
+	protected boolean showTeam = false;
 	protected QColor nameColor = new QColor();
 	
 	public FullPlayerInfo(Bais msg) {

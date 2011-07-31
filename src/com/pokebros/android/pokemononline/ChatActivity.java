@@ -38,7 +38,8 @@ public class ChatActivity extends Activity {
 	public enum ChatDialog {
 		Challenge,
 		AskForPass,
-		ConfirmDisconnect
+		ConfirmDisconnect,
+		FindBattle
 	}
 	
 	public final static int SWIPE_TIME_THRESHOLD = 100;
@@ -345,6 +346,35 @@ public class ChatActivity extends Activity {
 			})
 			.setNegativeButton("Cancel", null);
 			return builder.create();
+		case FindBattle:
+			final EditText range = new EditText(this);
+			range.setInputType(InputType.TYPE_CLASS_NUMBER);
+			range.setHint("Range");
+			final boolean[] options = new boolean[3];
+			builder.setTitle("Find Battle")
+			.setMultiChoiceItems(new CharSequence[]{"Force Rated", "Force Same Tier", "Only within range"}, null, new DialogInterface.OnMultiChoiceClickListener() {
+				public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+					options[which] = isChecked;
+				}
+			})
+			.setView(range)
+			.setPositiveButton("Find", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					if (netServ != null && netServ.socket.isConnected()) {
+						netServ.findingBattle = true;
+						Short inRange;
+						try {
+							inRange = new Short(range.getText().toString());
+						} catch (NumberFormatException e) {
+							inRange = 200;
+						}
+						netServ.socket.sendMessage(
+								constructFindBattle(options[0], options[1], options[2], inRange, (byte) 0),
+								Command.FindBattle);
+					}
+				}
+			});
+			return builder.create();
 		}
 		return new Dialog(this); // Should never get here but needed to run
 	}
@@ -394,11 +424,7 @@ public class ChatActivity extends Activity {
 							constructChallenge(ChallengeDesc.Cancelled.ordinal(), 0, Clauses.SleepClause.mask(), Mode.Singles.ordinal()),
 							Command.ChallengeStuff);
 				} else {
-					netServ.findingBattle = true;
-					// TODO present menu to choose these bools
-					netServ.socket.sendMessage(
-							constructFindBattle(false, false, false, (short) 200, (byte) 0),
-							Command.FindBattle);
+					showDialog(ChatDialog.FindBattle.ordinal());
 				}
 			}
 			break;
