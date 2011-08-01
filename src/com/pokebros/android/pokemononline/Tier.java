@@ -23,6 +23,6 @@ public class Tier {
 	
 	public void addSubTier(Tier t) {
 		subTiers.add(t);
-		subTiersAdapter.add(t);
+		//subTiersAdapter.add(t);
 	}
 }
