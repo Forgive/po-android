@@ -8,25 +8,46 @@ import java.io.OutputStream;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public class DataBaseHelper extends SQLiteOpenHelper {
 
 	private static final String DBNAME = "po_database";
+	private static final String DBPATH = "/data/data/com.pokebros.android.pokemononline/databases/";
 	private final Context myContext;
+	private boolean created;
 
 	public DataBaseHelper(Context context) {
 		super(context, DBNAME, null, 1);
 		myContext = context;
+		created = exists();
+		if (!created)
+			create();
 	}
 	
 	@Override
-	public void onCreate(SQLiteDatabase db) {
+	public void onCreate(SQLiteDatabase db) {}
+	
+    private boolean exists() {
+    	SQLiteDatabase checkDB = null;
+    	try{
+    		checkDB = SQLiteDatabase.openDatabase(DBPATH + DBNAME, null, SQLiteDatabase.OPEN_READONLY);
+    	}catch(SQLiteException e){
+    		//database does't exist yet.
+    	}
+    	if(checkDB != null){
+    		checkDB.close();
+    	}
+    	return checkDB != null ? true : false;
+    }
+	
+	public void create() {
 		try {
 			InputStream assetsDB;
 			assetsDB = myContext.getAssets().open(DBNAME);
-
-			OutputStream dbOut = new FileOutputStream("/data/data/com.pokebros.android.pokemononline/databases/" + DBNAME);
+			getReadableDatabase(); // Create file to overwrite
+			OutputStream dbOut = new FileOutputStream(DBPATH + DBNAME);
 
 			byte[] buffer = new byte[1024];
 			int length;
@@ -46,13 +67,15 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {}
 
 	public String query(String query) {
-		SQLiteDatabase db = getReadableDatabase();
-		Cursor curs = db.rawQuery(query, null);
-		curs.moveToFirst();
-		String ret = curs.getString(0);
-		curs.close();
-		close();
-		return ret;
+		synchronized(this) {
+			SQLiteDatabase db = getReadableDatabase();
+			Cursor curs = db.rawQuery(query, null);
+			curs.moveToFirst();
+			String ret = curs.getString(0);
+			curs.close();
+			close();
+			return ret;
+		}
 	}
 
 }
