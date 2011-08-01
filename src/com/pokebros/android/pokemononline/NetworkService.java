@@ -174,17 +174,17 @@ public class NetworkService extends Service {
 			while(msg.available() != 0) { // While there's another tier available
 				Tier t = new Tier((byte)msg.read(), msg.readQString());
 				if(t.level == prevTier.level) { // Sibling case
-					prevTier.parentTier.subTiers.add(t);
+					prevTier.parentTier.addSubTier(t);
 					t.parentTier = prevTier.parentTier;
 				}
 				else if(t.level < prevTier.level) { // Uncle case
 					while(t.level < prevTier.level)
 						prevTier = prevTier.parentTier;
-					prevTier.parentTier.subTiers.add(t);
+					prevTier.parentTier.addSubTier(t);
 					t.parentTier = prevTier.parentTier;
 				}
 				else if(t.level > prevTier.level) { // Child case
-					prevTier.subTiers.add(t);
+					prevTier.addSubTier(t);
 					t.parentTier = prevTier;
 				}
 				prevTier = t;
