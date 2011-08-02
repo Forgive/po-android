@@ -106,7 +106,6 @@ public class NetworkService extends Service {
 		        				socket.recvMessagePoll();
 		        			} catch (IOException e) {
 		        				// Disconnected
-		        				System.out.println("FUCK EVERYTHING");
 		        				break;
 		        			}
 		        			Baos tmp = socket.getMsg();

@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.View.OnKeyListener;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -39,7 +40,8 @@ public class ChatActivity extends Activity {
 		Challenge,
 		AskForPass,
 		ConfirmDisconnect,
-		FindBattle
+		FindBattle,
+		TierSelection
 	}
 	
 	public final static int SWIPE_TIME_THRESHOLD = 100;
@@ -54,6 +56,54 @@ public class ChatActivity extends Activity {
 	private TextView chatBox;
 	private EditText chatInput;
 	private ChatRealViewSwitcher chatViewSwitcher;
+	
+	class TierAlertDialog extends AlertDialog {
+		public Tier parentTier = null;
+		public ListView dialogListView = null;
+		
+		protected TierAlertDialog(Context context, Tier t) {
+			super(context);
+			parentTier = t;
+			dialogListView = makeTierListView();
+			setTitle("Tier Selection");
+			setView(dialogListView);
+			setIcon(0); // Don't want an icon
+		}
+		
+		@Override
+		public void onBackPressed() {
+			if(parentTier.parentTier == null) { // this is the top level
+				dismiss();
+			}
+			else {
+				dialogListView.setAdapter(new ArrayAdapter<Tier>(ChatActivity.this, R.layout.tier_list_item, parentTier.parentTier.subTiers));
+				parentTier = parentTier.parentTier;
+			}
+		}
+		
+		ListView makeTierListView() {
+			ListView lv = new ListView(ChatActivity.this);
+			lv.setAdapter(new ArrayAdapter<Tier>(ChatActivity.this, R.layout.tier_list_item, parentTier.subTiers));
+			lv.setOnItemClickListener(new OnItemClickListener() {
+				public void onItemClick(AdapterView<?> parent, View view,
+						int position, long id) {
+					Tier self = parentTier.subTiers.get((int)id);
+					if(self.subTiers.size() > 0) {
+						parentTier = self;
+						((ListView)parent).setAdapter(new ArrayAdapter<Tier>(ChatActivity.this, 
+								R.layout.tier_list_item, parentTier.subTiers));
+					}
+					else {
+						Baos b = new Baos();
+						b.putString(self.name);
+						netServ.socket.sendMessage(b, Command.TierSelection);
+						dismiss();
+					}
+				}
+			});
+			return lv;
+		}
+	}
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -376,6 +426,8 @@ public class ChatActivity extends Activity {
 				}
 			});
 			return builder.create();
+		case TierSelection:
+			return new TierAlertDialog(this, netServ.superTier);
 		}
 		return new Dialog(this); // Should never get here but needed to run
 	}
@@ -429,8 +481,9 @@ public class ChatActivity extends Activity {
 			break;
 		case R.id.preferences:
 			// Launch Preference activity
-			Toast.makeText(ChatActivity.this, "Preferences not Implemented Yet",
-                    Toast.LENGTH_SHORT).show();
+			//Toast.makeText(ChatActivity.this, "Preferences not Implemented Yet",
+            //        Toast.LENGTH_SHORT).show();
+			showDialog(ChatDialog.TierSelection.ordinal());
 			break;
     	}
     	return true;
