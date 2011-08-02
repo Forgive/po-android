@@ -137,10 +137,13 @@ public class ChatActivity extends Activity {
         	// Set the edit texts on list item click
 			public void onItemClick(AdapterView<?> parent, View view, int position,
 					long id) {
-				if (netServ.socket.isConnected())
+				if (netServ.socket.isConnected()) {
+					Toast toast = Toast.makeText(ChatActivity.this,"Challenge sent to " + ((PlayerListAdapter)parent.getAdapter()).getItem(position).nick(),Toast.LENGTH_SHORT);
+					toast.show();
 					netServ.socket.sendMessage(constructChallenge(ChallengeDesc.Sent.ordinal(), 
 							((PlayerListAdapter)parent.getAdapter()).getItem(position).id, 
 							Clauses.SleepClause.ordinal(), Mode.Singles.ordinal()), Command.ChallengeStuff);
+				}
 			}        	
 		});
       /*  players.setOnItemLongClickListener(new OnItemLongClickListener() {
