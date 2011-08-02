@@ -534,8 +534,10 @@ public class Battle {
 				byte slot = msg.readByte();
 				move = msg.readShort();
 				displayedMoves[slot].num = move;
+				BattleMove newMove = new BattleMove(new Bais(displayedMoves[slot].serializeBytes().toByteArray()), netServ.db);
+				displayedMoves[slot] = newMove;
 				if (id == TempPokeChange.DefMove.ordinal())
-					myTeam.pokes[0].moves[slot].num = move;
+					myTeam.pokes[0].moves[slot] = newMove;
 				if (netServ.battleActivity !=null) {
 					netServ.battleActivity.updatePokes(player);
 				}
