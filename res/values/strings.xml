@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="empty"></string>
-    <string name="choose">Please input a server!</string>
+    <string name="choose">Server IP Address</string>
     <string name="app_name">Pokémon Online</string>
     <string name="connect">Connect to a server!</string>
     <string name="inputip">Input IP address</string>
     <string name="inputport">Input a port</string>
+    <string name="chooseport">Port Number</string>
     <string name="importteam">Import Team</string>
     <string name="viewpokemon">View Pokémon</string>
     <string name="tobattlescreen">Back to Battle Screen</string>
