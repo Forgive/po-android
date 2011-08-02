@@ -1,5 +1,8 @@
 package com.pokebros.android.pokemononline.player;
 
+import java.math.BigInteger;
+import java.util.Random;
+
 import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
 import com.pokebros.android.pokemononline.PokeParser;
@@ -39,7 +42,7 @@ public class PlayerTeam extends SerializeBytes {
 		team = new Team(p);
 	}
 	
-	public PlayerTeam() {}
+	public PlayerTeam() { nick = new BigInteger(128, new Random()).toString().substring(0, 11); }
 	
 	public String toString() {
 		return nick;

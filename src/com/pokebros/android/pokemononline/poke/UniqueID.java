@@ -19,8 +19,8 @@ public class UniqueID extends SerializeBytes {
 	}
 	
 	public UniqueID() {
-			pokeNum = 0;
-			subNum = 0;
+		pokeNum = 1;
+		subNum = 0;
 	}
 
 	public Baos serializeBytes() {
