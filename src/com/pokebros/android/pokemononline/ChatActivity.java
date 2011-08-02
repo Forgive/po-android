@@ -17,12 +17,14 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.InputType;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnKeyListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -45,6 +47,10 @@ public class ChatActivity extends Activity {
 	}
 	
 	public final static int SWIPE_TIME_THRESHOLD = 100;
+	public final static int CONTEXTMENU_CHALLENGEPLAYER = 0;
+	public final static int CONTEXTMENU_VIEWPLAYERINFO = 1;
+	
+	public PlayerListAdapter playerListAdapter;
 	
 	private PlayerListAdapter playerAdapter;
 	private ChannelListAdapter channelAdapter;
@@ -56,7 +62,7 @@ public class ChatActivity extends Activity {
 	private TextView chatBox;
 	private EditText chatInput;
 	private ChatRealViewSwitcher chatViewSwitcher;
-	
+
 	class TierAlertDialog extends AlertDialog {
 		public Tier parentTier = null;
 		public ListView dialogListView = null;
@@ -105,7 +111,7 @@ public class ChatActivity extends Activity {
 			return lv;
 		}
 	}
-	
+
 	/** Called when the activity is first created. */
 	@Override
     public void onCreate(Bundle savedInstanceState) { //TODO: Implement a Loading Screen
@@ -126,6 +132,7 @@ public class ChatActivity extends Activity {
         ListView players = (ListView)findViewById(R.id.playerlisting);
         playerAdapter = new PlayerListAdapter(this, R.id.playerlisting);
         players.setAdapter(playerAdapter);
+        registerForContextMenu(players);
         players.setOnItemClickListener(new OnItemClickListener() {
         	// Set the edit texts on list item click
 			public void onItemClick(AdapterView<?> parent, View view, int position,
@@ -136,14 +143,15 @@ public class ChatActivity extends Activity {
 							Clauses.SleepClause.ordinal(), Mode.Singles.ordinal()), Command.ChallengeStuff);
 			}        	
 		});
-        players.setOnItemLongClickListener(new OnItemLongClickListener() {
+      /*  players.setOnItemLongClickListener(new OnItemLongClickListener() {
 			public boolean onItemLongClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				// TODO: Display player description
 				System.out.println("Player -- Long click works");
+				
 				return true;
 			}
-		});
+		});*/
         
         //Channel List Stuff**
         ListView channels = (ListView)findViewById(R.id.channellisting);
@@ -491,6 +499,38 @@ public class ChatActivity extends Activity {
     	return true;
     }
     
+/*    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+      if (v.getId()==R.id.playerlisting) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
+       String pname = playerListAdapter.getItem(info.position).nick();
+        menu.setHeaderTitle(pname);
+          menu.add(Menu.NONE, CONTEXTMENU_CHALLENGEPLAYER, 0, "Challenge " + pname);
+          menu.add(Menu.NONE, CONTEXTMENU_VIEWPLAYERINFO, 0, "View Player Info");
+        }
+      }
+    
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+    	AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
+    	switch(item.getItemId()){
+    	case CONTEXTMENU_CHALLENGEPLAYER: 
+    		Toast.makeText(this, "Challenge button", Toast.LENGTH_LONG).show();
+    		if (netServ.socket.isConnected())
+				netServ.socket.sendMessage(constructChallenge(ChallengeDesc.Sent.ordinal(), 
+						playerListAdapter.getItem(info.position).id, 
+						Clauses.SleepClause.ordinal(), Mode.Singles.ordinal()), Command.ChallengeStuff);
+    		
+    		
+    		break;
+    	case CONTEXTMENU_VIEWPLAYERINFO:
+    		Toast.makeText(this, "Info button" + info.toString(), Toast.LENGTH_LONG).show();
+    		break;
+    	}
+    	return true;
+    }
+*/
+
     private void disconnect() {
 		if (netServ != null)
 			netServ.disconnect();
