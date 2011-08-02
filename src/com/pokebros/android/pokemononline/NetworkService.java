@@ -263,6 +263,7 @@ public class NetworkService extends Service {
 				if (!battle.gotEnd) {
 					battle.isOver = true;
 					if (battleActivity != null)
+						battle = null;
 						battleActivity.end();
 				}
 			}

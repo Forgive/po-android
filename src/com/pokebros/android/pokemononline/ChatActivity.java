@@ -205,6 +205,7 @@ public class ChatActivity extends Activity {
 						}
 					});
 					updateChat();
+					chatViewSwitcher.invalidate();
 				}
 			}});
 	}
@@ -351,7 +352,7 @@ public class ChatActivity extends Activity {
 			range.setInputType(InputType.TYPE_CLASS_NUMBER);
 			range.setHint("Range");
 			final boolean[] options = new boolean[3];
-			builder.setTitle("Find Battle")
+			builder.setTitle(R.string.find_a_battle)
 			.setMultiChoiceItems(new CharSequence[]{"Force Rated", "Force Same Tier", "Only within range"}, null, new DialogInterface.OnMultiChoiceClickListener() {
 				public void onClick(DialogInterface dialog, int which, boolean isChecked) {
 					options[which] = isChecked;
@@ -392,8 +393,12 @@ public class ChatActivity extends Activity {
     	MenuItem findbattle = menu.findItem(R.id.findbattle);
     	if (netServ != null && netServ.findingBattle) {
     		findbattle.setTitle("Cancel Find Battle");
-    	} else {
-    		findbattle.setTitle("Find Battle");
+    	} 
+    	else if(netServ != null && !netServ.hasBattle()) {
+    		findbattle.setTitle(R.string.find_a_battle);
+    	}
+    	else if(netServ != null && netServ.hasBattle()) {
+    		findbattle.setTitle(R.string.tobattlescreen);
     	}
     	return true;
     }
@@ -401,29 +406,23 @@ public class ChatActivity extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
     	switch (item.getItemId()) {
-    	case R.id.backtobattle: 
-    		if(netServ.hasBattle()) {
-    			Intent in = new Intent(this, BattleActivity.class);
-    			in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    			startActivity(in);
-    			break;
-    		}
-    		else {
-    			Toast.makeText(ChatActivity.this, R.string.notinbattle,
-    					Toast.LENGTH_SHORT).show();
-    			break;	
-    		}
 		case R.id.chat_disconnect:
 			showDialog(ChatDialog.ConfirmDisconnect.ordinal());
     		break;
 		case R.id.findbattle:
 			if (netServ.socket.isConnected()) {
-				if (netServ.findingBattle) {
+				if (netServ.findingBattle && !netServ.hasBattle()) {
 					netServ.findingBattle = false;
 					netServ.socket.sendMessage(
 							constructChallenge(ChallengeDesc.Cancelled.ordinal(), 0, Clauses.SleepClause.mask(), Mode.Singles.ordinal()),
 							Command.ChallengeStuff);
-				} else {
+				} else if(!netServ.findingBattle && netServ.hasBattle()) {
+	    			Intent in = new Intent(this, BattleActivity.class);
+	    			in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+	    			startActivity(in);
+	    			break;
+	    		} 
+				else {
 					showDialog(ChatDialog.FindBattle.ordinal());
 				}
 			}
