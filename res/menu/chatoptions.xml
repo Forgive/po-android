@@ -5,7 +5,7 @@
     <item android:id="@+id/findbattle" android:title="@string/find_a_battle"></item>
     <item android:title="@string/disconnect" android:id="@+id/chat_disconnect"></item>
     
-    <item android:id="@+id/preferences" android:title="Preferences"></item>
+    <item android:id="@+id/preferences" android:title="Tier Selection"></item>
     
     
 </menu>

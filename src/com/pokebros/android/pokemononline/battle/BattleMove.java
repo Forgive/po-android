@@ -12,10 +12,11 @@ public class BattleMove extends SerializeBytes {
 	public byte currentPP = 0;
 	public byte totalPP = 0;
 	public short num = 0;
-	DataBaseHelper dbh;
+	public String name = "null";
+	public byte type;
 	
 	public String toString() {
-		return dbh.query("SELECT name FROM [Moves] WHERE _id = " + num);
+		return name;
 	}
 	
 	public int getColor() {
@@ -29,18 +30,20 @@ public class BattleMove extends SerializeBytes {
 	}
 	
 	public byte getType() {
-		return new Byte(dbh.query("SELECT type FROM [Moves] WHERE _id = " + num));
+		return type;
 	}
 	
 	public BattleMove(DataBaseHelper db) {
-		dbh = db;
+		name = db.query("SELECT name FROM [Moves] WHERE _id = " + num);
+		type = new Byte(db.query("SELECT type FROM [Moves] WHERE _id = " + num));
 	}
 	
 	public BattleMove(Bais msg, DataBaseHelper db) {
 		num = msg.readShort();
 		currentPP = msg.readByte();
 		totalPP = msg.readByte();
-		dbh = db;
+		name = db.query("SELECT name FROM [Moves] WHERE _id = " + num);
+		type = new Byte(db.query("SELECT type FROM [Moves] WHERE _id = " + num));
 	}
 	
 	public Baos serializeBytes() {

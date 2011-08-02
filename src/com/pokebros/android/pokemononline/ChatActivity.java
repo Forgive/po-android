@@ -97,6 +97,7 @@ public class ChatActivity extends Activity {
 						Baos b = new Baos();
 						b.putString(self.name);
 						netServ.socket.sendMessage(b, Command.TierSelection);
+						Toast.makeText(ChatActivity.this, "Tier Selected: " + self.name, Toast.LENGTH_SHORT).show();
 						dismiss();
 					}
 				}
@@ -419,6 +420,7 @@ public class ChatActivity extends Activity {
 						} catch (NumberFormatException e) {
 							inRange = 200;
 						}
+						System.out.println("Force Rated: " + options[0] + " Force Same Tier: " + options[1] + " Only within Range: " + options[2]);
 						netServ.socket.sendMessage(
 								constructFindBattle(options[0], options[1], options[2], inRange, (byte) 0),
 								Command.FindBattle);

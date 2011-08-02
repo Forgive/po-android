@@ -431,8 +431,6 @@ public class BattleActivity extends Activity {
 			}
 
 			netServ.showNotification(BattleActivity.class, "Battle");
-			Toast.makeText(BattleActivity.this, "Service connected",
-                    Toast.LENGTH_SHORT).show();
 
 			battleView.setBackgroundResource(resources.getIdentifier("bg" + netServ.battle.background, "drawable", "com.pokebros.android.pokemononline"));
 			
