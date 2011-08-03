@@ -30,7 +30,6 @@ public class PokeDragIcon extends ImageView implements DragSource, DropTarget {
 	public void onDropCompleted(View target, boolean success) {
 		// TODO Auto-generated method stub
 		if(success) {
-			System.out.println("I AM ON DROP COMPLETED");
 			
 			TranslateAnimation otherTa = new TranslateAnimation(0f, getLeft() - target.getLeft(), -1*(target.getHeight() + 10), 0f);
 			otherTa.setDuration(200);
@@ -60,13 +59,11 @@ public class PokeDragIcon extends ImageView implements DragSource, DropTarget {
 	public boolean acceptDrop(DragSource source, int x, int y, int xOffset,
 			int yOffset, Object dragInfo) {
 		//Accept all things by default
-		System.out.println("I AM ACCEPTING YOUR DROP");
 		return true;
 	}
 
 	public void onDragEnter(DragSource source, int x, int y, int xOffset,
 			int yOffset, Object dragInfo) {
-		System.out.println("YOU ENTERED ME");
 		TranslateAnimation ta = new TranslateAnimation(0f, 0f, 0f, -1*(getHeight() + 10));
 		ta.setDuration(100);
 		ta.setFillAfter(true);
@@ -76,7 +73,6 @@ public class PokeDragIcon extends ImageView implements DragSource, DropTarget {
 
 	public void onDragExit(DragSource source, int x, int y, int xOffset,
 			int yOffset, Object dragInfo) {
-		System.out.println("YOU EXITED ME");
 		TranslateAnimation ta = new TranslateAnimation(0f, 0f, -1*(getHeight() + 10), 0f);
 		ta.setDuration(100);
 		startAnimation(ta);
@@ -91,7 +87,6 @@ public class PokeDragIcon extends ImageView implements DragSource, DropTarget {
 	public void onDrop(DragSource source, int x, int y, int xOffset,
 			int yOffset, Object dragInfo) {
 		// TODO Auto-generated method stub
-		System.out.println("I AM ON DROP");
 
 	}
 

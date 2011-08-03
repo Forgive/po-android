@@ -442,6 +442,8 @@ public class BattleActivity extends Activity {
 					pokeListNames[i].setText(poke.nick);
 					pokeListHPs[i].setText(poke.currentHP +
 							"/" + poke.totalHP);
+					pokeListItems[i].setText(poke.itemString);
+					pokeListAbilities[i].setText(poke.abilityString);
 					for (int j = 0; j < 4; j++) {
 						pokeListMovePreviews[i][j].setText(poke.moves[j].toString());
 						int color;

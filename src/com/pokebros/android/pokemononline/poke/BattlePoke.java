@@ -4,6 +4,7 @@ import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
 import com.pokebros.android.pokemononline.DataBaseHelper;
 import com.pokebros.android.pokemononline.SerializeBytes;
+import com.pokebros.android.pokemononline.battle.Battle;
 import com.pokebros.android.pokemononline.battle.BattleMove;
 import com.pokebros.android.pokemononline.poke.PokeEnums.Status;
 
@@ -12,9 +13,9 @@ public class BattlePoke extends ShallowBattlePoke {
 	public short currentHP = 0;
 	public short totalHP = 0;
 	short item = 0;
-	String itemString;
+	public String itemString;
 	short ability = 0;
-	String abilityString;
+	public String abilityString;
 	byte statusCount = 0;
 	byte originalStatusCount = 0;
 	byte nature = 0;
@@ -36,7 +37,9 @@ public class BattlePoke extends ShallowBattlePoke {
 		shiny = msg.readBool();
 		level = msg.readByte();
 		item = msg.readShort();
+		itemString = Battle.itemName(item); // XXX This is probably how we should do all of these instead of passing db around
 		ability = msg.readShort();
+		abilityString = db.query("SELECT Name FROM [Abilities] WHERE _id = " + (ability + 1));
 		happiness = msg.readByte();
 		
 		for(int i = 0; i < 5; i++)

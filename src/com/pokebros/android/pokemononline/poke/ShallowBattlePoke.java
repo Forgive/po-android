@@ -26,7 +26,7 @@ public class ShallowBattlePoke extends SerializeBytes {
 		uID = new UniqueID(msg);
 		rnick = nick = msg.readQString();
 		if (!isMe)
-			nick = "The foe's " + nick;
+			nick = "the foe's " + nick;
 		lifePercent = msg.readByte();
 		fullStatus = msg.readInt();
 		gender = msg.readByte();

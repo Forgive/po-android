@@ -309,9 +309,8 @@ public class NetworkService extends Service {
 			int pID2 = msg.readInt();
 			if(pID1 == 0) { // This is us!
 				BattleConf conf = new BattleConf(msg);
-				BattleTeam team = new BattleTeam(msg, db);
 				// Start the battle
-				battle = new Battle(conf, team, players.get(conf.id(0)),
+				battle = new Battle(conf, msg, players.get(conf.id(0)),
 					players.get(conf.id(1)), mePlayer.id, bID, this);
 				currentChannel.writeToHist("\nBattle between " + mePlayer.nick() + 
 					" and " + players.get(pID2).nick() + " started!");
