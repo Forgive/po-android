@@ -14,10 +14,10 @@ public class PlayerInfo extends SerializeBytes {
 	String nick = "BROLOLHAH";
 	String info = "SUP";
 	byte auth = 0, flags = 0;
-	short rating = 0;
+	public short rating = 0;
 	public UniqueID[] pokes = new UniqueID[6];
 	short avatar = 72;
-	String tier = "OU";
+	public String tier = "OU";
 	QColor color = new QColor();
 	byte gen = 5;
 	

@@ -453,8 +453,8 @@ public class ChatActivity extends Activity {
 		case PlayerInfo:
 			View layout = inflater.inflate(R.layout.player_info_dialog, (LinearLayout)findViewById(R.id.player_info_dialog));
             final PlayerInfo player = playerAdapter.getItem(args.getInt("player"));
-            ImageView[] oppPokeIcons = new ImageView[6];
-            TextView oppInfo, oppTeam;           
+            ImageView[] pPokeIcons = new ImageView[6];
+            TextView pInfo, pTeam, pName, pTier, pRating;           
 			builder.setView(layout)
             .setNegativeButton("Back", new DialogInterface.OnClickListener(){
             	public void onClick(DialogInterface dialog, int which) {
@@ -474,15 +474,21 @@ public class ChatActivity extends Activity {
             
 
             for(int i = 0; i < 6; i++){
-        	oppPokeIcons[i] = (ImageView)layout.findViewById(getResources().getIdentifier("player_info_poke" + 
+        	pPokeIcons[i] = (ImageView)layout.findViewById(getResources().getIdentifier("player_info_poke" + 
         			(i+1), "id", packName));
-        	oppPokeIcons[i].setImageDrawable(getIcon(player.pokes[i]));
-        	oppInfo = (TextView)layout.findViewById(getResources().getIdentifier("player_info", "id", packName));
-        	oppInfo.setText(Html.fromHtml("<b>Info: </b>" + NetworkService.escapeHtml(player.info())));
-        	oppTeam = (TextView)layout.findViewById(getResources().getIdentifier("player_info_team", "id", packName));
-        	oppTeam.setText(player.nick() + "'s team:");
+        	pPokeIcons[i].setImageDrawable(getIcon(player.pokes[i]));
             }
-                    
+        	pInfo = (TextView)layout.findViewById(getResources().getIdentifier("player_info", "id", packName));
+        	pInfo.setText(Html.fromHtml("<b>Info: </b>" + NetworkService.escapeHtml(player.info())));
+        	pTeam = (TextView)layout.findViewById(getResources().getIdentifier("player_info_team", "id", packName));
+        	pTeam.setText(player.nick() + "'s team:");
+        	pName = (TextView)layout.findViewById(getResources().getIdentifier("player_info_name", "id", packName));
+        	pName.setText(player.nick());
+        	pTier = (TextView)layout.findViewById(getResources().getIdentifier("player_info_tier", "id", packName));
+        	pTier.setText(Html.fromHtml("<b>Tier: </b>" + NetworkService.escapeHtml(player.tier)));
+        	pRating = (TextView)layout.findViewById(getResources().getIdentifier("player_info_rating", "id", packName));
+            pRating.setText(Html.fromHtml("<b>Rating: </b>" + NetworkService.escapeHtml(new Short(player.rating).toString())));    
+        	
             return pInfoDialog;
 		}
 		return new Dialog(this); // Should never get here but needed to run

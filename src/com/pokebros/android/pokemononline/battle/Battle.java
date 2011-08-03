@@ -45,7 +45,7 @@ public class Battle {
 	public boolean allowSwitch, allowAttack;
 	public boolean[] allowAttacks = new boolean[4];
 	public int background;
-	public boolean shouldShowPreview = false, shouldStruggle = true;
+	public boolean shouldShowPreview = false, shouldStruggle = false;
 	public BattleMove[] displayedMoves = new BattleMove[4];
 	
 	ShallowBattlePoke[][] pokes = new ShallowBattlePoke[2][6];
