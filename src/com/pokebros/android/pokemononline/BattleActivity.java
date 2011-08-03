@@ -87,6 +87,12 @@ public class BattleActivity extends Activity {
 	ScrollView infoScroll;
 	TextView[] names = new TextView[2];
 	ImageView[] pokeSprites = new ImageView[2];
+	
+	LinearLayout topAttackRowLayout;
+	LinearLayout bottomAttackRowLayout;
+	LinearLayout struggleRowLayout;
+	RelativeLayout struggleLayout;
+	
 	Resources resources;
 	public NetworkService netServ = null;
 	int me, opp;
@@ -205,6 +211,17 @@ public class BattleActivity extends Activity {
         infoView = (TextView)findViewById(R.id.infoWindow);
         infoScroll = (ScrollView)findViewById(R.id.infoScroll);
         battleView = (RelativeLayout)findViewById(R.id.battleScreen);
+        
+        topAttackRowLayout = (LinearLayout)findViewById(R.id.topAttackRowLayout);
+    	bottomAttackRowLayout = (LinearLayout)findViewById(R.id.bottomAttackRowLayout);
+    	struggleRowLayout = (LinearLayout)findViewById(R.id.struggleRowLayout);
+    	struggleLayout = (RelativeLayout)findViewById(R.id.struggleLayout);
+    	
+    	struggleLayout.setOnClickListener(new OnClickListener() {
+    		public void onClick(View v) {
+    			netServ.socket.sendMessage(netServ.battle.constructAttack((byte)-1), Command.BattleMessage); // This is how you struggle
+    		}
+    	});
     }
 	
 	private Handler handler = new Handler();
@@ -321,7 +338,7 @@ public class BattleActivity extends Activity {
 		runOnUiThread(new Runnable() {
 			public void run() {
 				BattleMove move = netServ.battle.displayedMoves[moveNum];
-				attackPPs[moveNum].setText(move.currentPP + "/" + move.totalPP);
+				attackPPs[moveNum].setText("PP " + move.currentPP + "/" + move.totalPP);
 			}
 		});
 	}
@@ -393,7 +410,16 @@ public class BattleActivity extends Activity {
 	public boolean checkStruggle() {
 		// XXX TODO This method should hide moves, show the button if necessary and return whether it showed the button
 		boolean struggle = netServ.battle.shouldStruggle;
-		//netServ.socket.sendMessage(netServ.battle.constructAttack((byte)-1), Command.BattleMessage); // This is how you struggle
+		if(struggle) {
+			bottomAttackRowLayout.setVisibility(View.GONE);
+			topAttackRowLayout.setVisibility(View.GONE);
+			struggleRowLayout.setVisibility(View.VISIBLE);
+		}
+		else {
+			bottomAttackRowLayout.setVisibility(View.VISIBLE);
+			topAttackRowLayout.setVisibility(View.VISIBLE);
+			struggleRowLayout.setVisibility(View.GONE);
+		}
 		return struggle;
 	}
 	

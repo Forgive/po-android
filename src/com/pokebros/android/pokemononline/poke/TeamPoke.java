@@ -43,18 +43,22 @@ public class TeamPoke extends SerializeBytes {
 	public TeamPoke() {
 		uID = new UniqueID();
 		nick = "LOLZ";
-		item = 0;
-		ability = 65;
+		item = 71;
+		ability = 98;
 		nature = 0;
 		gender = 1;
 		gen = 5;
 		shiny = true;
 		happiness = 127;
 		level = 100;
-		moves[0] = 331;
+		/*moves[0] = 331;
 		moves[1] = 213;
 		moves[2] = 412;
-		moves[3] = 210;
+		moves[3] = 210;*/
+		moves[0] = 118;
+		moves[1] = 227;
+		moves[2] = 150;
+		moves[3] = 271;
 		DVs[0] = DVs[1] = DVs[2] = DVs[3] = DVs[4] = DVs[5] = 31;
 		EVs[0] = EVs[1] = EVs[2] = EVs[3] = EVs[4] = EVs[5] = 10;
 	}

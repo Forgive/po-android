@@ -19,7 +19,7 @@ public class UniqueID extends SerializeBytes {
 	}
 	
 	public UniqueID() {
-		pokeNum = 1;
+		pokeNum = 173;
 		subNum = 0;
 	}
 

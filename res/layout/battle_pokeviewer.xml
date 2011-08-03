@@ -174,17 +174,50 @@
 	<!-- START Action Buttons -->
 	<LinearLayout
 		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
+		android:layout_height="180dp"
 		android:layout_marginTop="4dp"
-		android:orientation="horizontal">		
+		android:orientation="horizontal"
+		android:id="@+id/struggleRowLayout"
+		android:visibility="gone">		
+		<RelativeLayout
+			android:id="@+id/struggleLayout"
+			android:layout_height="fill_parent"
+			android:layout_width="fill_parent"
+			android:layout_weight="1"
+			android:background="@drawable/curse_type_button"
+			android:layout_alignParentTop="true"
+			android:layout_marginTop="3dp"
+			android:layout_marginBottom="3dp"
+			android:layout_marginRight="3dp"
+			android:layout_marginLeft="3dp"
+			android:clickable="true">
+			<TextView
+				android:text="STRUGGLE"
+				android:textSize="30sp"
+				android:layout_marginTop="20dp"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/struggleName"
+				android:textColor="#000000"
+				android:layout_centerHorizontal="true"
+				android:textStyle="bold"/>
+		</RelativeLayout>
+		</LinearLayout>
+	<LinearLayout
+		android:layout_width="fill_parent"
+		android:layout_height="80dp"
+		android:layout_marginTop="4dp"
+		android:orientation="horizontal"
+		android:id="@+id/topAttackRowLayout">		
 		<RelativeLayout
 			android:id="@+id/attack1Layout"
-			android:layout_height="70dp"
+			android:layout_height="fill_parent"
 			android:layout_width="fill_parent"
 			android:layout_weight="1"
 			android:background="@drawable/battle_border_button"
 			android:layout_alignParentTop = "true"
 			android:layout_marginTop="3dp"
+			android:layout_marginBottom="3dp"
 			android:layout_marginRight="3dp"
 			android:layout_marginLeft="3dp">
 			<TextView
@@ -193,6 +226,7 @@
 				android:layout_height="wrap_content"
 				android:id="@+id/attack1Name"
 				android:textColor="#000000"
+				android:layout_marginTop="10dp"
 				android:layout_centerHorizontal="true"
 				android:textStyle="bold"/>
 			<TextView
@@ -205,20 +239,21 @@
 				android:layout_alignParentRight="true"/>
 		</RelativeLayout>
 		<RelativeLayout
-			android:layout_toRightOf="@id/attack1Layout"
 			android:id="@+id/attack2Layout"
-			android:layout_height="70dp"
+			android:layout_height="fill_parent"
 			android:layout_width="fill_parent"
 			android:layout_weight="1"
 			android:background="@drawable/battle_border_button"
 			android:layout_marginTop="3dp"
 			android:layout_marginRight="3dp"
-			android:layout_marginLeft="3dp">
+			android:layout_marginLeft="3dp"
+			android:layout_marginBottom="3dp">
 			<TextView
 				android:text="Attack 2"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:id="@+id/attack2Name"
+				android:layout_marginTop="10dp"
 				android:textColor="#000000"
 				android:layout_centerHorizontal="true"
 				android:textStyle="bold"/>
@@ -234,18 +269,19 @@
 	</LinearLayout>
 	<LinearLayout
 		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
+		android:layout_height="70dp"
 		android:layout_marginTop="4dp"
-		android:orientation="horizontal">
+		android:orientation="horizontal"
+		android:id="@+id/bottomAttackRowLayout"
+		android:layout_weight="1">
 		
 		<RelativeLayout
 			android:layout_below="@id/attack1Layout"
 			android:id="@+id/attack3Layout"
-			android:layout_height="70dp"
+			android:layout_height="fill_parent"
 			android:layout_width="fill_parent"
 			android:layout_weight="1"
 			android:background="@drawable/battle_border_button"
-			android:layout_marginTop="3dp"
 			android:layout_marginBottom="3dp"
 			android:layout_marginRight="3dp"
 			android:layout_marginLeft="3dp">
@@ -255,6 +291,7 @@
 				android:layout_height="wrap_content"
 				android:id="@+id/attack3Name"
 				android:textColor="#000000"
+				android:layout_marginTop="10dp"
 				android:layout_centerHorizontal="true"
 				android:textStyle="bold"/>
 			<TextView
@@ -270,11 +307,10 @@
 			android:layout_below="@id/attack2Layout"
 			android:layout_toRightOf="@id/attack3Layout"
 			android:id="@+id/attack4Layout"
-			android:layout_height="70dp"
+			android:layout_height="fill_parent"
 			android:layout_width="fill_parent"
 			android:layout_weight="1"
 			android:background="@drawable/battle_border_button"
-			android:layout_marginTop="3dp"
 			android:layout_marginBottom="3dp"
 			android:layout_marginRight="3dp"
 			android:layout_marginLeft="3dp">
@@ -283,6 +319,7 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:id="@+id/attack4Name"
+				android:layout_marginTop="10dp"
 				android:textColor="#000000"
 				android:layout_centerHorizontal="true"
 				android:textStyle="bold"/>
