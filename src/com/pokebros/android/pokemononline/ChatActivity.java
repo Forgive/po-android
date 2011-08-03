@@ -174,6 +174,7 @@ public class ChatActivity extends Activity {
 					long id) {
 				//TODO: Connect to channel
 				System.out.println("Channel -- click works");
+				Toast.makeText(ChatActivity.this, "Channel switching not implemented yet.", Toast.LENGTH_LONG).show();
 			}
 		});
         channels.setOnItemLongClickListener(new OnItemLongClickListener() {
