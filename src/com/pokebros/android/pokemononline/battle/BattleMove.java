@@ -43,7 +43,7 @@ public class BattleMove extends SerializeBytes {
 		currentPP = bm.currentPP;
 		num = bm.num;
 		totalPP = (byte)(new Byte(db.query("SELECT pp FROM [Moves] WHERE _id = " + num)) * 1.6);
-		name = new String(bm.name);
+		name = db.query("SELECT name FROM [Moves] WHERE _id = " + num);
 		type = bm.type;
 	}
 	

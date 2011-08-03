@@ -46,6 +46,7 @@ public class Battle {
 	public int background;
 	public boolean shouldShowPreview = false, shouldStruggle = true;
 	public BattleMove[] displayedMoves = new BattleMove[4];
+	final static int NUMREGITEMS = 314, NUMBERRYITEMS = 64; 
 	
 	ShallowBattlePoke[][] pokes = new ShallowBattlePoke[2][6];
 	ArrayList<Boolean> pokeAlive = new ArrayList<Boolean>();
@@ -386,12 +387,12 @@ public class Battle {
 			s = s.replaceAll("%tf", players[opp].nick());
 			if(type  != -1) s = s.replaceAll("%t", Type.values()[type].toString());
 			if(foe   != -1) s = s.replaceAll("%f", currentPoke(foe).nick);
-			if(other  != -1) s = s.replaceAll("%m", netServ.db.query("SELECT name FROM [Moves] WHERE _id = " + other));
+			if(other  != -1 && s.contains("%m")) s = s.replaceAll("%m", netServ.db.query("SELECT name FROM [Moves] WHERE _id = " + other));
 			s = s.replaceAll("%d", new Short(other).toString());
 			s = s.replaceAll("%q", q);
-			//s = s.replaceAll("%i", ItemName(other));
-			//s = s.replaceAll("%a", AbilityName(other));
-			if(other !=-1) s = s.replaceAll("%p", netServ.db.query("SELECT name FROM [Pokemons] WHERE Num = " + other));
+			if(other != -1 && s.contains("%i")) s = s.replaceAll("%i", itemName(other));
+			if(other != -1 && s.contains("%a")) s = s.replaceAll("%a", netServ.db.query("SELECT name FROM [Abilities] WHERE _id = " + (other + 1)));
+			if(other != -1 && s.contains("%p")) s = s.replaceAll("%p", netServ.db.query("SELECT name FROM [Pokemons] WHERE Num = " + other));
 			
 			writeToHist("\n" + s);
 			break;
@@ -630,7 +631,7 @@ public class Battle {
 		case ChangePP:
 			byte moveNum = msg.readByte();
 			byte newPP = msg.readByte();
-			myTeam.pokes[0].moves[moveNum].currentPP = newPP;
+			displayedMoves[moveNum].currentPP = myTeam.pokes[0].moves[moveNum].currentPP = newPP;
 			if(netServ.battleActivity != null)
 				netServ.battleActivity.updateMovePP(moveNum);
 			break;
@@ -639,6 +640,19 @@ public class Battle {
 			break;
 			
 		}
+	}
+	
+	
+	String itemName(int itemnum)
+	{
+	    if ( itemnum < 0 || (itemnum < 8000 && NUMREGITEMS <= itemnum) || (itemnum >= 8000 && NUMBERRYITEMS + 8000 <= itemnum) ) {
+		return "";
+	    }
+	    if (itemnum < 8000) {
+		return netServ.db.query("SELECT name FROM [Items] WHERE _id = " + itemnum + 1);
+	    } else {
+		return netServ.db.query("SELECT name FROM [Berries] WHERE _id = " + (itemnum - 7999));
+	    }
 	}
 	
 	enum TempPokeChange {
