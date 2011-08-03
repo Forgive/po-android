@@ -649,9 +649,9 @@ public class Battle {
 		return "";
 	    }
 	    if (itemnum < 8000) {
-		return netServ.db.query("SELECT name FROM [Items] WHERE _id = " + itemnum + 1);
+		return netServ.db.query("SELECT Name FROM [Items] WHERE _id = " + (itemnum + 1));
 	    } else {
-		return netServ.db.query("SELECT name FROM [Berries] WHERE _id = " + (itemnum - 7999));
+		return netServ.db.query("SELECT Name FROM [Berries] WHERE _id = " + (itemnum - 7999));
 	    }
 	}
 	
