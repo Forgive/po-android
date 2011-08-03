@@ -639,11 +639,17 @@ public class Battle {
 			// TODO
 			break;
 		case RearrangeTeam:
-			// TODO
 			oppTeam = new ShallowShownTeam(msg);
 			shouldShowPreview = true;
 			if(netServ.battleActivity != null && netServ.battleActivity.hasWindowFocus())
 				netServ.battleActivity.notifyRearrangeTeamDialog();
+			break;
+		case ChangePP:
+			byte moveNum = msg.readByte();
+			byte newPP = msg.readByte();
+			myTeam.pokes[0].moves[moveNum].currentPP = newPP;
+			if(netServ.battleActivity != null)
+				netServ.battleActivity.updateMovePP(moveNum);
 			break;
 		default:
 			System.out.println("Battle command unimplemented -- " + bc);

@@ -66,7 +66,11 @@ public class BattleActivity extends Activity {
 	RelativeLayout battleView;
 	TextProgressBar[] hpBars = new TextProgressBar[2];
 	TextView[] currentPokeNames = new TextView[2];
-	Button[] attack = new Button[4];
+	
+	TextView[] attackNames = new TextView[4];
+	TextView[] attackPPs = new TextView[4];
+	RelativeLayout[] attackLayouts = new RelativeLayout[4];
+	
 	TextView[] timers = new TextView[2];
 	TextView[] pokeListNames = new TextView[6];
 	TextView[] pokeListItems = new TextView[6];
@@ -180,8 +184,10 @@ public class BattleActivity extends Activity {
         realViewSwitcher = (RealViewSwitcher)findViewById(R.id.battlePokeSwitcher);
         
         for(int i = 0; i < 4; i++) {
-        	attack[i] = (Button)findViewById(resources.getIdentifier("attack" + (i+1), "id", packName));
-        	attack[i].setOnClickListener(battleListener);
+        	attackNames[i] = (TextView)findViewById(resources.getIdentifier("attack" + (i+1) + "Name", "id", packName));
+        	attackPPs[i] = (TextView)findViewById(resources.getIdentifier("attack" + (i+1) + "PP", "id", packName));
+        	attackLayouts[i] = (RelativeLayout)findViewById(resources.getIdentifier("attack" + (i+1) + "Layout", "id", packName));
+        	attackLayouts[i].setOnClickListener(battleListener);
         }
         for(int i = 0; i < 6; i++) {
         	pokeListNames[i] = (TextView)findViewById(resources.getIdentifier("pokename" + (i+1), "id", packName));
@@ -311,6 +317,14 @@ public class BattleActivity extends Activity {
 		});
 	}
 
+	public void updateMovePP(final int moveNum) {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				BattleMove move = netServ.battle.myTeam.pokes[0].moves[moveNum];
+				attackPPs[moveNum].setText(move.currentPP + "/" + move.totalPP);
+			}
+		});
+	}
 	public void updateMyPoke() {
 		runOnUiThread(new Runnable() {
 			public void run() {
@@ -322,7 +336,8 @@ public class BattleActivity extends Activity {
 					BattlePoke battlePoke = netServ.battle.myTeam.pokes[0];
 			        for(int i = 0; i < 4; i++) {
 			        	BattleMove move = netServ.battle.displayedMoves[i];
-			        	attack[i].setText(move.toString());
+			        	updateMovePP(i);
+			        	attackNames[i].setText(move.toString());
 			        	String type;
 			        	if (move.num == 237)
 			        		type = Type.values()[battlePoke.hiddenPowerType()].toString();
@@ -331,7 +346,7 @@ public class BattleActivity extends Activity {
 			        	type = type.toLowerCase();
 			        	int resID = resources.getIdentifier(type + "_type_button",
 					      		"drawable", "com.pokebros.android.pokemononline");
-			        	attack[i].setBackgroundResource(resID);
+			        	attackLayouts[i].setBackgroundResource(resID);
 			        }
 		        	pokeSprites[me].setImageDrawable(getSprite(poke, false));
 				}
@@ -359,9 +374,9 @@ public class BattleActivity extends Activity {
 			public void run() {
 				for(int i = 0; i < 4; i++) {
 					if (allowAttack)
-						attack[i].setEnabled(allowAttacks[i]);
+						attackLayouts[i].setEnabled(allowAttacks[i]);
 					else
-						attack[i].setEnabled(false);
+						attackLayouts[i].setEnabled(false);
 				}
 				for(int i = 0; i < 6; i++) {
 					if (netServ.battle.myTeam.pokes[i].status() != Status.Koed.poValue())
@@ -515,7 +530,7 @@ public class BattleActivity extends Activity {
     		int id = v.getId();
     		// Check to see if click was on attack button
     		for(int i = 0; i < 4; i++)
-    			if(id == attack[i].getId())
+    			if(id == attackLayouts[i].getId())
     				netServ.socket.sendMessage(netServ.battle.constructAttack((byte)i), Command.BattleMessage);
     		// Check to see if click was on pokelist button
     		for(int i = 0; i < 6; i++) {
@@ -525,7 +540,7 @@ public class BattleActivity extends Activity {
     			}
     		}
     		for(int i = 0; i < 4; i++) {
-				attack[i].setEnabled(false);
+				attackNames[i].setEnabled(false);
 			}
 			for(int i = 0; i < 6; i++) {
 				pokeListButtons[i].setEnabled(false);
