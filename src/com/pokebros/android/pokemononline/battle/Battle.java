@@ -662,6 +662,7 @@ public class Battle {
 						wait(10000);
 					}
 				} catch (InterruptedException e) {}
+				netServ.battleActivity.updateCurrentPokeListEntry();
 			}
 			break;
 		case SpotShifts:
