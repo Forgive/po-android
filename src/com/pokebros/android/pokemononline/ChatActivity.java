@@ -501,7 +501,14 @@ public class ChatActivity extends Activity {
     	}
     	return true;
     }
-    
+
+    public void makeToast(final String s) {
+    	runOnUiThread(new Runnable() {
+    		public void run() {
+    			Toast.makeText(ChatActivity.this, s, Toast.LENGTH_SHORT).show();
+    		}
+    	});
+    }
 /*    @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
       if (v.getId()==R.id.playerlisting) {

@@ -21,9 +21,10 @@ public class IncomingChallenge {
 		mode = msg.readByte();
 	}
 	
-	public boolean validate(Hashtable<Integer, PlayerInfo> players) {
-		if (players.get(opponent) != null)
-			oppName = players.get(opponent).nick();
+	public void setNick(PlayerInfo p) { if(p != null) oppName = p.nick(); }
+	
+	public boolean isValidChallenge(Hashtable<Integer, PlayerInfo> players) {
+		setNick(players.get(opponent));
 		return desc == ChallengeDesc.Sent.ordinal() && oppName != null;
 	}
 	

@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import com.pokebros.android.pokemononline.battle.Battle;
 import com.pokebros.android.pokemononline.battle.BattleConf;
 import com.pokebros.android.pokemononline.battle.BattleTeam;
+import com.pokebros.android.pokemononline.battle.ChallengeEnums;
 import com.pokebros.android.pokemononline.player.FullPlayerInfo;
 import com.pokebros.android.pokemononline.player.PlayerInfo;
 
@@ -191,17 +192,33 @@ public class NetworkService extends Service {
 			break;
 		case ChallengeStuff:
 			IncomingChallenge challenge = new IncomingChallenge(msg);
-			if (challenge.validate(players)) {
-				challenges.addFirst(challenge);
-				if (chatActivity != null && chatActivity.hasWindowFocus()) {
-					chatActivity.notifyChallenge();
-				} else {
-					Notification note = new Notification(R.drawable.icon, "You've been challenged by " + challenge.oppName + "!", System.currentTimeMillis());
-			        note.setLatestEventInfo(this, "POAndroid", "You've been challenged!", PendingIntent.getActivity(this, 0,
-			                new Intent(NetworkService.this, ChatActivity.class), Intent.FLAG_ACTIVITY_NEW_TASK));
-			        noteMan.cancel(IncomingChallenge.note);
-					noteMan.notify(IncomingChallenge.note, note);
+			challenge.setNick(players.get(challenge.opponent));
+			System.out.println("CHALLENGE STUFF: " + ChallengeEnums.ChallengeDesc.values()[challenge.desc]);
+			switch(ChallengeEnums.ChallengeDesc.values()[challenge.desc]) {
+			case Sent:
+				if (challenge.isValidChallenge(players)) {
+					challenges.addFirst(challenge);
+					if (chatActivity != null && chatActivity.hasWindowFocus()) {
+						chatActivity.notifyChallenge();
+					} else {
+						Notification note = new Notification(R.drawable.icon, "You've been challenged by " + challenge.oppName + "!", System.currentTimeMillis());
+						note.setLatestEventInfo(this, "POAndroid", "You've been challenged!", PendingIntent.getActivity(this, 0,
+								new Intent(NetworkService.this, ChatActivity.class), Intent.FLAG_ACTIVITY_NEW_TASK));
+						noteMan.cancel(IncomingChallenge.note);
+						noteMan.notify(IncomingChallenge.note, note);
+					}
 				}
+				break;
+			case Refused:
+				if(challenge.oppName != null && chatActivity != null) {
+					chatActivity.makeToast(challenge.oppName + " refused your challenge");
+				}
+				break;
+			case Busy:
+				if(challenge.oppName != null && chatActivity != null) {
+					chatActivity.makeToast(challenge.oppName + " is busy");
+				}
+				break;
 			}
 			break;
 		case ChannelsList:
