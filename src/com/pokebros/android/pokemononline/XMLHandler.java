@@ -4,6 +4,8 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import android.widget.Toast;
+
 public class XMLHandler extends DefaultHandler {
 	private boolean inTrainer = false;
 	private boolean inMove = false;

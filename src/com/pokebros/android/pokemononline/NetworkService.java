@@ -81,7 +81,6 @@ public class NetworkService extends Service {
 		db = new DataBaseHelper(NetworkService.this);
 		showNotification(ChatActivity.class, "Chat");
 		noteMan = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		System.out.println("NETWORK SERVICE PATTTHHHHH" + filePath);
 		super.onCreate();
 	}
 	
@@ -137,7 +136,6 @@ public class NetworkService extends Service {
 			filePath = bundle.getString("filePath");
 			meLoginPlayer = new FullPlayerInfo(filePath);
 			mePlayer = new PlayerInfo (meLoginPlayer);
-			System.out.println("NETWORK SERVICE PATTTHHHHH (onStartCommand)" + filePath);
 		}
 		if (bundle != null && bundle.containsKey("ip"))
 			connect(bundle.getString("ip"), bundle.getShort("port"));

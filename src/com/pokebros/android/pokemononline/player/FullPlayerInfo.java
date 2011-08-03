@@ -16,6 +16,9 @@ public class FullPlayerInfo extends SerializeBytes {
 	protected boolean ladderEnabled = true;
 	protected boolean showTeam = false;
 	protected QColor nameColor = new QColor();
+	private File team;
+	private String myPath = "/sdcard/team.xml";
+	private PokeParser p;
 	
 	public FullPlayerInfo(Bais msg) {
 		playerTeam = new PlayerTeam(msg);
@@ -25,9 +28,15 @@ public class FullPlayerInfo extends SerializeBytes {
 	}
 	
 	public FullPlayerInfo(String path) {
-		File team = new File(path);
+		if (path == null)
+			team = new File(myPath);
+		else
+			team = new File(path);
 		if (team.exists()) {
-			PokeParser p = new PokeParser(path);
+			if (path == null)
+				p = new PokeParser(myPath);
+			else 
+				p = new PokeParser(path);
 			playerTeam = new PlayerTeam(p);
 		}
 		else {	

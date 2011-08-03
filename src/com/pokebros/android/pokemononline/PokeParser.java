@@ -11,6 +11,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.apache.http.ParseException;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -31,7 +32,6 @@ public class PokeParser extends DefaultHandler
 	XMLDataSet parsedTeam;
 	
 	public PokeParser(String path) {
-		System.out.println("POKEPARSER PATTTHHH " + path);
 		try {
 			in = new FileInputStream(path);
 		} catch (FileNotFoundException e) {
@@ -60,18 +60,14 @@ public class PokeParser extends DefaultHandler
 		/* Create a new ContentHandler and apply it to the XML-Reader */
 		XMLHandler myHandler = new XMLHandler();
 		xr.setContentHandler(myHandler);
-
-		/*FileInputStream in = null;
-		try {
-			in = new FileInputStream("/sdcard/team.xml");
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}*/
+		
 		try {
 			xr.parse(new InputSource(in));
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (SAXException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
 			e.printStackTrace();
 		}
 		parsedTeam = myHandler.getParsedData();

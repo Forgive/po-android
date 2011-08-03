@@ -1,15 +1,5 @@
 package com.pokebros.android.pokemononline;
 
-import java.io.IOException;
-import java.net.SocketTimeoutException;
-import java.net.URI;
-import java.nio.channels.UnresolvedAddressException;
-
-import org.xmlpull.v1.XmlPullParserException;
-
-import com.pokebros.android.pokemononline.RegistryConnectionService.RegistryCommandListener;
-import com.pokebros.android.pokemononline.ServerListAdapter.Server;
-
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
@@ -18,7 +8,6 @@ import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.InputType;
@@ -36,6 +25,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import com.pokebros.android.pokemononline.RegistryConnectionService.RegistryCommandListener;
+import com.pokebros.android.pokemononline.ServerListAdapter.Server;
 
 public class RegistryActivity extends Activity implements ServiceConnection, RegistryCommandListener {
 	
@@ -149,7 +141,6 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 				Intent intent = new Intent(RegistryActivity.this, NetworkService.class);
 				intent.putExtra("ip", ip.getText().toString());
 				intent.putExtra("port", portVal);
-				System.out.println("REGISTRY ACTIVITY PATTTHHHHH" + path);
 				intent.putExtra("filePath", path);
 				startService(intent);
 				startActivity(new Intent(RegistryActivity.this, ChatActivity.class));
@@ -178,6 +169,7 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 							public void onClick(DialogInterface dialog,	int whichButton) {
 								String value = input.getText().toString();
 								path = value;
+								Toast.makeText(getApplicationContext(), "Team imported from " + path, Toast.LENGTH_SHORT).show();
 							}
 						});
 
@@ -188,7 +180,6 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 					});
 
 				alert.show();
-    			//Toast.makeText(getApplicationContext(), "'Import Team' has not been implemented yet! Put your team in /sdcard/team.xml", Toast.LENGTH_SHORT).show();
     		}
     	}
     };
