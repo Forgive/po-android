@@ -26,8 +26,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.LinearGradient;
+import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.Shader.TileMode;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -40,6 +46,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
@@ -361,9 +368,8 @@ public class BattleActivity extends Activity {
 			        	else
 			        		type = move.getTypeString();
 			        	type = type.toLowerCase();
-			        	int resID = resources.getIdentifier(type + "_type_button",
-					      		"drawable", "com.pokebros.android.pokemononline");
-			        	attackLayouts[i].setBackgroundResource(resID);
+			        	attackLayouts[i].setBackgroundDrawable(resources.getDrawable(resources.getIdentifier(type + "_type_button",
+					      		"drawable", "com.pokebros.android.pokemononline")));
 			        }
 		        	pokeSprites[me].setImageDrawable(getSprite(poke, false));
 				}
@@ -391,17 +397,21 @@ public class BattleActivity extends Activity {
 			public void run() {
 				if (!checkStruggle()) {
 					for (int i = 0; i < 4; i++) {
-						if (allowAttack)
-							attackLayouts[i].setEnabled(allowAttacks[i]);
-						else
-							attackLayouts[i].setEnabled(false);
+						if (allowAttack) {
+							setAttackButtonEnabled(i, allowAttacks[i]);
+							//attackLayouts[i].setEnabled(allowAttacks[i]);
+						}
+						else {
+							setAttackButtonEnabled(i, false);
+							//attackLayouts[i].setEnabled(false);
+						}
 					}
 				}
 				for(int i = 0; i < 6; i++) {
 					if (netServ.battle.myTeam.pokes[i].status() != Status.Koed.poValue())
-						pokeListButtons[i].setEnabled(allowSwitch);
+						setPokeListButtonEnabled(i, allowSwitch);
 					else
-						pokeListButtons[i].setEnabled(false);
+						setPokeListButtonEnabled(i, false);
 				}
 			}
 		});
@@ -577,14 +587,40 @@ public class BattleActivity extends Activity {
     			}
     		}
     		for(int i = 0; i < 4; i++) {
-				attackNames[i].setEnabled(false);
+    			setAttackButtonEnabled(i, false);
 			}
 			for(int i = 0; i < 6; i++) {
-				pokeListButtons[i].setEnabled(false);
+				setPokeListButtonEnabled(i, false);
 			}
     	}
     };
     
+    void setPokeListButtonEnabled(int num, boolean enabled) {
+    	setLayoutEnabled(pokeListButtons[num], enabled);
+    	setTextViewEnabled(pokeListNames[num], enabled);
+    	setTextViewEnabled(pokeListItems[num], enabled);
+    	setTextViewEnabled(pokeListAbilities[num], enabled);
+    	setTextViewEnabled(pokeListHPs[num], enabled);
+    	//setTextViewEnabled(pokeListIcons[num], enabled);
+    	for(int i = 0; i < 4; i++)
+    		setTextViewEnabled(pokeListMovePreviews[num][i], enabled);
+    }
+    
+    void setAttackButtonEnabled(int num, boolean enabled) {
+    	attackLayouts[num].setEnabled(enabled);
+		attackNames[num].setEnabled(enabled);
+		attackPPs[num].setEnabled(enabled);
+    }
+    
+    void setLayoutEnabled(ViewGroup v, boolean enabled) {
+    	v.setEnabled(enabled);
+    	v.getBackground().setAlpha(enabled ? 255 : 128);
+    }
+    
+    void setTextViewEnabled(TextView v, boolean enabled) {
+    	v.setEnabled(enabled);
+    	v.setTextColor(v.getTextColors().withAlpha(enabled ? 255 : 128).getDefaultColor());
+    }
     @Override
     public void onBackPressed() {
     	if(netServ != null && !netServ.battle.isOver)
