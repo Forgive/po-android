@@ -24,10 +24,10 @@ public class FullPlayerInfo extends SerializeBytes {
 		nameColor = new QColor(msg);
 	}
 	
-	public FullPlayerInfo() {
-		File team = new File("/sdcard/team.xml");
+	public FullPlayerInfo(String path) {
+		File team = new File(path);
 		if (team.exists()) {
-			PokeParser p = new PokeParser();
+			PokeParser p = new PokeParser(path);
 			playerTeam = new PlayerTeam(p);
 		}
 		else {	

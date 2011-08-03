@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -14,6 +15,8 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
+
+import android.net.Uri;
 
 import com.pokebros.android.pokemononline.player.PlayerTeam;
 import com.pokebros.android.pokemononline.poke.TeamPoke;
@@ -27,9 +30,10 @@ public class PokeParser extends DefaultHandler
 	PlayerTeam pt;
 	XMLDataSet parsedTeam;
 	
-	public PokeParser() {
+	public PokeParser(String path) {
+		System.out.println("POKEPARSER PATTTHHH " + path);
 		try {
-			in = new FileInputStream("/sdcard/team.xml");
+			in = new FileInputStream(path);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -57,12 +61,12 @@ public class PokeParser extends DefaultHandler
 		XMLHandler myHandler = new XMLHandler();
 		xr.setContentHandler(myHandler);
 
-		FileInputStream in = null;
+		/*FileInputStream in = null;
 		try {
 			in = new FileInputStream("/sdcard/team.xml");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-		}
+		}*/
 		try {
 			xr.parse(new InputSource(in));
 		} catch (IOException e) {

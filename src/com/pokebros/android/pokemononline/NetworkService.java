@@ -47,13 +47,14 @@ public class NetworkService extends Service {
 	private String salt = null;
 	public boolean failedConnect = false;
 	public DataBaseHelper db;
+	private String filePath = "/sdcard/team.xml";
 	
 	public boolean hasBattle() {
 		return battle != null;
 	}
 	
-	private FullPlayerInfo meLoginPlayer = new FullPlayerInfo();
-	public PlayerInfo mePlayer = new PlayerInfo(meLoginPlayer);
+	private FullPlayerInfo meLoginPlayer;
+	public PlayerInfo mePlayer;
 	public Battle battle = null;// = new Battle();
 	
 	protected Hashtable<Integer, Channel> channels = new Hashtable<Integer, Channel>();
@@ -80,6 +81,7 @@ public class NetworkService extends Service {
 		db = new DataBaseHelper(NetworkService.this);
 		showNotification(ChatActivity.class, "Chat");
 		noteMan = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		System.out.println("NETWORK SERVICE PATTTHHHHH" + filePath);
 		super.onCreate();
 	}
 	
@@ -92,7 +94,6 @@ public class NetworkService extends Service {
 				} catch (IOException e) {
 					failedConnect = true;
 					if(chatActivity != null) {
-						System.out.println("NUUUULLLLL");
 						chatActivity.notifyFailedConnection();
 					}
 					return;
@@ -132,6 +133,12 @@ public class NetworkService extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		super.onStartCommand(intent, flags, startId);
 		Bundle bundle = intent.getExtras();
+		if (bundle != null && bundle.containsKey("filePath")) {
+			filePath = bundle.getString("filePath");
+			meLoginPlayer = new FullPlayerInfo(filePath);
+			mePlayer = new PlayerInfo (meLoginPlayer);
+			System.out.println("NETWORK SERVICE PATTTHHHHH (onStartCommand)" + filePath);
+		}
 		if (bundle != null && bundle.containsKey("ip"))
 			connect(bundle.getString("ip"), bundle.getShort("port"));
 		return START_STICKY;

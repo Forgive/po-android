@@ -2,6 +2,7 @@ package com.pokebros.android.pokemononline;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.net.URI;
 import java.nio.channels.UnresolvedAddressException;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -12,9 +13,12 @@ import com.pokebros.android.pokemononline.ServerListAdapter.Server;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
+import android.app.AlertDialog;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.InputType;
@@ -41,7 +45,7 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 	private EditText ip;
 	private EditText port;
 	private boolean bound = false;
-	
+	private String path;
 	RegistryConnectionService service;
 	
     /** Called when the activity is first created. */
@@ -145,18 +149,46 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 				Intent intent = new Intent(RegistryActivity.this, NetworkService.class);
 				intent.putExtra("ip", ip.getText().toString());
 				intent.putExtra("port", portVal);
+				System.out.println("REGISTRY ACTIVITY PATTTHHHHH" + path);
+				intent.putExtra("filePath", path);
 				startService(intent);
 				startActivity(new Intent(RegistryActivity.this, ChatActivity.class));
 				RegistryActivity.this.finish();
     		}
     		else if (v == findViewById(R.id.importteambutton)) {
-					try {
-						PokeParser p = new PokeParser();
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-    			Toast.makeText(getApplicationContext(), "'Import Team' has not been implemented yet! Put your team in /sdcard/team.xml", Toast.LENGTH_SHORT).show();
+				/*
+				 * Intent intent = new Intent(RegistryActivity.this,
+				 * FileDialog.class); intent.putExtra(FileDialog.START_PATH,
+				 * "/sdcard"); System.out.println("OMGGGGGGGGGGGGGGGG " +
+				 * intent.toString());
+				 * RegistryActivity.this.startActivityForResult(intent, 1);
+				 */
+				AlertDialog.Builder alert = new AlertDialog.Builder(RegistryActivity.this);
+
+				alert.setTitle("Team Import");
+				alert.setMessage("Please type the path to your team.");
+
+				// Set an EditText view to get user input
+				final EditText input = new EditText(RegistryActivity.this);
+				input.append("/sdcard/");
+				alert.setView(input);
+
+				alert.setPositiveButton("Import",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,	int whichButton) {
+								String value = input.getText().toString();
+								path = value;
+							}
+						});
+
+				alert.setNegativeButton("Cancel",
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog,	int whichButton) {
+						}
+					});
+
+				alert.show();
+    			//Toast.makeText(getApplicationContext(), "'Import Team' has not been implemented yet! Put your team in /sdcard/team.xml", Toast.LENGTH_SHORT).show();
     		}
     	}
     };
