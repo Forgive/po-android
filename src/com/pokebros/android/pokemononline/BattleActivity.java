@@ -320,7 +320,7 @@ public class BattleActivity extends Activity {
 	public void updateMovePP(final int moveNum) {
 		runOnUiThread(new Runnable() {
 			public void run() {
-				BattleMove move = netServ.battle.myTeam.pokes[0].moves[moveNum];
+				BattleMove move = netServ.battle.displayedMoves[moveNum];
 				attackPPs[moveNum].setText(move.currentPP + "/" + move.totalPP);
 			}
 		});

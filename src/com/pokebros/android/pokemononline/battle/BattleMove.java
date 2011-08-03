@@ -39,10 +39,10 @@ public class BattleMove extends SerializeBytes {
 		type = new Byte(db.query("SELECT type FROM [Moves] WHERE _id = " + num));
 	}
 	
-	public BattleMove(BattleMove bm) {
+	public BattleMove(BattleMove bm, DataBaseHelper db) {
 		currentPP = bm.currentPP;
-		totalPP = bm.totalPP;
 		num = bm.num;
+		totalPP = (byte)(new Byte(db.query("SELECT pp FROM [Moves] WHERE _id = " + num)) * 1.6);
 		name = new String(bm.name);
 		type = bm.type;
 	}
