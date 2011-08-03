@@ -430,6 +430,7 @@ public class ChatActivity extends Activity {
 			.setMultiChoiceItems(new CharSequence[]{"Force Rated", "Force Same Tier", "Only within range"}, null, new DialogInterface.OnMultiChoiceClickListener() {
 				public void onClick(DialogInterface dialog, int which, boolean isChecked) {
 					options[which] = isChecked;
+					System.out.println("HAAARP FORCE RATED: " + options[0] + "FORCE SAME TIER: " + options[1] + "ONLY WITHIN RANGE: " + options[2]);
 				}
 			})
 			.setView(range)
@@ -620,12 +621,19 @@ public class ChatActivity extends Activity {
     private Baos constructFindBattle(boolean forceRated, boolean forceSameTier,
     		boolean onlyInRange, short range, byte mode) {
 		Baos find = new Baos();
-		find.putBool(forceRated);
+		/*find.putBool(forceRated);
 		find.putBool(forceSameTier);
 		find.putBool(onlyInRange);
 		find.putBool(false); // Padding
 		find.putShort(range);
-		find.write(mode); // singles/doubles/triples
+		find.write(mode); // singles/doubles/triples*/
+		int flags = 0;
+		flags |= (forceRated ? 1:0);
+		flags |= (forceSameTier ? 1:0);
+		flags |= (onlyInRange ? 1:0);
+		find.putInt(flags);
+		find.putShort(range);
+		find.write(mode);
 		return find;
     }
 
