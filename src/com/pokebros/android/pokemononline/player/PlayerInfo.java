@@ -15,7 +15,7 @@ public class PlayerInfo extends SerializeBytes {
 	String info = "SUP";
 	byte auth = 0, flags = 0;
 	short rating = 0;
-	UniqueID[] pokes = new UniqueID[6];
+	public UniqueID[] pokes = new UniqueID[6];
 	short avatar = 72;
 	String tier = "OU";
 	QColor color = new QColor();

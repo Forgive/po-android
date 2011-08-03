@@ -167,6 +167,8 @@ public class Battle {
 	
 	public String tu (String toUpper) {
 		// Makes the first letter of a string uppercase
+		if (toUpper.length() <= 1)
+			return toUpper;
 		return toUpper.substring(0,1).toUpperCase()+toUpper.substring(1);
 	}
 	

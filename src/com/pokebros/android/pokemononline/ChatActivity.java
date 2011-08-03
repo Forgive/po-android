@@ -3,6 +3,8 @@ package com.pokebros.android.pokemononline;
 import java.util.Enumeration;
 
 import com.pokebros.android.pokemononline.player.PlayerInfo;
+import com.pokebros.android.pokemononline.poke.ShallowShownPoke;
+import com.pokebros.android.pokemononline.poke.UniqueID;
 import com.pokebros.android.pokemononline.battle.ChallengeEnums.*;
 import de.marcreichelt.android.ChatRealViewSwitcher;
 import android.app.Activity;
@@ -12,12 +14,16 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.res.Resources;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.Html;
 import android.text.InputType;
 import android.view.ContextMenu;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -28,6 +34,8 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnKeyListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -43,14 +51,13 @@ public class ChatActivity extends Activity {
 		AskForPass,
 		ConfirmDisconnect,
 		FindBattle,
-		TierSelection
+		TierSelection,
+		PlayerInfo
 	}
 	
 	public final static int SWIPE_TIME_THRESHOLD = 100;
 	public final static int CONTEXTMENU_CHALLENGEPLAYER = 0;
 	public final static int CONTEXTMENU_VIEWPLAYERINFO = 1;
-	
-	public PlayerListAdapter playerListAdapter;
 	
 	private PlayerListAdapter playerAdapter;
 	private ChannelListAdapter channelAdapter;
@@ -62,7 +69,8 @@ public class ChatActivity extends Activity {
 	private TextView chatBox;
 	private EditText chatInput;
 	private ChatRealViewSwitcher chatViewSwitcher;
-
+	private String packName = "com.pokebros.android.pokemononline";
+	
 	class TierAlertDialog extends AlertDialog {
 		public Tier parentTier = null;
 		public ListView dialogListView = null;
@@ -114,9 +122,9 @@ public class ChatActivity extends Activity {
 
 	/** Called when the activity is first created. */
 	@Override
-    public void onCreate(Bundle savedInstanceState) { //TODO: Implement a Loading Screen
+    public void onCreate(Bundle savedInstanceState) { 
 		System.out.println("CREATED CHAT ACTIVITY");
-		
+		//TODO: Implement a Loading Screen
 		//progressDialog = ProgressDialog.show(ChatActivity.this, "","Loading. Please wait...", true);
 		//progressDialog.setCancelable(true);
 
@@ -129,24 +137,24 @@ public class ChatActivity extends Activity {
     	chatViewSwitcher.setCurrentScreen(1);
  
     	//Player List Stuff**
-        ListView players = (ListView)findViewById(R.id.playerlisting);
-        playerAdapter = new PlayerListAdapter(this, R.id.playerlisting);
-        players.setAdapter(playerAdapter);
-        registerForContextMenu(players);
-        players.setOnItemClickListener(new OnItemClickListener() {
-        	// Set the edit texts on list item click
-			public void onItemClick(AdapterView<?> parent, View view, int position,
-					long id) {
-				if (netServ.socket.isConnected()) {
-					Toast toast = Toast.makeText(ChatActivity.this,"Challenge sent to " + ((PlayerListAdapter)parent.getAdapter()).getItem(position).nick(),Toast.LENGTH_SHORT);
-					toast.show();
-					netServ.socket.sendMessage(constructChallenge(ChallengeDesc.Sent.ordinal(), 
-							((PlayerListAdapter)parent.getAdapter()).getItem(position).id, 
-							Clauses.SleepClause.ordinal(), Mode.Singles.ordinal()), Command.ChallengeStuff);
-				}
-			}        	
-		});
-      /*  players.setOnItemLongClickListener(new OnItemLongClickListener() {
+    	ListView players = (ListView)findViewById(R.id.playerlisting);
+    	playerAdapter = new PlayerListAdapter(this, R.id.playerlisting);
+    	players.setAdapter(playerAdapter);
+    	registerForContextMenu(players);
+   /* 	players.setOnItemClickListener(new OnItemClickListener() {
+    		// Set the edit texts on list item click
+    		public void onItemClick(AdapterView<?> parent, View view, int position,
+    				long id) {
+    			if (netServ.socket.isConnected()) {
+    				Toast.makeText(ChatActivity.this,"Challenge sent to " + 
+    						((PlayerListAdapter)parent.getAdapter()).getItem(position).nick(),Toast.LENGTH_SHORT).show();
+    				netServ.socket.sendMessage(constructChallenge(ChallengeDesc.Sent.ordinal(), 
+    						((PlayerListAdapter)parent.getAdapter()).getItem(position).id, 
+    						Clauses.SleepClause.ordinal(), Mode.Singles.ordinal()), Command.ChallengeStuff);
+    			}
+    		}        	
+    	});
+        players.setOnItemLongClickListener(new OnItemLongClickListener() {
 			public boolean onItemLongClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				// TODO: Display player description
@@ -330,6 +338,7 @@ public class ChatActivity extends Activity {
 	@Override
 	protected Dialog onCreateDialog(final int id, final Bundle args) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
 		switch (ChatDialog.values()[id]) {
 		case Challenge:
 			builder.setMessage(this.getString(R.string.accept_challenge) + " " + args.getString("oppName") + "?") // TODO add challenge info
@@ -441,6 +450,40 @@ public class ChatActivity extends Activity {
 			return builder.create();
 		case TierSelection:
 			return new TierAlertDialog(this, netServ.superTier);
+		case PlayerInfo:
+			View layout = inflater.inflate(R.layout.player_info_dialog, (LinearLayout)findViewById(R.id.player_info_dialog));
+            final PlayerInfo player = playerAdapter.getItem(args.getInt("player"));
+            ImageView[] oppPokeIcons = new ImageView[6];
+            TextView oppInfo, oppTeam;           
+			builder.setView(layout)
+            .setNegativeButton("Back", new DialogInterface.OnClickListener(){
+            	public void onClick(DialogInterface dialog, int which) {
+            		removeDialog(id);
+            	}
+            })
+            .setPositiveButton("Challenge", new DialogInterface.OnClickListener(){
+            	public void onClick(DialogInterface dialog, int which) {
+            		if (netServ.socket.isConnected())
+            			Toast.makeText(ChatActivity.this,"Challenge sent to " + 
+            					player.nick(),Toast.LENGTH_SHORT).show();
+            		netServ.socket.sendMessage(constructChallenge(ChallengeDesc.Sent.ordinal(),player.id, 
+            				Clauses.SleepClause.ordinal(), Mode.Singles.ordinal()), Command.ChallengeStuff);
+            		removeDialog(id);
+            	}});
+            final AlertDialog pInfoDialog = builder.create();
+            
+
+            for(int i = 0; i < 6; i++){
+        	oppPokeIcons[i] = (ImageView)layout.findViewById(getResources().getIdentifier("player_info_poke" + 
+        			(i+1), "id", packName));
+        	oppPokeIcons[i].setImageDrawable(getIcon(player.pokes[i]));
+        	oppInfo = (TextView)layout.findViewById(getResources().getIdentifier("player_info", "id", packName));
+        	oppInfo.setText(Html.fromHtml("<b>Info: </b>" + NetworkService.escapeHtml(player.info())));
+        	oppTeam = (TextView)layout.findViewById(getResources().getIdentifier("player_info_team", "id", packName));
+        	oppTeam.setText(player.nick() + "'s team:");
+            }
+                    
+            return pInfoDialog;
 		}
 		return new Dialog(this); // Should never get here but needed to run
 	}
@@ -493,6 +536,7 @@ public class ChatActivity extends Activity {
 			}
 			break;
 		case R.id.preferences:
+			//TODO: Make actual preferences menu
 			// Launch Preference activity
 			//Toast.makeText(ChatActivity.this, "Preferences not Implemented Yet",
             //        Toast.LENGTH_SHORT).show();
@@ -509,11 +553,11 @@ public class ChatActivity extends Activity {
     		}
     	});
     }
-/*    @Override
+    @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
       if (v.getId()==R.id.playerlisting) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
-       String pname = playerListAdapter.getItem(info.position).nick();
+       AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
+       String pname = playerAdapter.getItem(info.position).nick();
         menu.setHeaderTitle(pname);
           menu.add(Menu.NONE, CONTEXTMENU_CHALLENGEPLAYER, 0, "Challenge " + pname);
           menu.add(Menu.NONE, CONTEXTMENU_VIEWPLAYERINFO, 0, "View Player Info");
@@ -524,22 +568,23 @@ public class ChatActivity extends Activity {
     public boolean onContextItemSelected(MenuItem item) {
     	AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
     	switch(item.getItemId()){
-    	case CONTEXTMENU_CHALLENGEPLAYER: 
-    		Toast.makeText(this, "Challenge button", Toast.LENGTH_LONG).show();
+    	case CONTEXTMENU_CHALLENGEPLAYER:
     		if (netServ.socket.isConnected())
-				netServ.socket.sendMessage(constructChallenge(ChallengeDesc.Sent.ordinal(), 
-						playerListAdapter.getItem(info.position).id, 
-						Clauses.SleepClause.ordinal(), Mode.Singles.ordinal()), Command.ChallengeStuff);
-    		
-    		
+    			Toast.makeText(ChatActivity.this,"Challenge sent to " + 
+    					playerAdapter.getItem(info.position).nick(),Toast.LENGTH_SHORT).show();
+    		netServ.socket.sendMessage(constructChallenge(ChallengeDesc.Sent.ordinal(), 
+    				playerAdapter.getItem(info.position).id, 
+    				Clauses.SleepClause.ordinal(), Mode.Singles.ordinal()), Command.ChallengeStuff);
     		break;
     	case CONTEXTMENU_VIEWPLAYERINFO:
-    		Toast.makeText(this, "Info button" + info.toString(), Toast.LENGTH_LONG).show();
+    		Bundle args = new Bundle();
+    		args.putInt("player", info.position);
+    		showDialog(ChatDialog.PlayerInfo.ordinal(), args);
     		break;
     	}
     	return true;
     }
-*/
+
 
     private void disconnect() {
 		if (netServ != null)
@@ -605,6 +650,17 @@ public class ChatActivity extends Activity {
             	channelAdapter.addChannel(ch);
 			}
 		});
+	}
+	
+	private Drawable getIcon(UniqueID uid) {
+		Resources resources = getResources();
+		int resID = resources.getIdentifier("pi" + uid.pokeNum +
+				(uid.subNum == 0 ? "" : "_" + uid.subNum) +
+				"_icon", "drawable", packName);
+		if (resID == 0)
+			resID = resources.getIdentifier("pi" + uid.pokeNum + "_icon",
+					"drawable", packName);
+		return resources.getDrawable(resID);
 	}
 	
     @Override
