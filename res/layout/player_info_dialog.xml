@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout 
   android:orientation="vertical"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent" android:weightSum="1" android:id="@+id/player_info_dialog" android:paddingLeft="5dp" android:paddingRight="5dp" xmlns:android="http://schemas.android.com/apk/res/android">
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent" android:weightSum="1" android:id="@+id/player_info_dialog" android:paddingLeft="5dp" android:paddingRight="5dp" xmlns:android="http://schemas.android.com/apk/res/android">
     
     <TextView android:layout_alignParentLeft="true" android:text="PlayerName" android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/player_info_name" android:layout_alignParentTop="true" android:textStyle="bold" android:textSize="15sp"></TextView>
     <TextView android:layout_alignParentLeft="true" android:layout_below="@+id/player_info_name" android:layout_height="wrap_content" android:text="PlayerTier" android:layout_width="wrap_content" android:id="@+id/player_info_tier" android:textSize="12sp"></TextView>

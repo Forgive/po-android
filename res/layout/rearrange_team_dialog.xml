@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.android.launcher.DragLayer
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="match_parent"
-  android:layout_height="match_parent"
+	android:layout_width="fill_parent"
+  android:layout_height="fill_parent"
   android:id="@+id/drag_my_poke">
 <RelativeLayout 
   android:orientation="vertical"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent" android:weightSum="1" android:id="@+id/rearrange_team_dialog" android:paddingLeft="5dp">
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent" android:weightSum="1" android:id="@+id/rearrange_team_dialog" android:paddingLeft="5dp">
     
     <TextView android:layout_alignParentLeft="true" android:layout_alignParentTop="true" android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="@string/rearrange_team_description" android:textSize="13sp" android:id="@+id/arrange_team_info"></TextView>
     <TextView android:layout_alignParentLeft="true" android:layout_below="@+id/arrange_team_info" android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="@string/your_team" android:layout_marginTop="4dp" android:textStyle="bold" android:id="@+id/yourteam_id"></TextView>

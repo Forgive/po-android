@@ -70,6 +70,7 @@ public class ChatActivity extends Activity {
 	private EditText chatInput;
 	private ChatRealViewSwitcher chatViewSwitcher;
 	private String packName = "com.pokebros.android.pokemononline";
+	private int lastClicked; 
 	
 	class TierAlertDialog extends AlertDialog {
 		public Tier parentTier = null;
@@ -308,9 +309,9 @@ public class ChatActivity extends Activity {
 	
 	private void checkChallenges() {
 		if (netServ != null) {
-			IncomingChallenge challenge = netServ.challenges.poll();
+			IncomingChallenge challenge = netServ.challenges.peek();
 			if (challenge != null) {
-				ChatActivity.this.showDialog(ChatDialog.Challenge.ordinal(), challenge.toBundle());
+				ChatActivity.this.showDialog(ChatDialog.Challenge.ordinal());
 				netServ.noteMan.cancel(IncomingChallenge.note);
 			}
 		}
@@ -337,12 +338,13 @@ public class ChatActivity extends Activity {
 	}
 	
 	@Override
-	protected Dialog onCreateDialog(final int id, final Bundle args) {
+	protected Dialog onCreateDialog(final int id) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
+		final IncomingChallenge challenge = netServ.challenges.poll();
 		switch (ChatDialog.values()[id]) {
 		case Challenge:
-			builder.setMessage(this.getString(R.string.accept_challenge) + " " + args.getString("oppName") + "?") // TODO add challenge info
+			builder.setMessage(this.getString(R.string.accept_challenge) + " " + challenge.oppName + "?") // TODO add challenge info
 			.setCancelable(false)
 			.setPositiveButton(this.getString(R.string.accept), new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
@@ -350,9 +352,9 @@ public class ChatActivity extends Activity {
 					if (netServ.socket.isConnected())
 						netServ.socket.sendMessage(
 								constructChallenge(ChallengeDesc.Accepted.ordinal(),
-										args.getInt("opponent"),
-										args.getInt("clauses"),
-										args.getByte("mode")),
+										challenge.opponent,
+										challenge.clauses,
+										challenge.mode),
 										Command.ChallengeStuff);
 					// Without removeDialog() the dialog is reused and can only
 					// be modified in onPrepareDialog(). This dialog changes
@@ -369,9 +371,9 @@ public class ChatActivity extends Activity {
 					if (netServ.socket.isConnected())
 						netServ.socket.sendMessage(
 								constructChallenge(ChallengeDesc.Refused.ordinal(),
-										args.getInt("opponent"),
-										args.getInt("clauses"),
-										args.getByte("mode")),
+										challenge.opponent,
+										challenge.clauses,
+										challenge.mode),
 										Command.ChallengeStuff);
 					removeDialog(id);
 					checkChallenges();
@@ -453,12 +455,13 @@ public class ChatActivity extends Activity {
 			return new TierAlertDialog(this, netServ.superTier);
 		case PlayerInfo:
 			View layout = inflater.inflate(R.layout.player_info_dialog, (LinearLayout)findViewById(R.id.player_info_dialog));
-            final PlayerInfo player = playerAdapter.getItem(args.getInt("player"));
+            final PlayerInfo player = playerAdapter.getItem(lastClicked);
             ImageView[] pPokeIcons = new ImageView[6];
             TextView pInfo, pTeam, pName, pTier, pRating;           
 			builder.setView(layout)
-            .setNegativeButton("Back", new DialogInterface.OnClickListener(){
-            	public void onClick(DialogInterface dialog, int which) {
+            .setNegativeButton("Back", null)
+            .setOnCancelListener(new DialogInterface.OnCancelListener(){
+            	public void onCancel(DialogInterface dialog) {
             		removeDialog(id);
             	}
             })
@@ -584,9 +587,8 @@ public class ChatActivity extends Activity {
     				Clauses.SleepClause.ordinal(), Mode.Singles.ordinal()), Command.ChallengeStuff);
     		break;
     	case CONTEXTMENU_VIEWPLAYERINFO:
-    		Bundle args = new Bundle();
-    		args.putInt("player", info.position);
-    		showDialog(ChatDialog.PlayerInfo.ordinal(), args);
+    		lastClicked = info.position;
+    		showDialog(ChatDialog.PlayerInfo.ordinal());
     		break;
     	}
     	return true;
