@@ -33,7 +33,8 @@ public class BattleMove extends SerializeBytes {
 		return type;
 	}
 	
-	public BattleMove(DataBaseHelper db) {
+	public BattleMove(int n, DataBaseHelper db) {
+		num = (short) n;
 		name = db.query("SELECT name FROM [Moves] WHERE _id = " + num);
 		type = new Byte(db.query("SELECT type FROM [Moves] WHERE _id = " + num));
 	}

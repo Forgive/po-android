@@ -372,11 +372,13 @@ public class BattleActivity extends Activity {
 	public void updateButtons(final boolean allowSwitch, final boolean allowAttack, final boolean[] allowAttacks) {
 		runOnUiThread(new Runnable() {
 			public void run() {
-				for(int i = 0; i < 4; i++) {
-					if (allowAttack)
-						attackLayouts[i].setEnabled(allowAttacks[i]);
-					else
-						attackLayouts[i].setEnabled(false);
+				if (!checkStruggle()) {
+					for (int i = 0; i < 4; i++) {
+						if (allowAttack)
+							attackLayouts[i].setEnabled(allowAttacks[i]);
+						else
+							attackLayouts[i].setEnabled(false);
+					}
 				}
 				for(int i = 0; i < 6; i++) {
 					if (netServ.battle.myTeam.pokes[i].status() != Status.Koed.poValue())
@@ -386,6 +388,13 @@ public class BattleActivity extends Activity {
 				}
 			}
 		});
+	}
+	
+	public boolean checkStruggle() {
+		// XXX TODO This method should hide moves, show the button if necessary and return whether it showed the button
+		boolean struggle = netServ.battle.shouldStruggle;
+		//netServ.socket.sendMessage(netServ.battle.constructAttack((byte)-1), Command.BattleMessage); // This is how you struggle
+		return struggle;
 	}
 	
 	private Drawable getIcon(UniqueID uid) {

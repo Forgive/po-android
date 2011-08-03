@@ -1,20 +1,15 @@
 package com.pokebros.android.pokemononline.battle;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.Vector;
 import java.lang.Math;
 
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.SystemClock;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 
 import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
-import com.pokebros.android.pokemononline.DataBaseHelper;
 import com.pokebros.android.pokemononline.NetworkService;
 import com.pokebros.android.pokemononline.ColorEnums.*;
 import com.pokebros.android.pokemononline.player.PlayerInfo;
@@ -49,7 +44,7 @@ public class Battle {
 	public boolean allowSwitch, allowAttack;
 	public boolean[] allowAttacks = new boolean[4];
 	public int background;
-	public boolean shouldShowPreview = false;
+	public boolean shouldShowPreview = false, shouldStruggle = true;
 	public BattleMove[] displayedMoves = new BattleMove[4];
 	
 	ShallowBattlePoke[][] pokes = new ShallowBattlePoke[2][6];
@@ -103,7 +98,7 @@ public class Battle {
 		}
 
 		for (int i = 0; i < 4; i++)
-			displayedMoves[i] = new BattleMove(netServ.db);
+			displayedMoves[i] = new BattleMove(0, netServ.db);
 	}
 	
 	public Boolean isMyTimerTicking() {
@@ -168,25 +163,6 @@ public class Battle {
 		b.putBaos(new BattleChoice(me, rc, ChoiceType.RearrangeType));
 		return b;
 	}
-	
-/*	public static String queryDB(String query) {
-		DataBaseHelper datHelp = new DataBaseHelper(netServ);
-		try {
-			datHelp.createDatabase();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		datHelp.open();
-		SQLiteDatabase mess = datHelp.getReadableDatabase();
-		Cursor messCurs = mess.rawQuery(query, null);
-		messCurs.moveToFirst();
-		String s = messCurs.getString(0);
-		messCurs.close();
-		mess.close();
-		datHelp.close();
-		
-		return s;
-	}*/
 	
 	public void receiveCommand(Bais msg)  {
 		BattleCommand bc = BattleCommand.values()[msg.readByte()];
@@ -530,7 +506,6 @@ public class Battle {
 			id = msg.readByte();
 			switch(TempPokeChange.values()[id]) {
 			case TempMove:
-				System.out.println("GOT TEMPMOVE");
 			case DefMove:
 				byte slot = msg.readByte();
 				move = msg.readShort();
@@ -538,10 +513,9 @@ public class Battle {
 				BattleMove newMove = new BattleMove(new Bais(displayedMoves[slot].serializeBytes().toByteArray()), netServ.db);
 				displayedMoves[slot] = newMove;
 				if (id == TempPokeChange.DefMove.ordinal()) {
-					System.out.println("GOT DEFMOVE");
 					myTeam.pokes[0].moves[slot] = newMove;
 				}
-				if (netServ.battleActivity !=null) {
+				if (netServ.battleActivity != null) {
 					netServ.battleActivity.updatePokes(player);
 				}
 				break;
@@ -581,7 +555,6 @@ public class Battle {
 			}
 			break;
 		case MakeYourChoice:
-			// XXX is this correct behavior?
 			if (netServ.battleActivity != null) {
 				netServ.battleActivity.updateButtons(allowSwitch, allowAttack, allowAttacks);
 				if (allowSwitch && !allowAttack)
@@ -591,12 +564,20 @@ public class Battle {
 		case OfferChoice:
 			byte numSlot = msg.readByte(); // XXX what is this?
 			allowSwitch = msg.readBool();
+			System.out.println("Switch allowed: " + allowSwitch);
 			allowAttack = msg.readBool();
+			System.out.println("Attacks allowed: " + allowAttack);
 			for (int i = 0; i < 4; i++) {
 					allowAttacks[i] = msg.readBool();
 					System.out.print("Allow attack " + i + ": ");
 					System.out.println(allowAttacks[i]);
 			}
+			
+			if (allowAttack && !allowAttacks[0] && !allowAttacks[1] && !allowAttacks[2] && !allowAttacks[3])
+				shouldStruggle = true;
+			else
+				shouldStruggle = false;
+			
 			if (netServ.battleActivity != null)
 				netServ.battleActivity.updateButtons(allowSwitch, allowAttack, allowAttacks);
 			break;
