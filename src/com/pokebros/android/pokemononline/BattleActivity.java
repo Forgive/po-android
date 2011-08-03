@@ -502,7 +502,6 @@ public class BattleActivity extends Activity {
     		for(int i = 0; i < 6; i++) {
     			if(id == myArrangePokeIcons[i].getId() && e.getAction() == MotionEvent.ACTION_DOWN) {
     				Object dragInfo = v;
-    				System.out.println("CLICKCKCKC");
     				mDragLayer.startDrag(v, myArrangePokeIcons[i], dragInfo, DragController.DRAG_ACTION_MOVE);
     				break;
     			}

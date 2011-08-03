@@ -203,7 +203,9 @@ public class Battle {
 				myTeam.pokes[0] = myTeam.pokes[fromSpot];
 				myTeam.pokes[fromSpot] = temp;
 				
-				displayedMoves = myTeam.pokes[0].moves;
+				for (int i=0; i < 4; i++) {
+					displayedMoves[i] = new BattleMove(myTeam.pokes[0].moves[i]);
+				}
 			}
 			
 			ShallowBattlePoke tempPoke = pokes[player][0];
@@ -238,8 +240,6 @@ public class Battle {
 		case Ko:
 			writeToHist(Html.fromHtml("<br><b>" + NetworkService.escapeHtml((currentPoke(player).nick) +
 					" fainted!</b>")));
-			if(netServ.battleActivity != null && player == me)
-				netServ.battleActivity.switchToPokeViewer();
 			break;
 		case Hit:
 			byte number = msg.readByte();
@@ -530,14 +530,17 @@ public class Battle {
 			id = msg.readByte();
 			switch(TempPokeChange.values()[id]) {
 			case TempMove:
+				System.out.println("GOT TEMPMOVE");
 			case DefMove:
 				byte slot = msg.readByte();
 				move = msg.readShort();
 				displayedMoves[slot].num = move;
 				BattleMove newMove = new BattleMove(new Bais(displayedMoves[slot].serializeBytes().toByteArray()), netServ.db);
 				displayedMoves[slot] = newMove;
-				if (id == TempPokeChange.DefMove.ordinal())
+				if (id == TempPokeChange.DefMove.ordinal()) {
+					System.out.println("GOT DEFMOVE");
 					myTeam.pokes[0].moves[slot] = newMove;
+				}
 				if (netServ.battleActivity !=null) {
 					netServ.battleActivity.updatePokes(player);
 				}
@@ -579,10 +582,11 @@ public class Battle {
 			break;
 		case MakeYourChoice:
 			// XXX is this correct behavior?
-			allowSwitch = true;
-			allowAttack = true;
-			if (netServ.battleActivity != null)
+			if (netServ.battleActivity != null) {
 				netServ.battleActivity.updateButtons(allowSwitch, allowAttack, allowAttacks);
+				if (allowSwitch && !allowAttack)
+					netServ.battleActivity.switchToPokeViewer();
+			}
 			break;
 		case OfferChoice:
 			byte numSlot = msg.readByte(); // XXX what is this?
