@@ -24,7 +24,6 @@ public class PlayerListAdapter extends ArrayAdapter<com.pokebros.android.pokemon
 	}
 	
 	public void removePlayer(PlayerInfo p){
-		System.out.println("REMOVE PLAYER CALLED!!!!!!!!!!*******");
 		remove(p);
 	}
 	

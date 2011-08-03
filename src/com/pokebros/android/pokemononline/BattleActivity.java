@@ -381,14 +381,14 @@ public class BattleActivity extends Activity {
 	public void updateOppPoke() {
 		runOnUiThread(new Runnable() {
 			public void run() {
-				ShallowBattlePoke poke = netServ.battle.currentPoke(opp);
-				// Load correct moveset and name
-				if(poke != null) {
-					currentPokeNames[opp].setText(poke.rnick);
-					setHpBarTo(opp, poke.lifePercent);
-		        	pokeSprites[opp].setImageDrawable(getSprite(poke, true));
+					ShallowBattlePoke poke = netServ.battle.currentPoke(opp);
+					// Load correct moveset and name
+					if(poke != null) {
+						currentPokeNames[opp].setText(poke.rnick);
+						setHpBarTo(opp, poke.lifePercent);
+						pokeSprites[opp].setImageDrawable(getSprite(poke, true));
+					}
 				}
-			}
 		});		
 	}
 	
@@ -542,8 +542,6 @@ public class BattleActivity extends Activity {
 		
 		public void onServiceDisconnected(ComponentName className) {
 			netServ.battleActivity = null;
-			if (netServ.battle.isOver)
-				netServ.battle = null;
 			netServ = null;
 		}
 	};
@@ -555,6 +553,9 @@ public class BattleActivity extends Activity {
     @Override
     public void onDestroy() {
     	unbindService(connection);
+		if (netServ != null && netServ.battle != null && netServ.battle.isOver) {
+			netServ.battle = null;
+		}
     	super.onDestroy();
     }
 

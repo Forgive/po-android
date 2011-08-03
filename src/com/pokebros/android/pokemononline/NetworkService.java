@@ -281,7 +281,7 @@ public class NetworkService extends Service {
 			if (id1 == mePlayer.id || id2 == mePlayer.id) {
 				if (players.get(id1) != null && players.get(id2) != null && battleDesc < 3)
 					currentChannel.writeToHist("\n" + players.get(id1).nick() + outcome + players.get(id2).nick() + ".");
-				if (!battle.gotEnd) {
+				if (battle != null && !battle.gotEnd) {
 					battle.isOver = true;
 					if (battleActivity != null)
 						battle = null;
