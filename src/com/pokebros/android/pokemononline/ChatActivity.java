@@ -10,6 +10,7 @@ import de.marcreichelt.android.ChatRealViewSwitcher;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -59,11 +60,13 @@ public class ChatActivity extends Activity {
 	public final static int CONTEXTMENU_CHALLENGEPLAYER = 0;
 	public final static int CONTEXTMENU_VIEWPLAYERINFO = 1;
 	
-	private PlayerListAdapter playerAdapter;
+	private PlayerListAdapter playerAdapter = null;
 	private ChannelListAdapter channelAdapter;
 	
-	//public ProgressDialog progressDialog;
-	
+	public ProgressDialog progressDialog;
+
+	private ListView players;
+	private ListView channels;
 	private NetworkService netServ = null;
 	private ScrollView chatScroll;
 	private TextView chatBox;
@@ -126,9 +129,13 @@ public class ChatActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) { 
 		System.out.println("CREATED CHAT ACTIVITY");
 		//TODO: Implement a Loading Screen
-		//progressDialog = ProgressDialog.show(ChatActivity.this, "","Loading. Please wait...", true);
-		//progressDialog.setCancelable(true);
-
+		progressDialog = ProgressDialog.show(ChatActivity.this, "","Loading. Please wait...", true);
+		progressDialog.setCancelable(true);
+		progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+			public void onCancel(DialogInterface dialog) {
+				disconnect();
+			}
+		});
 		
 		super.onCreate(savedInstanceState);
         setContentView(R.layout.chat);
@@ -138,9 +145,8 @@ public class ChatActivity extends Activity {
     	chatViewSwitcher.setCurrentScreen(1);
  
     	//Player List Stuff**
-    	ListView players = (ListView)findViewById(R.id.playerlisting);
-    	playerAdapter = new PlayerListAdapter(this, R.id.playerlisting);
-    	players.setAdapter(playerAdapter);
+    	players = (ListView)findViewById(R.id.playerlisting);
+    	playerAdapter = new PlayerListAdapter(ChatActivity.this, 0);
     	registerForContextMenu(players);
    /* 	players.setOnItemClickListener(new OnItemClickListener() {
     		// Set the edit texts on list item click
@@ -166,9 +172,8 @@ public class ChatActivity extends Activity {
 		});*/
         
         //Channel List Stuff**
-        ListView channels = (ListView)findViewById(R.id.channellisting);
-        channelAdapter = new ChannelListAdapter(this, R.id.channellisting);
-        channels.setAdapter(channelAdapter);
+        channels = (ListView)findViewById(R.id.channellisting);
+        channelAdapter = new ChannelListAdapter(this, 0);
         channels.setOnItemClickListener(new OnItemClickListener() {
         	// Set the edit texts on list item click
 			public void onItemClick(AdapterView<?> parent, View view, int position,
@@ -237,8 +242,10 @@ public class ChatActivity extends Activity {
 				netServ.showNotification(ChatActivity.class, "Chat");
 			
 			netServ.chatActivity = ChatActivity.this;
-			
-			populateUI();
+			if (netServ.currentChannel != null && netServ.currentChannel.joined) {
+				populateUI();
+				progressDialog.dismiss();
+			}
 	        checkChallenges();
 	        checkAskForPass();
 	        checkFailedConnection();
@@ -251,25 +258,32 @@ public class ChatActivity extends Activity {
 	};
 	
 	public void populateUI() {
-		runOnUiThread(new Runnable() {
-			public void run() {
-				if (netServ.currentChannel != null) {
-					// Populate the player list
-					Enumeration<PlayerInfo> e = netServ.currentChannel.players.elements();
-					playerAdapter.setNotifyOnChange(false);
-					while(e.hasMoreElements()) {
-						playerAdapter.addPlayer(e.nextElement());
-					}
-					playerAdapter.setNotifyOnChange(true);
-					playerAdapter.sortByNick();
-					//Populate the Channel list
-					Enumeration<Channel> c = netServ.channels.elements();
-					channelAdapter.setNotifyOnChange(false);
-					while(c.hasMoreElements())
-						channelAdapter.addChannel(c.nextElement());
-					channelAdapter.setNotifyOnChange(true);
-					channelAdapter.sortByName();
-					//Load scrollback	
+		if (netServ.currentChannel != null) {
+			System.out.println("crashed yet 0");
+			// Populate the player list
+			Enumeration<PlayerInfo> e = netServ.currentChannel.players.elements();
+			playerAdapter.setNotifyOnChange(false);
+			System.out.println("crashed yet 1");
+			while(e.hasMoreElements()) {
+				playerAdapter.add(e.nextElement());
+			}
+			playerAdapter.sortByNick();
+			System.out.println("crashed yet 2");
+			playerAdapter.setNotifyOnChange(true);
+			System.out.println("crashed yet 3");
+			//Populate the Channel list
+			Enumeration<Channel> c = netServ.channels.elements();
+			channelAdapter.setNotifyOnChange(false);
+			while(c.hasMoreElements())
+				channelAdapter.addChannel(c.nextElement());
+			channelAdapter.sortByName();
+			channelAdapter.setNotifyOnChange(true);
+			//Load scrollback	
+			runOnUiThread(new Runnable() {
+				public void run() {
+			    	players.setAdapter(playerAdapter);
+			        channels.setAdapter(channelAdapter);
+					channelAdapter.notifyDataSetChanged();
 					chatBox.setText(netServ.currentChannel.hist);
 					chatScroll.post(new Runnable() {
 						public void run() {
@@ -278,8 +292,8 @@ public class ChatActivity extends Activity {
 					});
 					updateChat();
 					chatViewSwitcher.invalidate();
-				}
-			}});
+				}});
+		}
 	}
 	
 	public void updateChat() {
@@ -332,7 +346,6 @@ public class ChatActivity extends Activity {
 	
 	private void checkFailedConnection() {
 		if(netServ != null && netServ.failedConnect) {
-			Toast.makeText(this, "OH GOD WHY", Toast.LENGTH_LONG).show();
 			disconnect();
 		}
 	}
@@ -603,6 +616,8 @@ public class ChatActivity extends Activity {
     private void disconnect() {
 		if (netServ != null)
 			netServ.disconnect();
+		if (progressDialog != null)
+			progressDialog.dismiss();
 		Intent intent = new Intent(this, RegistryActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		intent.putExtra("sticky", true);
@@ -652,7 +667,7 @@ public class ChatActivity extends Activity {
 	public void addPlayer(final PlayerInfo pi) {
 		runOnUiThread(new Runnable() {
 			public void run() {
-            	playerAdapter.addPlayer(pi);
+				playerAdapter.add(pi);
 			}
 		});
 	}

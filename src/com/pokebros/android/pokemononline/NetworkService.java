@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.widget.Toast;
 
 public class NetworkService extends Service {
 	public static String escapeHtml(String toEscape) {
@@ -98,8 +99,6 @@ public class NetworkService extends Service {
 					return;
 				}
 				socket.sendMessage(meLoginPlayer.serializeBytes(), Command.Login);
-				if (chatActivity != null)
-					chatActivity.populateUI();
 				new Thread(new Runnable() {
 		        	public void run() {
 		        		while(true) {
@@ -230,7 +229,9 @@ public class NetworkService extends Service {
 			int numChannels = msg.readInt();
 			for(int k = 0; k < numChannels; k++) {
 				int chanId = msg.readInt();
-				addChannel(msg.readQString(),chanId);
+				Channel ch = new Channel(chanId, msg.readQString(), this);
+				channels.put(chanId, ch);
+				//addChannel(msg.readQString(),chanId);
 			}
 			System.out.println(channels.toString());
 			//currentChannel = channels.get(0);
@@ -348,18 +349,23 @@ public class NetworkService extends Service {
 			break;
 		case RemoveChannel:
 			int chanId = msg.readInt();
-			chatActivity.removeChannel(channels.get(chanId));
+			if (chatActivity != null)
+				chatActivity.removeChannel(channels.get(chanId));
 			channels.remove(chanId);
 			break;
 		case ChanNameChange:
 			chanId = msg.readInt();
-			chatActivity.removeChannel(channels.get(chanId));
+			if (chatActivity != null)
+				chatActivity.removeChannel(channels.get(chanId));
 			channels.remove(chanId);
 			channels.put(chanId, new Channel(chanId, msg.readQString(), this));
 			break;
 		case SendMessage: {
 			// TODO print this to the screen
-			System.out.println(msg.readQString());
+			String message = msg.readQString();
+			System.out.println(message);
+			if (chatActivity != null)
+				chatActivity.makeToast(message);
 			break;
 		}
 		default:

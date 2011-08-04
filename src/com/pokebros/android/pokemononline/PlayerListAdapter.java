@@ -19,10 +19,6 @@ public class PlayerListAdapter extends ArrayAdapter<com.pokebros.android.pokemon
 		super(context, resource);
 	}
 	
-	public void addPlayer(PlayerInfo p) {
-		add(p);
-	}
-	
 	public void removePlayer(PlayerInfo p){
 		remove(p);
 	}

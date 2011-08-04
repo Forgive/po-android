@@ -11,7 +11,7 @@ public class Channel {
 	protected String name;
 	protected int id;
 	protected int events = 0;
-	protected boolean isReadyToQuit = false;
+	protected boolean isReadyToQuit = false, joined = false;
 	
 	public Hashtable<Integer, PlayerInfo> players = new Hashtable<Integer, PlayerInfo>();
 	
@@ -43,7 +43,7 @@ public class Channel {
 		if(p != null) {
 			players.put(p.id, p);
 			
-			if(netServ != null && netServ.chatActivity != null)
+			if(netServ != null && netServ.chatActivity != null && this.equals(netServ.currentChannel))
 				netServ.chatActivity.addPlayer(p);
 		}
 		else
@@ -67,9 +67,15 @@ public class Channel {
 			switch(c) {
 			case JoinChannel: {
 				PlayerInfo p = netServ.players.get(msg.readInt());
-				addPlayer(p);
-				if (p.id == netServ.mePlayer.id) // We joined the channel
+				if (p.id == netServ.mePlayer.id) { // We joined the channel
 					netServ.currentChannel = this;
+					if (netServ.chatActivity != null) {
+						netServ.chatActivity.populateUI();
+						netServ.chatActivity.progressDialog.dismiss();
+					}
+				}
+				addPlayer(p);
+				joined = true;
 				break;
 			}
 			case ChannelMessage:
