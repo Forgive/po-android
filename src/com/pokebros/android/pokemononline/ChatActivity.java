@@ -259,18 +259,14 @@ public class ChatActivity extends Activity {
 	
 	public void populateUI() {
 		if (netServ.currentChannel != null) {
-			System.out.println("crashed yet 0");
 			// Populate the player list
 			Enumeration<PlayerInfo> e = netServ.currentChannel.players.elements();
 			playerAdapter.setNotifyOnChange(false);
-			System.out.println("crashed yet 1");
 			while(e.hasMoreElements()) {
 				playerAdapter.add(e.nextElement());
 			}
 			playerAdapter.sortByNick();
-			System.out.println("crashed yet 2");
 			playerAdapter.setNotifyOnChange(true);
-			System.out.println("crashed yet 3");
 			//Populate the Channel list
 			Enumeration<Channel> c = netServ.channels.elements();
 			channelAdapter.setNotifyOnChange(false);

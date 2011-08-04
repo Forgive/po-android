@@ -234,7 +234,6 @@ public class NetworkService extends Service {
 				//addChannel(msg.readQString(),chanId);
 			}
 			System.out.println(channels.toString());
-			//currentChannel = channels.get(0);
 			break;
 		case ChannelPlayers:
 			Channel ch = channels.get(msg.readInt());
@@ -340,7 +339,7 @@ public class NetworkService extends Service {
 				break;
 			}
 			askedForPass = true;
-			if (chatActivity != null && chatActivity.hasWindowFocus()) {
+			if (chatActivity != null && (chatActivity.hasWindowFocus() || chatActivity.progressDialog.isShowing())) {
 				chatActivity.notifyAskForPass();
 			}
 			break;
@@ -365,8 +364,7 @@ public class NetworkService extends Service {
 			String message = msg.readQString();
 			System.out.println(message);
 			if (chatActivity != null && message.contains("Wrong password for this name."))
-				//TODO: Mike: Change the toast to "message" when you fix name verification
-				chatActivity.makeToast("Our name verification doesn't work right now, please disconnect. Sorry!", "long");
+				chatActivity.makeToast(message, "long");
 			break;
 		}
 		default:
@@ -401,7 +399,10 @@ public class NetworkService extends Service {
 	}
 	
 	private String toHex(byte[] b) {
-		return new BigInteger(1, b).toString(16);
+		String ret = new BigInteger(1, b).toString(16);
+		while (ret.length() < 32)
+			ret = "0" + ret;
+		return ret;
 	}
 	
 	protected void herp() {
