@@ -372,7 +372,6 @@ public class NetworkService extends Service {
 	}
 
 	public void sendPass(String s) {
-		System.out.println(s);
 		askedForPass = false;
 		MessageDigest md5;
 		try {
