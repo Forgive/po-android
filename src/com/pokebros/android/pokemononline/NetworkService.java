@@ -215,12 +215,12 @@ public class NetworkService extends Service {
 				break;
 			case Refused:
 				if(challenge.oppName != null && chatActivity != null) {
-					chatActivity.makeToast(challenge.oppName + " refused your challenge");
+					chatActivity.makeToast(challenge.oppName + " refused your challenge", "short");
 				}
 				break;
 			case Busy:
 				if(challenge.oppName != null && chatActivity != null) {
-					chatActivity.makeToast(challenge.oppName + " is busy");
+					chatActivity.makeToast(challenge.oppName + " is busy", "short");
 				}
 				break;
 			}
@@ -364,8 +364,9 @@ public class NetworkService extends Service {
 			// TODO print this to the screen
 			String message = msg.readQString();
 			System.out.println(message);
-			if (chatActivity != null)
-				chatActivity.makeToast(message);
+			if (chatActivity != null && message.contains("Wrong password for this name."))
+				//TODO: Mike: Change the toast to "message" when you fix name verification
+				chatActivity.makeToast("Our name verification doesn't work right now, please disconnect. Sorry!", "long");
 			break;
 		}
 		default:

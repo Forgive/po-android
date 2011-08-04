@@ -574,12 +574,21 @@ public class ChatActivity extends Activity {
     	return true;
     }
 
-    public void makeToast(final String s) {
+    public void makeToast(final String s, final String length) {
+    	if (length == "long") {
     	runOnUiThread(new Runnable() {
     		public void run() {
-    			Toast.makeText(ChatActivity.this, s, Toast.LENGTH_SHORT).show();
+    			Toast.makeText(ChatActivity.this, s, Toast.LENGTH_LONG).show();
     		}
     	});
+    	}
+    	else if(length == "short") {
+        	runOnUiThread(new Runnable() {
+        		public void run() {
+        			Toast.makeText(ChatActivity.this, s, Toast.LENGTH_SHORT).show();
+        		}
+        	});
+    	}
     }
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
