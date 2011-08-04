@@ -460,7 +460,11 @@ public class ChatActivity extends Activity {
             ImageView[] pPokeIcons = new ImageView[6];
             TextView pInfo, pTeam, pName, pTier, pRating;           
 			builder.setView(layout)
-            .setNegativeButton("Back", null)
+            .setNegativeButton("Back", new DialogInterface.OnClickListener(){
+            	public void onClick(DialogInterface dialog, int which) {
+            		removeDialog(id);
+            	}
+            })
             .setOnCancelListener(new DialogInterface.OnCancelListener(){
             	public void onCancel(DialogInterface dialog) {
             		removeDialog(id);

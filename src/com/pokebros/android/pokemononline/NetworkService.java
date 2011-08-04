@@ -372,12 +372,13 @@ public class NetworkService extends Service {
 	}
 
 	public void sendPass(String s) {
+		System.out.println(s);
 		askedForPass = false;
 		MessageDigest md5;
 		try {
 			md5 = MessageDigest.getInstance("MD5");
 			Baos hashPass = new Baos();
-			hashPass.putString(toHex(md5.digest((toHex(md5.digest(s.getBytes("ISO-8859-1"))) + salt).getBytes("ISO-8859-1"))));
+			hashPass.putString(toHex(md5.digest(mashBytes(toHex(md5.digest(s.getBytes("ISO-8859-1"))).getBytes("ISO-8859-1"), salt.getBytes("ISO-8859-1")))));
 			socket.sendMessage(hashPass, Command.AskForPass);
 		} catch (NoSuchAlgorithmException nsae) {
 			System.out.println("Attempting authentication threw an exception: " + nsae);
@@ -386,8 +387,15 @@ public class NetworkService extends Service {
 		}
 	}
 	
+	private byte[] mashBytes(final byte[] a, final byte[] b) {
+		byte[] ret = new byte[a.length + b.length];
+		System.arraycopy(a, 0, ret, 0, a.length);
+		System.arraycopy(b, 0, ret, a.length, b.length);
+		return ret;
+	}
+	
 	private String toHex(byte[] b) {
-		return String.format("%x", new BigInteger(b));
+		return new BigInteger(1, b).toString(16);
 	}
 	
 	protected void herp() {
