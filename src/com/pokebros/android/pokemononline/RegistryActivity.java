@@ -176,10 +176,11 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 						saveTeam.write(stringBuffer.getBytes());
 						saveTeam.flush();
 						saveTeam.close();
-						meLoginPlayer.playerTeam.nick = nick;
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
+					} finally {
+						meLoginPlayer.playerTeam.nick = nick;
 					}
 				}
 				
