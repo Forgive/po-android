@@ -17,6 +17,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
+import android.content.Context;
 import android.net.Uri;
 
 import com.pokebros.android.pokemononline.player.PlayerTeam;
@@ -31,9 +32,9 @@ public class PokeParser extends DefaultHandler
 	PlayerTeam pt;
 	XMLDataSet parsedTeam;
 	
-	public PokeParser(String path) {
+	public PokeParser(Context context) {
 		try {
-			in = new FileInputStream(path);
+			in = context.openFileInput("team.xml");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}

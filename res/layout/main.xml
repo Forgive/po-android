@@ -5,11 +5,11 @@
     android:layout_height="fill_parent"
     android:padding="4dp">
 <TextView android:id="@+id/textView1" android:textAppearance="?android:attr/textAppearanceLarge" android:layout_height="wrap_content" android:text="@string/connect" android:layout_width="wrap_content"></TextView>
-<TextView android:layout_height="wrap_content" android:text="@string/inputip" android:layout_width="fill_parent"></TextView>
-<EditText android:hint = "@string/choose" android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/ipedit">
+<TextView android:layout_height="wrap_content" android:text="@string/choosename" android:layout_width="fill_parent"></TextView>
+<EditText android:hint = "@string/inputname" android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/nameedit" android:maxLength="12">
 </EditText>
-<TextView android:id="@+id/textView2" android:layout_height="wrap_content" android:text="@string/inputport" android:layout_width="wrap_content"></TextView>
-<EditText android:hint = "@string/chooseport" android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/portedit"></EditText>
+<TextView android:id="@+id/textView2" android:layout_height="wrap_content" android:text="@string/chooseaddr" android:layout_width="wrap_content"></TextView>
+<EditText android:hint = "@string/inputaddr" android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/addredit"></EditText>
 <RelativeLayout android:layout_height="wrap_content" android:id="@+id/RelativeLayout1" android:layout_width="fill_parent" android:weightSum="1">
     <Button android:layout_alignParentLeft="true" android:layout_alignParentTop="true" android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="@string/importteam" android:id="@+id/importteambutton"></Button>
     <Button android:layout_alignParentRight="true" android:layout_alignParentTop="true" android:layout_height="wrap_content" android:id="@+id/connectbutton" android:text="@string/connect" android:layout_width="wrap_content"></Button>

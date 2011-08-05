@@ -11,7 +11,7 @@ import com.pokebros.android.pokemononline.Team;
 
 // Player as represented in the teambuilder.
 public class PlayerTeam extends SerializeBytes {
-	protected String nick = "SYSTEMDEFAULT";
+	public String nick = "SYSTEMDEFAULT";
 	protected String info = "I AM THE DEFAULT TEAM. PLEASE IMPORT YOUR OWN TEAM! **Team should go '/sdcard/team.xml' for now..**";
 	protected String loseMsg = "SHUCKS!";
 	protected String winMsg = "YEEEAAAAHH!!!";

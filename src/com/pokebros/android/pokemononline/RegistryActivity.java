@@ -1,10 +1,18 @@
 package com.pokebros.android.pokemononline;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.regex.Pattern;
+
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.app.AlertDialog;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -28,16 +36,18 @@ import android.widget.Toast;
 
 import com.pokebros.android.pokemononline.RegistryConnectionService.RegistryCommandListener;
 import com.pokebros.android.pokemononline.ServerListAdapter.Server;
+import com.pokebros.android.pokemononline.player.FullPlayerInfo;
 
 public class RegistryActivity extends Activity implements ServiceConnection, RegistryCommandListener {
 	
 	static final String TAG = "RegistryActivity";
 	
 	private ServerListAdapter adapter;
-	private EditText ip;
-	private EditText port;
+	private EditText editAddr;
+	private EditText editName;
 	private boolean bound = false;
 	private String path;
+	private FullPlayerInfo meLoginPlayer;
 	RegistryConnectionService service;
 	
     /** Called when the activity is first created. */
@@ -64,21 +74,20 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
         
         setContentView(R.layout.main);
          
-		ip = (EditText)RegistryActivity.this.findViewById(R.id.ipedit);
+		editAddr = (EditText)RegistryActivity.this.findViewById(R.id.addredit);
+		editName = (EditText)RegistryActivity.this.findViewById(R.id.nameedit);
 		// Hide the soft-keyboard when the activity is created
-		ip.setInputType(InputType.TYPE_NULL);
-		//ip.setText("141.212.112.54");
-		ip.setHint("Server IP Address");
-		ip.setOnTouchListener(new View.OnTouchListener() {
+		editName.setInputType(InputType.TYPE_NULL);
+		editName.setOnTouchListener(new View.OnTouchListener() {
 			public boolean onTouch(View v, MotionEvent event) {
-				ip.setInputType(InputType.TYPE_CLASS_TEXT);
-				ip.onTouchEvent(event);
+				editName.setInputType(InputType.TYPE_CLASS_TEXT);
+				editName.onTouchEvent(event);
 				return true;
 			}
 		});
-		port = (EditText)RegistryActivity.this.findViewById(R.id.portedit);
-		port.setHint("Server Port Number");
-		//port.setText("5080");
+
+		meLoginPlayer = new FullPlayerInfo(RegistryActivity.this);
+		editName.append(meLoginPlayer.nick());
 		
 		//Capture out button from layout
         Button conbutton = (Button)findViewById(R.id.connectbutton);
@@ -95,11 +104,9 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 			public void onItemClick(AdapterView<?> parent, View view, int position,
 					long id) {
 				Server server = (Server)parent.getItemAtPosition(position);
-				ip.setText("");
-				port.setText("");
-				ip.append(server.ip);
-				port.append(String.valueOf(server.port));
-			}        	
+				editAddr.setText("");
+				editAddr.append(server.ip + ":" + String.valueOf(server.port));
+			}
 		});
         
         
@@ -120,42 +127,74 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
         
         Intent intent = new Intent(RegistryActivity.this, RegistryConnectionService.class);
         bindService(intent, this, 0);
-        startService(intent); 
-        Log.v(TAG, "Service started!");
-        
+        startService(intent);
     }
     
     private OnClickListener registryListener = new OnClickListener() {
     	public void onClick(View v) {
     		if (v == findViewById(R.id.connectbutton)){
+    			String ipString = editAddr.getText().toString().split(":")[0];
+    			String portString = "";
+    			try {
+    				portString = editAddr.getText().toString().split(":")[1];
+    			} catch (ArrayIndexOutOfBoundsException e) {
+					// No need to act
+    			}
     			short portVal = -1;
 				try {
-					portVal = Short.parseShort(port.getText().toString());
+					portVal = Short.parseShort(portString);
 				} catch(NumberFormatException e) {
 					// No need to act
 				}
 				if (portVal < 1 || portVal > 65535) {
 					// TODO: R.string
-					Toast.makeText(RegistryActivity.this, "Invalid value for port", Toast.LENGTH_LONG);
+					Toast.makeText(RegistryActivity.this, "Invalid value for port", Toast.LENGTH_LONG).show();
         			return;
 				}
-
+				
+				String nick = editName.getText().toString();
+				if (nick.length() > 0 && !nick.equals(meLoginPlayer.nick())) {
+					// Save name changes
+					try {
+						// Open team for reading
+						FileInputStream team = RegistryActivity.this.openFileInput("team.xml");
+						
+						// Read team into ByteArrayOutputStream
+						Baos saveBuffer = new Baos();
+						byte[] buffer = new byte[1024];
+						int length;
+						while ((length = team.read(buffer))>0)
+							saveBuffer.write(buffer, 0, length);
+						team.close();
+						
+						// Replace trainer name in Baos with user entered trainer name
+						String stringBuffer = new String(saveBuffer.toByteArray());
+						stringBuffer = stringBuffer.replaceFirst(">.*</Trainer>", ">" + nick + "</Trainer>");
+						
+						// Write Baos to file
+						FileOutputStream saveTeam = openFileOutput("team.xml", Context.MODE_PRIVATE);
+						saveTeam.write(stringBuffer.getBytes());
+						saveTeam.flush();
+						saveTeam.close();
+						meLoginPlayer.playerTeam.nick = nick;
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
 				Intent intent = new Intent(RegistryActivity.this, NetworkService.class);
-				intent.putExtra("ip", ip.getText().toString());
+				intent.putExtra("ip", ipString);
 				intent.putExtra("port", portVal);
-				intent.putExtra("filePath", path);
+				Bundle loginPlayer = new Bundle();
+				loginPlayer.putByteArray("loginBytes", meLoginPlayer.serializeBytes().toByteArray());
+				intent.putExtra("loginPlayer", loginPlayer);
+
 				startService(intent);
 				startActivity(new Intent(RegistryActivity.this, ChatActivity.class));
 				RegistryActivity.this.finish();
     		}
     		else if (v == findViewById(R.id.importteambutton)) {
-				/*
-				 * Intent intent = new Intent(RegistryActivity.this,
-				 * FileDialog.class); intent.putExtra(FileDialog.START_PATH,
-				 * "/sdcard"); System.out.println("OMGGGGGGGGGGGGGGGG " +
-				 * intent.toString());
-				 * RegistryActivity.this.startActivityForResult(intent, 1);
-				 */
 				AlertDialog.Builder alert = new AlertDialog.Builder(RegistryActivity.this);
 
 				alert.setTitle("Team Import");
@@ -169,11 +208,32 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 				alert.setPositiveButton("Import",
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,	int whichButton) {
-								String value = input.getText().toString();
-								path = value;
+								String path = input.getText().toString();
+								
+								if (path != null) {
+									try {
+										// Copy imported file to default team location
+										FileOutputStream saveTeam = openFileOutput("team.xml", Context.MODE_PRIVATE);
+										FileInputStream team = new FileInputStream(path);
+
+										byte[] buffer = new byte[1024];
+										int length;
+										while ((length = team.read(buffer))>0)
+											saveTeam.write(buffer, 0, length);
+										saveTeam.flush();
+										saveTeam.close();
+										team.close();
+									} catch (IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+								}
+								
+								meLoginPlayer = new FullPlayerInfo(RegistryActivity.this);
+								editName.setText("");
+								editName.append(meLoginPlayer.nick());
 								Toast.makeText(getApplicationContext(), "Team imported from " + path, Toast.LENGTH_SHORT).show();
-							}
-						});
+						}});
 
 				alert.setNegativeButton("Cancel",
 					new DialogInterface.OnClickListener() {
@@ -191,12 +251,6 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.mainoptions, menu);
-        return true;
-    }
-    
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        	Toast.makeText(this, "'Import Team' has not been implemented yet! Put your team in /sdcard/team.xml", Toast.LENGTH_LONG).show();
         return true;
     }
     

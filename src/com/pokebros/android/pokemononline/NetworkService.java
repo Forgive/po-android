@@ -48,7 +48,6 @@ public class NetworkService extends Service {
 	private String salt = null;
 	public boolean failedConnect = false;
 	public DataBaseHelper db;
-	private String filePath = "/sdcard/team.xml";
 	
 	public boolean hasBattle() {
 		return battle != null;
@@ -131,9 +130,8 @@ public class NetworkService extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		super.onStartCommand(intent, flags, startId);
 		Bundle bundle = intent.getExtras();
-		if (bundle != null && bundle.containsKey("filePath")) {
-			filePath = bundle.getString("filePath");
-			meLoginPlayer = new FullPlayerInfo(filePath);
+		if (bundle != null && bundle.containsKey("loginPlayer")) {
+			meLoginPlayer = new FullPlayerInfo(new Bais(bundle.getBundle("loginPlayer").getByteArray("loginBytes")));
 			mePlayer = new PlayerInfo (meLoginPlayer);
 		}
 		if (bundle != null && bundle.containsKey("ip"))
