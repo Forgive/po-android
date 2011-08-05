@@ -128,7 +128,6 @@ public class ChatActivity extends Activity {
 	@Override
     public void onCreate(Bundle savedInstanceState) { 
 		System.out.println("CREATED CHAT ACTIVITY");
-		//TODO: Implement a Loading Screen
 		progressDialog = ProgressDialog.show(ChatActivity.this, "","Loading. Please wait...", true);
 		progressDialog.setCancelable(true);
 		progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
@@ -164,7 +163,6 @@ public class ChatActivity extends Activity {
         players.setOnItemLongClickListener(new OnItemLongClickListener() {
 			public boolean onItemLongClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				// TODO: Display player description
 				System.out.println("Player -- Long click works");
 				
 				return true;
@@ -353,8 +351,27 @@ public class ChatActivity extends Activity {
 		final IncomingChallenge challenge = netServ.challenges.poll();
 		switch (ChatDialog.values()[id]) {
 		case Challenge:
-			builder.setMessage(this.getString(R.string.accept_challenge) + " " + challenge.oppName + "?") // TODO add challenge info
+			View challengedLayout = inflater.inflate(R.layout.player_info_dialog, (LinearLayout)findViewById(R.id.player_info_dialog));
+			PlayerInfo opp = netServ.players.get(challenge.opponent);
+			ImageView[] oppPokeIcons = new ImageView[6];
+			TextView oppInfo, oppTeam, oppName, oppTier, oppRating;           
+			builder.setView(challengedLayout)
 			.setCancelable(false)
+			//.setMessage(this.getString(R.string.accept_challenge))
+			.setNegativeButton(this.getString(R.string.decline), new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					// Decline challenge
+					if (netServ.socket.isConnected())
+						netServ.socket.sendMessage(
+								constructChallenge(ChallengeDesc.Refused.ordinal(),
+										challenge.opponent,
+										challenge.clauses,
+										challenge.mode),
+										Command.ChallengeStuff);
+					removeDialog(id);
+					checkChallenges();
+				}
+			})
 			.setPositiveButton(this.getString(R.string.accept), new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
 					// Accept challenge
@@ -373,22 +390,28 @@ public class ChatActivity extends Activity {
 					removeDialog(id);
 					checkChallenges();
 				}
-			})
-			.setNegativeButton(this.getString(R.string.decline), new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int which) {
-					// Accept challenge
-					if (netServ.socket.isConnected())
-						netServ.socket.sendMessage(
-								constructChallenge(ChallengeDesc.Refused.ordinal(),
-										challenge.opponent,
-										challenge.clauses,
-										challenge.mode),
-										Command.ChallengeStuff);
-					removeDialog(id);
-					checkChallenges();
-				}
 			});
-			return builder.create();
+			final AlertDialog oppInfoDialog = builder.create();
+
+
+			for(int i = 0; i < 6; i++){
+				oppPokeIcons[i] = (ImageView)challengedLayout.findViewById(getResources().getIdentifier("player_info_poke" + 
+						(i+1), "id", packName));
+				oppPokeIcons[i].setImageDrawable(getIcon(opp.pokes[i]));
+			}
+			oppInfo = (TextView)challengedLayout.findViewById(getResources().getIdentifier("player_info", "id", packName));
+			oppInfo.setText(Html.fromHtml("<b>Info: </b>" + NetworkService.escapeHtml(opp.info())));
+			oppTeam = (TextView)challengedLayout.findViewById(getResources().getIdentifier("player_info_team", "id", packName));
+			oppTeam.setText(opp.nick() + "'s team:");
+			oppName = (TextView)challengedLayout.findViewById(getResources().getIdentifier("player_info_name", "id", packName));
+			oppName.setText(this.getString(R.string.accept_challenge) + " " + opp.nick() + "?");
+			oppName.setTextSize(18);
+			oppTier = (TextView)challengedLayout.findViewById(getResources().getIdentifier("player_info_tier", "id", packName));
+			oppTier.setText(Html.fromHtml("<b>Tier: </b>" + NetworkService.escapeHtml(opp.tier)));
+			oppRating = (TextView)challengedLayout.findViewById(getResources().getIdentifier("player_info_rating", "id", packName));
+			oppRating.setText(Html.fromHtml("<b>Rating: </b>" + NetworkService.escapeHtml(new Short(opp.rating).toString())));    
+
+			return oppInfoDialog;
 		case AskForPass:
         	//View layout = inflater.inflate(R.layout.ask_for_pass, null);
         	final EditText passField = new EditText(this);
