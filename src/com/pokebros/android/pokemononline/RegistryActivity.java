@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.Dialog;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -20,6 +21,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.text.InputType;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -34,6 +36,9 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
+import com.pokebros.android.pokemononline.ChatActivity.ChatDialog;
 import com.pokebros.android.pokemononline.RegistryConnectionService.RegistryCommandListener;
 import com.pokebros.android.pokemononline.ServerListAdapter.Server;
 import com.pokebros.android.pokemononline.player.FullPlayerInfo;
@@ -49,6 +54,11 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 	private String path;
 	private FullPlayerInfo meLoginPlayer;
 	RegistryConnectionService service;
+
+	enum RegistryDialog {
+		SelectImportMethod,
+		ImportTeamFromFile
+	}
 	
     /** Called when the activity is first created. */
     @Override
@@ -196,61 +206,93 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 				RegistryActivity.this.finish();
     		}
     		else if (v == findViewById(R.id.importteambutton)) {
-				AlertDialog.Builder alert = new AlertDialog.Builder(RegistryActivity.this);
-
-				alert.setTitle("Team Import");
-				alert.setMessage("Please type the path to your team.");
-
-				// Set an EditText view to get user input
-				final EditText input = new EditText(RegistryActivity.this);
-				input.append("/sdcard/");
-				alert.setView(input);
-
-				alert.setPositiveButton("Import",
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog,	int whichButton) {
-								String path = input.getText().toString();
-								
-								if (path != null) {
-									try {
-										// Copy imported file to default team location
-										FileInputStream team = new FileInputStream(path);
-										FileOutputStream saveTeam = openFileOutput("team.xml", Context.MODE_PRIVATE);
-
-										byte[] buffer = new byte[1024];
-										int length;
-										while ((length = team.read(buffer))>0)
-											saveTeam.write(buffer, 0, length);
-										saveTeam.flush();
-										saveTeam.close();
-										team.close();
-										meLoginPlayer = new FullPlayerInfo(RegistryActivity.this);
-										editName.setText("");
-										editName.append(meLoginPlayer.nick());
-										if (!meLoginPlayer.isDefault)
-											Toast.makeText(RegistryActivity.this, "Team successfully imported from " + path, Toast.LENGTH_SHORT).show();
-										else {
-											Toast.makeText(RegistryActivity.this, "Team from " + path + " could not be parsed successfully. Is the file a valid team?", Toast.LENGTH_LONG).show();
-											deleteFile("team.xml");
-										}
-									} catch (IOException e) {
-										System.out.println("Team not found");
-										Toast.makeText(RegistryActivity.this, path + " could not be opened. Does the file exist?", Toast.LENGTH_LONG).show();
-									}
-								}
-						}});
-
-				alert.setNegativeButton("Cancel",
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog,	int whichButton) {
-						}
-					});
-
-				alert.show();
+    			showDialog(RegistryDialog.SelectImportMethod.ordinal());
     		}
     	}
     };
     
+	@Override
+	protected Dialog onCreateDialog(final int id) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		switch (RegistryDialog.values()[id]) {
+		case SelectImportMethod:
+			final boolean[] options = new boolean[2];
+			builder.setTitle("Import team...")
+			.setSingleChoiceItems(new CharSequence[]{"From file", "From QR code"}, -1, new Dialog.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					options[which] = true;
+					options[1 - which] = false;
+				}
+			})
+			.setPositiveButton("Import", new Dialog.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					if (options[0]) // From File
+						showDialog(RegistryDialog.ImportTeamFromFile.ordinal());
+					else if (options[1]) { // From QR Code
+						AlertDialog result = IntentIntegrator.initiateScan(RegistryActivity.this);
+						if (result != null)
+							result.show();
+					}
+				}
+			})
+			.setNegativeButton("Cancel", null);
+			break;
+		case ImportTeamFromFile:
+			// Set an EditText view to get user input
+			final EditText input = new EditText(RegistryActivity.this);
+			input.append("/sdcard/");
+
+			builder.setTitle("Team Import")
+			.setMessage("Please type the path to your team.")
+			.setView(input)
+			.setPositiveButton("Import", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog,	int whichButton) {
+					String path = input.getText().toString();
+
+					if (path != null) {
+						try {
+							// Copy imported file to default team location
+							FileInputStream team = new FileInputStream(path);
+							FileOutputStream saveTeam = openFileOutput("team.xml", Context.MODE_PRIVATE);
+
+							byte[] buffer = new byte[1024];
+							int length;
+							while ((length = team.read(buffer))>0)
+								saveTeam.write(buffer, 0, length);
+							saveTeam.flush();
+							saveTeam.close();
+							team.close();
+							meLoginPlayer = new FullPlayerInfo(RegistryActivity.this);
+							editName.setText("");
+							editName.append(meLoginPlayer.nick());
+							if (!meLoginPlayer.isDefault)
+								Toast.makeText(RegistryActivity.this, "Team successfully imported from " + path, Toast.LENGTH_SHORT).show();
+							else {
+								Toast.makeText(RegistryActivity.this, "Team from " + path + " could not be parsed successfully. Is the file a valid team?", Toast.LENGTH_LONG).show();
+								deleteFile("team.xml");
+							}
+						} catch (IOException e) {
+							System.out.println("Team not found");
+							Toast.makeText(RegistryActivity.this, path + " could not be opened. Does the file exist?", Toast.LENGTH_LONG).show();
+						}
+					}
+				}})
+			.setNegativeButton("Cancel", null);
+			break;
+		}
+		return builder.create();
+	}
+    
+	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+		IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+		if (scanResult != null && scanResult.getFormatName() != null && scanResult.getFormatName().equals("QR_CODE")) {
+			Toast.makeText(this, "Scan succeeded!", Toast.LENGTH_SHORT).show();
+			System.out.println(scanResult.getContents());
+		} else {
+			Toast.makeText(this, "Scan failed!", Toast.LENGTH_SHORT).show();
+		}
+	}
+	
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);

@@ -129,7 +129,10 @@ public class NetworkService extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		super.onStartCommand(intent, flags, startId);
-		Bundle bundle = intent.getExtras();
+		Bundle bundle = null;
+		if (intent != null) // Intent can be null if service restarts after being killed
+							// XXX We probably don't handle such restarts very gracefully 
+			bundle = intent.getExtras();
 		if (bundle != null && bundle.containsKey("loginPlayer")) {
 			meLoginPlayer = new FullPlayerInfo(new Bais(bundle.getBundle("loginPlayer").getByteArray("loginBytes")));
 			mePlayer = new PlayerInfo (meLoginPlayer);
