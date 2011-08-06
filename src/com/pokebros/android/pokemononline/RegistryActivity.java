@@ -259,6 +259,12 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
         return true;
     }
     
+    @Override
+    public boolean onMenuItemSelected(int which, MenuItem item) {
+    	// XXX Placeholder
+    	return true;
+    }
+    
 	public void ServerListEnd() {
 		runOnUiThread(new Runnable() {
 			public void run() {
