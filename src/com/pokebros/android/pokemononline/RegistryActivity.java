@@ -214,8 +214,8 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 								if (path != null) {
 									try {
 										// Copy imported file to default team location
-										FileOutputStream saveTeam = openFileOutput("team.xml", Context.MODE_PRIVATE);
 										FileInputStream team = new FileInputStream(path);
+										FileOutputStream saveTeam = openFileOutput("team.xml", Context.MODE_PRIVATE);
 
 										byte[] buffer = new byte[1024];
 										int length;
@@ -224,16 +224,20 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 										saveTeam.flush();
 										saveTeam.close();
 										team.close();
+										meLoginPlayer = new FullPlayerInfo(RegistryActivity.this);
+										editName.setText("");
+										editName.append(meLoginPlayer.nick());
+										if (!meLoginPlayer.isDefault)
+											Toast.makeText(RegistryActivity.this, "Team successfully imported from " + path, Toast.LENGTH_SHORT).show();
+										else {
+											Toast.makeText(RegistryActivity.this, "Team from " + path + " could not be parsed successfully. Is the file a valid team?", Toast.LENGTH_LONG).show();
+											deleteFile("team.xml");
+										}
 									} catch (IOException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
+										System.out.println("Team not found");
+										Toast.makeText(RegistryActivity.this, path + " could not be opened. Does the file exist?", Toast.LENGTH_LONG).show();
 									}
 								}
-								
-								meLoginPlayer = new FullPlayerInfo(RegistryActivity.this);
-								editName.setText("");
-								editName.append(meLoginPlayer.nick());
-								Toast.makeText(getApplicationContext(), "Team imported from " + path, Toast.LENGTH_SHORT).show();
 						}});
 
 				alert.setNegativeButton("Cancel",

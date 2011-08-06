@@ -14,7 +14,7 @@ import com.pokebros.android.pokemononline.SerializeBytes;
 // Used for logging into the server.
 public class FullPlayerInfo extends SerializeBytes {
 	public PlayerTeam playerTeam;
-		
+	public boolean isDefault = true;
 	protected boolean ladderEnabled = true;
 	protected boolean showTeam = false;
 	protected QColor nameColor = new QColor();
@@ -30,9 +30,14 @@ public class FullPlayerInfo extends SerializeBytes {
 		try {
 			context.openFileInput("team.xml");
 			playerTeam = new PlayerTeam(new PokeParser(context));
+			isDefault = false;
 		} catch (FileNotFoundException e) {
 			//TODO Warn player that default team has loaded
-			System.out.println("NO TEAM IMPORTED, SYSTEM LOADED DEFAULT TEAM");
+			System.out.println("NO TEAM FOUND, SYSTEM LOADED DEFAULT TEAM");
+			playerTeam = new PlayerTeam();
+		} catch (NumberFormatException e) {
+			// The file could not be parsed correctly
+			System.out.println("INVALID TEAM FOUND, SYSTEM LOADED DEFAULT TEAM");
 			playerTeam = new PlayerTeam();
 		}
 	}
