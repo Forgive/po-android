@@ -134,7 +134,7 @@ public class NetworkService extends Service {
 							// XXX We probably don't handle such restarts very gracefully 
 			bundle = intent.getExtras();
 		if (bundle != null && bundle.containsKey("loginPlayer")) {
-			meLoginPlayer = new FullPlayerInfo(new Bais(bundle.getBundle("loginPlayer").getByteArray("loginBytes")));
+			meLoginPlayer = new FullPlayerInfo(new Bais(bundle.getByteArray("loginPlayer")));
 			mePlayer = new PlayerInfo (meLoginPlayer);
 		}
 		if (bundle != null && bundle.containsKey("ip"))

@@ -1,11 +1,15 @@
 package com.pokebros.android.pokemononline;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.regex.Pattern;
+import java.util.zip.*;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -197,9 +201,7 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 				Intent intent = new Intent(RegistryActivity.this, NetworkService.class);
 				intent.putExtra("ip", ipString);
 				intent.putExtra("port", portVal);
-				Bundle loginPlayer = new Bundle();
-				loginPlayer.putByteArray("loginBytes", meLoginPlayer.serializeBytes().toByteArray());
-				intent.putExtra("loginPlayer", loginPlayer);
+				intent.putExtra("loginPlayer", meLoginPlayer.serializeBytes().toByteArray());
 
 				startService(intent);
 				startActivity(new Intent(RegistryActivity.this, ChatActivity.class));
@@ -284,13 +286,26 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 	}
     
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+		boolean succeeded = false;
 		IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
-		if (scanResult != null && scanResult.getFormatName() != null && scanResult.getFormatName().equals("QR_CODE")) {
-			Toast.makeText(this, "Scan succeeded!", Toast.LENGTH_SHORT).show();
-			System.out.println(scanResult.getContents());
-		} else {
-			Toast.makeText(this, "Scan failed!", Toast.LENGTH_SHORT).show();
+		if (scanResult != null && "QR_CODE".equals(scanResult.getFormatName())) {
+			try {
+				InflaterInputStream iis = new InflaterInputStream(new ByteArrayInputStream(scanResult.getContents().getBytes("UTF-8")));
+				FileOutputStream saveTeam = openFileOutput("team.xml", Context.MODE_PRIVATE);
+				byte[] buffer = new byte[1024];
+				int length;
+				while ((length = iis.read(buffer))>0)
+					saveTeam.write(buffer, 0, length);
+				succeeded = true;
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
+		Toast.makeText(this, "Import " + (succeeded ? "succeeded!" : "failed!"), Toast.LENGTH_LONG).show();
 	}
 	
     @Override
