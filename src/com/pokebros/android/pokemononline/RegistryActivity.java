@@ -1,14 +1,10 @@
 package com.pokebros.android.pokemononline;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.util.regex.Pattern;
 import java.util.zip.*;
 
 import android.app.Activity;
@@ -25,7 +21,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.text.InputType;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -290,7 +285,14 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 		IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
 		if (scanResult != null && "QR_CODE".equals(scanResult.getFormatName())) {
 			try {
-				InflaterInputStream iis = new InflaterInputStream(new ByteArrayInputStream(scanResult.getContents().getBytes("UTF-8")));
+				byte[] qrRead = intent.getByteArrayExtra("SCAN_RESULT_BYTES");
+				// Discard the first 4 bits. These set the mode of the qr data (always the same for us)
+				for(int i = 0; i < qrRead.length - 1; i++)
+					// The new byte is your lower 4 bits and the upper 4 bits of the next guy
+					qrRead[i] = (byte) (((qrRead[i] & 0xf) << 4) | ((qrRead[i+1] & 0xf0) >>> 4));
+				// Read in the length (two bytes)
+				int qrLen = ((int)(qrRead[0]) << 8) | ((int)qrRead[1] & 0xff);
+				InflaterInputStream iis = new InflaterInputStream(new ByteArrayInputStream(qrRead, 2, qrLen));
 				FileOutputStream saveTeam = openFileOutput("team.xml", Context.MODE_PRIVATE);
 				byte[] buffer = new byte[1024];
 				int length;
