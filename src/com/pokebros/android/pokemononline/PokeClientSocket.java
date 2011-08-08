@@ -81,7 +81,7 @@ public class PokeClientSocket {
 			if(isReadingLength) {
 				// If we're in the middle of reading length,
 				// read in the rest.
-				remaining |= currentData.get();
+				remaining |= ((int)currentData.get() & 0xff);
 				isReadingLength = false;
 				dataLen--;
 			}
@@ -96,7 +96,7 @@ public class PokeClientSocket {
 				else if(remaining == 0 && dataLen == 1) {
 					// If there's only one byte left, read in
 					// the top byte of the message length.
-					remaining = (((int)currentData.get()) << 8);
+					remaining = (((int)currentData.get() & 0xff) << 8);
 					isReadingLength = true;
 					return;
 				}

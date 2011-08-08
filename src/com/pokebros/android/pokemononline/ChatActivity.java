@@ -328,13 +328,13 @@ public class ChatActivity extends Activity {
 	protected Dialog onCreateDialog(final int id) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
-		final IncomingChallenge challenge = netServ.challenges.poll();
 		switch (ChatDialog.values()[id]) {
 		case Challenge:
 			if (netServ == null) {
 				removeDialog(id);
 				dismissDialog(id);
 			}
+			final IncomingChallenge challenge = netServ.challenges.poll();
 			View challengedLayout = inflater.inflate(R.layout.player_info_dialog, (LinearLayout)findViewById(R.id.player_info_dialog));
 			PlayerInfo opp = netServ.players.get(challenge.opponent);
 			ImageView[] oppPokeIcons = new ImageView[6];
