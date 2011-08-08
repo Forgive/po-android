@@ -538,7 +538,7 @@ public class Battle {
 			break;
 		case Clause:
 			if (player >= 0 && player < Clauses.values().length)
-				writeToHist(Clauses.values()[player].battleText());
+				writeToHist("\n" + Clauses.values()[player].battleText());
 			break;
 		case Rated:
 			boolean rated = msg.readBool();
