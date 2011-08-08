@@ -281,7 +281,6 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 	}
     
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-		boolean succeeded = false;
 		IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
 		if (scanResult != null && "QR_CODE".equals(scanResult.getFormatName())) {
 			try {
@@ -298,16 +297,24 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 				int length;
 				while ((length = iis.read(buffer))>0)
 					saveTeam.write(buffer, 0, length);
-				succeeded = true;
+				saveTeam.flush();
+				saveTeam.close();
+				meLoginPlayer = new FullPlayerInfo(RegistryActivity.this);
+				editName.setText("");
+				editName.append(meLoginPlayer.nick());
+				if (!meLoginPlayer.isDefault)
+					Toast.makeText(RegistryActivity.this, "Team successfully imported from QR code", Toast.LENGTH_SHORT).show();
+				else {
+					Toast.makeText(RegistryActivity.this, "Team from QR code could not be parsed successfully. Is the QR code a valid team?", Toast.LENGTH_LONG).show();
+					deleteFile("team.xml");
+				}
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Toast.makeText(RegistryActivity.this, "Team from QR code could not be parsed successfully. Is the QR code a valid team?", Toast.LENGTH_LONG).show();
 			}
 		}
-		Toast.makeText(this, "Import " + (succeeded ? "succeeded!" : "failed!"), Toast.LENGTH_LONG).show();
 	}
 	
     @Override
