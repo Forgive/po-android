@@ -13,6 +13,7 @@ import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
 import com.pokebros.android.pokemononline.NetworkService;
 import com.pokebros.android.pokemononline.ColorEnums.*;
+import com.pokebros.android.pokemononline.battle.ChallengeEnums.*;
 import com.pokebros.android.pokemononline.player.PlayerInfo;
 import com.pokebros.android.pokemononline.poke.BattlePoke;
 import com.pokebros.android.pokemononline.poke.ShallowBattlePoke;
@@ -47,6 +48,7 @@ public class Battle {
 	public int background;
 	public boolean shouldShowPreview = false, shouldStruggle = false;
 	public BattleMove[] displayedMoves = new BattleMove[4];
+	public BattleConf conf;
 	
 	ShallowBattlePoke[][] pokes = new ShallowBattlePoke[2][6];
 	ArrayList<Boolean> pokeAlive = new ArrayList<Boolean>();
@@ -60,11 +62,11 @@ public class Battle {
 		}
 	}
 	
-	public Battle(BattleConf conf, Bais msg, PlayerInfo p1, PlayerInfo p2, int meID, int bID, NetworkService ns) {
+	public Battle(BattleConf bc, Bais msg, PlayerInfo p1, PlayerInfo p2, int meID, int bID, NetworkService ns) {
 		hist = new SpannableStringBuilder();
 		histDelta = new SpannableStringBuilder();
 		netServ = ns;
-		mode = conf.mode; // singles, doubles, triples
+		conf = bc; // singles, doubles, triples
 		this.bID = bID;
 		myTeam = new BattleTeam(msg, netServ.db);
 		
@@ -535,13 +537,19 @@ public class Battle {
 			// writeToHist("\n");
 			break;
 		case Clause:
-			// TODO
+			if (player >= 0 && player < Clauses.values().length)
+				writeToHist(Clauses.values()[player].battleText());
 			break;
 		case Rated:
 			boolean rated = msg.readBool();
-			writeToHist(Html.fromHtml("<br><b><font color =" + QtColor.Blue + 
+			writeToHist(Html.fromHtml("<br><b><font color =" + QtColor.Blue + "Rule: " +
 					(rated ? "Rated" : "Unrated") + "</b></font>"));
-			// TODO Print clauses
+            for (int i = 0; i < Clauses.values().length; i++) {
+                if ((conf.clauses & (1 << i)) > 0 ? true : false) {
+                    writeToHist(Html.fromHtml("<br><b><font color =" + QtColor.Blue + "Rule: " +
+                    		Clauses.values()[i]));
+                }
+            }
 			break;
 		case TierSection:
 			String tier = msg.readQString();

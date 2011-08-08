@@ -331,6 +331,8 @@ public class BattleActivity extends Activity {
 	}
 
 	public void updateCurrentPokeListEntry() {
+		if (netServ == null)
+			return;
 		runOnUiThread(new Runnable() {
 			public void run() {
 				BattlePoke battlePoke = netServ.battle.myTeam.pokes[0];

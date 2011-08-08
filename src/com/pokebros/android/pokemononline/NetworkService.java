@@ -306,8 +306,9 @@ public class NetworkService extends Service {
 			break;
 		case BattleMessage:
 			msg.readInt(); // currently support only one battle, unneeded
-			msg.readInt(); // discard the size, unneeded 
-			battle.receiveCommand(msg);
+			msg.readInt(); // discard the size, unneeded
+			if (battle != null)
+				battle.receiveCommand(msg);
 			break;
 		case EngageBattle:
 			bID = msg.readInt();

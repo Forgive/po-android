@@ -53,7 +53,8 @@ public class ChatActivity extends Activity {
 		ConfirmDisconnect,
 		FindBattle,
 		TierSelection,
-		PlayerInfo
+		PlayerInfo,
+		ChallengeMode
 	}
 	
 	public final static int SWIPE_TIME_THRESHOLD = 100;
@@ -147,27 +148,6 @@ public class ChatActivity extends Activity {
     	players = (ListView)findViewById(R.id.playerlisting);
     	playerAdapter = new PlayerListAdapter(ChatActivity.this, 0);
     	registerForContextMenu(players);
-   /* 	players.setOnItemClickListener(new OnItemClickListener() {
-    		// Set the edit texts on list item click
-    		public void onItemClick(AdapterView<?> parent, View view, int position,
-    				long id) {
-    			if (netServ.socket.isConnected()) {
-    				Toast.makeText(ChatActivity.this,"Challenge sent to " + 
-    						((PlayerListAdapter)parent.getAdapter()).getItem(position).nick(),Toast.LENGTH_SHORT).show();
-    				netServ.socket.sendMessage(constructChallenge(ChallengeDesc.Sent.ordinal(), 
-    						((PlayerListAdapter)parent.getAdapter()).getItem(position).id, 
-    						Clauses.SleepClause.ordinal(), Mode.Singles.ordinal()), Command.ChallengeStuff);
-    			}
-    		}        	
-    	});
-        players.setOnItemLongClickListener(new OnItemLongClickListener() {
-			public boolean onItemLongClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				System.out.println("Player -- Long click works");
-				
-				return true;
-			}
-		});*/
         
         //Channel List Stuff**
         channels = (ListView)findViewById(R.id.channellisting);
@@ -351,6 +331,10 @@ public class ChatActivity extends Activity {
 		final IncomingChallenge challenge = netServ.challenges.poll();
 		switch (ChatDialog.values()[id]) {
 		case Challenge:
+			if (netServ == null) {
+				removeDialog(id);
+				dismissDialog(id);
+			}
 			View challengedLayout = inflater.inflate(R.layout.player_info_dialog, (LinearLayout)findViewById(R.id.player_info_dialog));
 			PlayerInfo opp = netServ.players.get(challenge.opponent);
 			ImageView[] oppPokeIcons = new ImageView[6];
@@ -457,7 +441,7 @@ public class ChatActivity extends Activity {
 			final EditText range = new EditText(this);
 			range.setInputType(InputType.TYPE_CLASS_NUMBER);
 			range.setHint("Range");
-			final boolean[] options = new boolean[3];
+			final boolean[] options = new boolean[]{false, false, false};
 			builder.setTitle(R.string.find_a_battle)
 			.setMultiChoiceItems(new CharSequence[]{"Force Rated", "Force Same Tier", "Only within range"}, null, new DialogInterface.OnMultiChoiceClickListener() {
 				public void onClick(DialogInterface dialog, int which, boolean isChecked) {
@@ -504,11 +488,7 @@ public class ChatActivity extends Activity {
             })
             .setPositiveButton("Challenge", new DialogInterface.OnClickListener(){
             	public void onClick(DialogInterface dialog, int which) {
-            		if (netServ.socket.isConnected())
-            			Toast.makeText(ChatActivity.this,"Challenge sent to " + 
-            					player.nick(),Toast.LENGTH_SHORT).show();
-            		netServ.socket.sendMessage(constructChallenge(ChallengeDesc.Sent.ordinal(),player.id, 
-            				Clauses.SleepClause.ordinal(), Mode.Singles.ordinal()), Command.ChallengeStuff);
+        			showDialog(ChatDialog.ChallengeMode.ordinal());
             		removeDialog(id);
             	}});
             final AlertDialog pInfoDialog = builder.create();
@@ -531,6 +511,43 @@ public class ChatActivity extends Activity {
             pRating.setText(Html.fromHtml("<b>Rating: </b>" + NetworkService.escapeHtml(new Short(player.rating).toString())));    
         	
             return pInfoDialog;
+		case ChallengeMode:
+            final PlayerInfo playerZ = playerAdapter.getItem(lastClicked); // Scope here doesn't really work out so nicely with final variables
+            final Clauses[] clauses = Clauses.values();
+            int numClauses = clauses.length;
+			final boolean[] optionZ = new boolean[numClauses];
+			final String[] clauseNames = new String[numClauses];
+			for (int i=0; i < numClauses; i++) {
+				optionZ[i] = false;
+				clauseNames[i] = clauses[i].toString();
+			}
+            builder.setMultiChoiceItems(clauseNames, null, new DialogInterface.OnMultiChoiceClickListener() {
+				public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+					optionZ[which] = isChecked;
+				}
+			})
+			.setPositiveButton("Challenge", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					int clauses = 0;
+					for (int i = 0; i < optionZ.length; i++)
+						clauses |= (optionZ[i] ? Clauses.values()[i].mask() : 0);
+					if (netServ != null && netServ.socket != null && netServ.socket.isConnected())
+						netServ.socket.sendMessage(constructChallenge(ChallengeDesc.Sent.ordinal(), playerZ.id, clauses, Mode.Singles.ordinal()), Command.ChallengeStuff);
+					removeDialog(id);
+				}
+			})
+            .setNegativeButton("Back", new DialogInterface.OnClickListener(){
+            	public void onClick(DialogInterface dialog, int which) {
+            		removeDialog(id);
+            	}
+            })
+            .setOnCancelListener(new DialogInterface.OnCancelListener(){
+            	public void onCancel(DialogInterface dialog) {
+            		removeDialog(id);
+            	}
+            })
+            .setTitle("Select clauses");
+            return builder.create();
 		}
 		return new Dialog(this); // Should never get here but needed to run
 	}
@@ -625,12 +642,8 @@ public class ChatActivity extends Activity {
     	AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
     	switch(item.getItemId()){
     	case CONTEXTMENU_CHALLENGEPLAYER:
-    		if (netServ.socket.isConnected())
-    			Toast.makeText(ChatActivity.this,"Challenge sent to " + 
-    					playerAdapter.getItem(info.position).nick(),Toast.LENGTH_SHORT).show();
-    		netServ.socket.sendMessage(constructChallenge(ChallengeDesc.Sent.ordinal(), 
-    				playerAdapter.getItem(info.position).id, 
-    				Clauses.SleepClause.ordinal(), Mode.Singles.ordinal()), Command.ChallengeStuff);
+    		lastClicked = info.position;
+    		showDialog(ChatDialog.ChallengeMode.ordinal());
     		break;
     	case CONTEXTMENU_VIEWPLAYERINFO:
     		lastClicked = info.position;
@@ -668,16 +681,10 @@ public class ChatActivity extends Activity {
     private Baos constructFindBattle(boolean forceRated, boolean forceSameTier,
     		boolean onlyInRange, short range, byte mode) {
 		Baos find = new Baos();
-		/*find.putBool(forceRated);
-		find.putBool(forceSameTier);
-		find.putBool(onlyInRange);
-		find.putBool(false); // Padding
-		find.putShort(range);
-		find.write(mode); // singles/doubles/triples*/
 		int flags = 0;
 		flags |= (forceRated ? 1:0);
-		flags |= (forceSameTier ? 1:0);
-		flags |= (onlyInRange ? 1:0);
+		flags |= (forceSameTier ? 2:0);
+		flags |= (onlyInRange ? 4:0);
 		find.putInt(flags);
 		find.putShort(range);
 		find.write(mode);
