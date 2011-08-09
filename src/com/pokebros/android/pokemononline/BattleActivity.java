@@ -488,7 +488,7 @@ public class BattleActivity extends Activity {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			netServ = ((NetworkService.LocalBinder)service).getService();
 			netServ.herp();
-			if (netServ.battle.isOver) {
+			if (netServ.hasBattle()) {
 	    		startActivity(new Intent(BattleActivity.this, ChatActivity.class));
 				finish();
 				return;
