@@ -50,7 +50,7 @@ public class NetworkService extends Service {
 	public DataBaseHelper db;
 	
 	public boolean hasBattle() {
-		return battle != null || battle.isOver;
+		return battle != null && battle.isOver;
 	}
 	
 	private FullPlayerInfo meLoginPlayer;
