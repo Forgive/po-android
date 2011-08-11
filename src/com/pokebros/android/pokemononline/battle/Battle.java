@@ -42,7 +42,7 @@ public class Battle {
 	private static NetworkService netServ;
 	public BattleTeam myTeam;
 	public ShallowShownTeam oppTeam;
-	public boolean isOver = false, gotEnd = false;
+	public boolean gotEnd = false;
 	public boolean allowSwitch, allowAttack;
 	public boolean[] allowAttacks = new boolean[4];
 	public int background;
@@ -530,7 +530,6 @@ public class Battle {
 				writeToHist(Html.fromHtml("<br><b><font color =" + QtColor.Blue +
 						players[player].nick() +" won the battle!</b></font>"));
 			gotEnd = true;
-			isOver = true;
 			break;
 		case BlankMessage:
 			// XXX This prints out a lot of extra space

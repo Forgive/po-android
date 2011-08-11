@@ -488,7 +488,7 @@ public class BattleActivity extends Activity {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			netServ = ((NetworkService.LocalBinder)service).getService();
 			netServ.herp();
-			if (netServ.hasBattle()) {
+			if (!netServ.hasBattle()) {
 	    		startActivity(new Intent(BattleActivity.this, ChatActivity.class));
 				finish();
 				return;
@@ -555,9 +555,6 @@ public class BattleActivity extends Activity {
     @Override
     public void onDestroy() {
     	unbindService(connection);
-		if (netServ != null && netServ.battle != null && netServ.battle.isOver) {
-			netServ.battle = null;
-		}
     	super.onDestroy();
     }
 
@@ -626,7 +623,7 @@ public class BattleActivity extends Activity {
     }
     @Override
     public void onBackPressed() {
-    	if(netServ != null && !netServ.battle.isOver)
+    	if(netServ != null && !netServ.battle.gotEnd)
     		netServ.socket.sendMessage(netServ.battle.constructCancel(), Command.BattleMessage);
     	else {
     		startActivity(new Intent(BattleActivity.this, ChatActivity.class));
@@ -650,7 +647,8 @@ public class BattleActivity extends Activity {
     		finish();
     		break;
     	case R.id.forfeit:
-    		showDialog(BattleDialog.ConfirmForfeit.ordinal());
+    		if (netServ != null && netServ.hasBattle() && !netServ.battle.gotEnd)
+    			showDialog(BattleDialog.ConfirmForfeit.ordinal());
     		break;
     	case R.id.draw:
     		//TODO: Offer Draw
@@ -670,11 +668,11 @@ public class BattleActivity extends Activity {
 		}
 	}
     
-	private void forfeit() {
-		if (netServ != null && !netServ.battle.isOver) {
-    		Baos forfeit = new Baos();
-    		forfeit.putInt(netServ.battle.bID);
-    		netServ.socket.sendMessage(forfeit, Command.BattleFinished);
+	void endBattle() {
+		if (netServ != null && netServ.socket != null && netServ.socket.isConnected() && netServ.hasBattle()) {
+    		Baos bID = new Baos();
+    		bID.putInt(netServ.battle.bID);
+    		netServ.socket.sendMessage(bID, Command.BattleFinished);
 		}
 	}
 	
@@ -714,15 +712,11 @@ public class BattleActivity extends Activity {
 			.setCancelable(true)
 			.setPositiveButton("Forfeit", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
-					forfeit();
+					endBattle();
 				}
 			})
 			.setNegativeButton("Cancel", null);
 			return builder.create();
-        //case DIALOG_GAMEOVER_ID:
-            // TODO grammar
-            // do the work to define the another Dialog
-           // break;
         default:
             return new Dialog(this);
         }

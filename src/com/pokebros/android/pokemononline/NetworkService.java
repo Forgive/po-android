@@ -50,7 +50,7 @@ public class NetworkService extends Service {
 	public DataBaseHelper db;
 	
 	public boolean hasBattle() {
-		return battle != null && battle.isOver;
+		return battle != null;
 	}
 	
 	private FullPlayerInfo meLoginPlayer;
@@ -141,9 +141,9 @@ public class NetworkService extends Service {
 			connect(bundle.getString("ip"), bundle.getShort("port"));
 		return START_STICKY;
 	}
-	
-    protected void showNotification(Class<?> toStart, String text) {
-        Notification notification = new Notification(R.drawable.icon, text,
+
+    protected void showNotification(Class<?> toStart, String text, String note) {
+        Notification notification = new Notification(R.drawable.icon, note,
                 System.currentTimeMillis());
         // The PendingIntent to launch our activity if the user selects this notification
         PendingIntent notificationIntent = PendingIntent.getActivity(this, 0,
@@ -151,6 +151,10 @@ public class NetworkService extends Service {
 
         notification.setLatestEventInfo(this, "POAndroid", text, notificationIntent);
         this.startForeground(NOTIFICATION, notification);
+    }
+
+    protected void showNotification(Class<?> toStart, String text) {
+    	showNotification(toStart, text, text);
     }
 	
 	public void handleMsg(Bais msg) {
@@ -262,30 +266,21 @@ public class NetworkService extends Service {
 			byte battleDesc = msg.readByte();
 			int id1 = msg.readInt();
 			int id2 = msg.readInt();
-			String outcome = new String();
-			switch(battleDesc) {
-			case 0: // Forfeit
-				outcome = " won by forfeit against ";
-				break;
-			case 1: // Win
-				outcome = " won against ";
-				break;
-			case 2: // Tie
-				outcome = " tied with ";
-				break;
-			case 3: // Close
-				outcome = " was close against ";
-				break;
-			default:
-				outcome = " had no idea against ";
-			}
-			if (id1 == mePlayer.id || id2 == mePlayer.id) {
-				if (players.get(id1) != null && players.get(id2) != null && battleDesc < 3)
-					currentChannel.writeToHist("\n" + players.get(id1).nick() + outcome + players.get(id2).nick() + ".");
-				if (battle != null && !battle.gotEnd) {
-					battle.isOver = true;
+			System.out.println("bID " + battleID + " battleDesc " + battleDesc + " id1 " + id1 + " id2 " + id2);
+			String[] outcome = new String[]{" won by forfeit against ", " won against ", " tied with "};
+			if (battle != null && battle.bID == battleID) {
+				if (mePlayer.id == id1 && battleDesc == 1) {
+					showNotification(ChatActivity.class, "Chat", "You won!");
+				} else if (mePlayer.id == id2 && battleDesc < 2) {
+					showNotification(ChatActivity.class, "Chat", "You lost!");
+				} else if (battleDesc == 2) {
+					showNotification(ChatActivity.class, "Chat", "You tied!");
+				}
+				if (players.get(id1) != null && players.get(id2) != null && battleDesc < 2)
+					currentChannel.writeToHist("\n" + players.get(id1).nick() + outcome[battleDesc] + players.get(id2).nick() + ".");
+				else if (battleDesc == 3) {
+					battle = null;
 					if (battleActivity != null)
-						battle = null;
 						battleActivity.end();
 				}
 			}
@@ -372,7 +367,7 @@ public class NetworkService extends Service {
 		default:
 			System.out.println("Unimplented message");
 		}
-		if (hasBattle() && battleActivity != null && battle.histDelta.length() != 0)
+		if (battle != null && battleActivity != null && battle.histDelta.length() != 0)
 			battleActivity.updateBattleInfo();
 		if (chatActivity != null && currentChannel != null && currentChannel.histDelta.length() != 0)
 			chatActivity.updateChat();

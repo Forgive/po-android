@@ -206,8 +206,10 @@ public class ChatActivity extends Activity {
 	public void onResume() {
 		super.onResume();
 		chatViewSwitcher.setCurrentScreen(1);
-		if (netServ != null && (!netServ.hasBattle() || netServ.battle.isOver))
+		if (netServ != null && !netServ.hasBattle())
 			netServ.showNotification(ChatActivity.class, "Chat");
+		else if (netServ != null && netServ.hasBattle() && netServ.battle.gotEnd)
+			netServ.battleActivity.endBattle();
 		checkChallenges();
 		checkAskForPass();
 		checkFailedConnection();
@@ -216,7 +218,7 @@ public class ChatActivity extends Activity {
 	private ServiceConnection connection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			netServ = ((NetworkService.LocalBinder)service).getService();
-			if (!netServ.hasBattle() || netServ.battle.isOver)
+			if (!netServ.hasBattle())
 				netServ.showNotification(ChatActivity.class, "Chat");
 			
 			netServ.chatActivity = ChatActivity.this;
