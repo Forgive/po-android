@@ -90,7 +90,7 @@ public class PokeClientSocket {
 				// and the buffer has at least the size of the
 				// next message in it, start reading it in.
 				if(remaining == 0 && dataLen >= 2) {
-					remaining = currentData.getShort();
+					remaining = ((int)currentData.getShort() & 0xffff);
 					dataLen -= 2;
 				}
 				else if(remaining == 0 && dataLen == 1) {
