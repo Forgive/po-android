@@ -17,7 +17,7 @@ public class ChallengeEnums {
 	public enum Clauses
 	{
 		SleepClause { public final int mask() { return 1; }
-						public final String toString() { return "Sleep Clasue"; }
+						public final String toString() { return "Sleep Clause"; }
 						public final String battleText() {return "Sleep Clause prevented the sleep inducing effect of the move from working."; } },
 		FreezeClause { public final int mask() { return 2; }
 						public final String toString() { return "Freeze Clause"; }
