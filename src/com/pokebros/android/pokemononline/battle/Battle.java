@@ -56,6 +56,8 @@ public class Battle {
 	public SpannableStringBuilder hist; //= new SpannableStringBuilder();
 	public SpannableStringBuilder histDelta; //= new SpannableStringBuilder();
 	
+	public BattleDynamicInfo[] dynamicInfo = new BattleDynamicInfo[2];
+	
 	public void writeToHist(CharSequence text) {
 		synchronized(histDelta) {
 			histDelta.append(text);
@@ -687,6 +689,10 @@ public class Battle {
 			displayedMoves[moveNum].currentPP = myTeam.pokes[0].moves[moveNum].currentPP = newPP;
 			if(netServ.battleActivity != null)
 				netServ.battleActivity.updateMovePP(moveNum);
+			break;
+		case DynamicInfo:
+			dynamicInfo[player] = new BattleDynamicInfo(msg);
+			System.out.println("PLAYER " + player + " " + dynamicInfo[player]);
 			break;
 		default:
 			System.out.println("Battle command unimplemented -- " + bc);

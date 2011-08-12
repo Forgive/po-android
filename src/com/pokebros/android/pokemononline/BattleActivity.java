@@ -39,6 +39,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
+import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -61,7 +62,9 @@ import android.widget.Toast;
 public class BattleActivity extends Activity {
 	public enum BattleDialog {
 		RearrangeTeam,
-		ConfirmForfeit
+		ConfirmForfeit, 
+		OppDynamicInfo, 
+		MyDynamicInfo
 	}
 
 	public final static int SWIPE_TIME_THRESHOLD = 100;
@@ -519,6 +522,8 @@ public class BattleActivity extends Activity {
 	        
 	        pokeSprites[me] = (ImageView)findViewById(R.id.pokeSpriteB);
 	        pokeSprites[opp] = (ImageView)findViewById(R.id.pokeSpriteA);
+	        for(int i = 0; i < 2; i++)
+	        	pokeSprites[i].setOnLongClickListener(spriteListener);
 	        
 	        // Load scrollback
 	        infoView.setText(netServ.battle.hist);
@@ -593,6 +598,16 @@ public class BattleActivity extends Activity {
 				setPokeListButtonEnabled(i, false);
 			}
     	}
+    };
+    
+    public OnLongClickListener spriteListener = new OnLongClickListener() {
+		public boolean onLongClick(View v) {
+			if(v.getId() == pokeSprites[me].getId())
+				showDialog(BattleDialog.MyDynamicInfo.ordinal());
+			else
+				showDialog(BattleDialog.OppDynamicInfo.ordinal());
+			return true;
+		}	
     };
     
     void setPokeListButtonEnabled(int num, boolean enabled) {
@@ -677,36 +692,38 @@ public class BattleActivity extends Activity {
 	}
 	
     protected Dialog onCreateDialog(final int id) {
+    	int player = me;
     	final AlertDialog dialog;
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
         switch(BattleDialog.values()[id]) {
-        case RearrangeTeam:
+        case RearrangeTeam: {
         	View layout = inflater.inflate(R.layout.rearrange_team_dialog, (LinearLayout)findViewById(R.id.rearrange_team_dialog));
-            builder.setView(layout)
-            .setPositiveButton("Done", new DialogInterface.OnClickListener(){
-            	public void onClick(DialogInterface dialog, int which) {
-            		netServ.socket.sendMessage(netServ.battle.constructRearrange(), Command.BattleMessage);
+        	builder.setView(layout)
+        	.setPositiveButton("Done", new DialogInterface.OnClickListener(){
+        		public void onClick(DialogInterface dialog, int which) {
+        			netServ.socket.sendMessage(netServ.battle.constructRearrange(), Command.BattleMessage);
         			netServ.battle.shouldShowPreview = false;
-            		removeDialog(id);
-            	}})
-            .setCancelable(false);
-            dialog = builder.create();
-            
+        			removeDialog(id);
+        		}})
+        		.setCancelable(false);
+        	dialog = builder.create();
+
         	mDragLayer = (DragLayer)layout.findViewById(R.id.drag_my_poke);
-            for(int i = 0; i < 6; i++){
-            	BattlePoke poke = netServ.battle.myTeam.pokes[i];
-            	myArrangePokeIcons[i] = (PokeDragIcon)layout.findViewById(resources.getIdentifier("my_arrange_poke" + (i+1), "id", packName));
-            	myArrangePokeIcons[i].setOnTouchListener(dialogListener);
-            	myArrangePokeIcons[i].setImageDrawable(getIcon(poke.uID));
-            	myArrangePokeIcons[i].num = i;
-            	myArrangePokeIcons[i].battleActivity = this;
-            	
-            	ShallowShownPoke oppPoke = netServ.battle.oppTeam.pokes[i];
-            	oppArrangePokeIcons[i] = (ImageView)layout.findViewById(resources.getIdentifier("foe_arrange_poke" + (i+1), "id", packName));
-            	oppArrangePokeIcons[i].setImageDrawable(getIcon(oppPoke.uID));
-            }
+        	for(int i = 0; i < 6; i++){
+        		BattlePoke poke = netServ.battle.myTeam.pokes[i];
+        		myArrangePokeIcons[i] = (PokeDragIcon)layout.findViewById(resources.getIdentifier("my_arrange_poke" + (i+1), "id", packName));
+        		myArrangePokeIcons[i].setOnTouchListener(dialogListener);
+        		myArrangePokeIcons[i].setImageDrawable(getIcon(poke.uID));
+        		myArrangePokeIcons[i].num = i;
+        		myArrangePokeIcons[i].battleActivity = this;
+
+        		ShallowShownPoke oppPoke = netServ.battle.oppTeam.pokes[i];
+        		oppArrangePokeIcons[i] = (ImageView)layout.findViewById(resources.getIdentifier("foe_arrange_poke" + (i+1), "id", packName));
+        		oppArrangePokeIcons[i].setImageDrawable(getIcon(oppPoke.uID));
+        	}
             return dialog;
+        }
         case ConfirmForfeit:
 			builder.setMessage("Really Forfeit?")
 			.setCancelable(true)
@@ -717,6 +734,23 @@ public class BattleActivity extends Activity {
 			})
 			.setNegativeButton("Cancel", null);
 			return builder.create();
+        case OppDynamicInfo:
+        	player = opp;
+        case MyDynamicInfo:
+        	if(netServ != null) {
+        		View layout = inflater.inflate(R.layout.dynamic_info_layout, (LinearLayout)findViewById(R.id.dynamic_info_layout));
+        		builder.setView(layout);
+        		TextView t = (TextView)layout.findViewById(R.id.statNamesView);
+        		t.setText(netServ.battle.dynamicInfo[player].statsAndHazards());
+        		t = (TextView)layout.findViewById(R.id.statNumsView);
+        		t.setText(netServ.battle.dynamicInfo[player].numbers());
+        		builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+					public void onCancel(DialogInterface dialog) {
+						removeDialog(id);
+					}
+				});
+        		return builder.create();
+        	}
         default:
             return new Dialog(this);
         }
