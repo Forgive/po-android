@@ -1,6 +1,7 @@
 package com.pokebros.android.pokemononline;
 
 import java.util.Hashtable;
+import java.util.Iterator;
 
 import android.text.Html;
 import android.text.SpannableStringBuilder;
@@ -11,7 +12,7 @@ public class Channel {
 	protected String name;
 	protected int id;
 	protected int events = 0;
-	protected boolean isReadyToQuit = false, joined = false;
+	protected boolean isReadyToQuit = false;
 	
 	public Hashtable<Integer, PlayerInfo> players = new Hashtable<Integer, PlayerInfo>();
 	
@@ -43,7 +44,7 @@ public class Channel {
 		if(p != null) {
 			players.put(p.id, p);
 			
-			if(netServ != null && netServ.chatActivity != null && this.equals(netServ.currentChannel))
+			if(netServ != null && netServ.chatActivity != null && this.equals(netServ.joinedChannels.peek()))
 				netServ.chatActivity.addPlayer(p);
 		}
 		else
@@ -68,14 +69,13 @@ public class Channel {
 			case JoinChannel: {
 				PlayerInfo p = netServ.players.get(msg.readInt());
 				if (p.id == netServ.mePlayer.id) { // We joined the channel
-					netServ.currentChannel = this;
+					netServ.joinedChannels.addFirst(this);
 					if (netServ.chatActivity != null) {
-						netServ.chatActivity.populateUI();
+						netServ.chatActivity.populateUI(true);
 						netServ.chatActivity.progressDialog.dismiss();
 					}
 				}
 				addPlayer(p);
-				joined = true;
 				break;
 			}
 			case ChannelMessage:
@@ -89,6 +89,13 @@ public class Channel {
 				break;
 			case LeaveChannel:
 				PlayerInfo p = netServ.players.get(msg.readInt());
+				if (p.id == netServ.mePlayer.id) { // We left the channel
+					// XXX this runtime complexity sucks
+					netServ.joinedChannels.remove(this);
+					if (netServ.chatActivity != null) {
+						netServ.chatActivity.populateUI(true);
+					}
+				}
 				removePlayer(p);
 				break;
 			default:

@@ -47,7 +47,7 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.view.KeyEvent;
 
 public class ChatActivity extends Activity {
-	public enum ChatDialog {
+	private enum ChatDialog {
 		Challenge,
 		AskForPass,
 		ConfirmDisconnect,
@@ -58,11 +58,16 @@ public class ChatActivity extends Activity {
 	}
 	
 	public final static int SWIPE_TIME_THRESHOLD = 100;
-	public final static int CONTEXTMENU_CHALLENGEPLAYER = 0;
-	public final static int CONTEXTMENU_VIEWPLAYERINFO = 1;
+	
+	private enum ChatContext {
+		ChallengePlayer,
+		ViewPlayerInfo,
+		JoinChannel,
+		LeaveChannel;
+	}
 	
 	private PlayerListAdapter playerAdapter = null;
-	private ChannelListAdapter channelAdapter;
+	private ChannelListAdapter channelAdapter = null;
 	
 	public ProgressDialog progressDialog;
 
@@ -74,7 +79,8 @@ public class ChatActivity extends Activity {
 	private EditText chatInput;
 	private ChatRealViewSwitcher chatViewSwitcher;
 	private String packName = "com.pokebros.android.pokemononline";
-	private int lastClicked; 
+	private PlayerInfo lastClickedPlayer;
+	private Channel lastClickedChannel;
 	
 	class TierAlertDialog extends AlertDialog {
 		public Tier parentTier = null;
@@ -152,21 +158,16 @@ public class ChatActivity extends Activity {
         //Channel List Stuff**
         channels = (ListView)findViewById(R.id.channellisting);
         channelAdapter = new ChannelListAdapter(this, 0);
+        registerForContextMenu(channels);
         channels.setOnItemClickListener(new OnItemClickListener() {
-        	// Set the edit texts on list item click
-			public void onItemClick(AdapterView<?> parent, View view, int position,
-					long id) {
-				//TODO: Connect to channel
-				System.out.println("Channel -- click works");
-				Toast.makeText(ChatActivity.this, "Channel switching not implemented yet.", Toast.LENGTH_LONG).show();
-			}
-		});
-        channels.setOnItemLongClickListener(new OnItemLongClickListener() {
-			public boolean onItemLongClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				// TODO: Disconnect from channel
-				System.out.println("Channel -- Long click works");
-				return true;
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				Channel clicked = channelAdapter.getItem(position);
+				if(netServ != null && netServ.joinedChannels.contains(clicked)) {
+					// XXX remove is implemented as O(N) we could do it O(1) if we really had to
+					netServ.joinedChannels.remove(clicked);
+					netServ.joinedChannels.addFirst(clicked);
+					populateUI(true);
+				}
 			}
 		});
         
@@ -188,10 +189,11 @@ public class ChatActivity extends Activity {
             	// and the socket is connected
                 if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
                     (keyCode == KeyEvent.KEYCODE_ENTER) &&
+                    netServ != null && netServ.socket != null &&
                     netServ.socket.isConnected()) {
                   // Perform action on key press
                 	Baos b = new Baos();
-                	b.putInt(0);
+                	b.putInt(netServ.joinedChannels.peek().id);
                 	b.putString(chatInput.getText().toString());
                 	netServ.socket.sendMessage(b, Command.ChannelMessage);
                 	chatInput.getText().clear();
@@ -222,8 +224,8 @@ public class ChatActivity extends Activity {
 				netServ.showNotification(ChatActivity.class, "Chat");
 			
 			netServ.chatActivity = ChatActivity.this;
-			if (netServ.currentChannel != null && netServ.currentChannel.joined) {
-				populateUI();
+			if (netServ.joinedChannels.peek() != null && !netServ.joinedChannels.isEmpty()) {
+				populateUI(false);
 				progressDialog.dismiss();
 			}
 	        checkChallenges();
@@ -237,10 +239,14 @@ public class ChatActivity extends Activity {
 		}
 	};
 	
-	public void populateUI() {
-		if (netServ.currentChannel != null) {
+	public void populateUI(boolean clear) {
+		if (netServ.joinedChannels.peek() != null) {
 			// Populate the player list
-			Enumeration<PlayerInfo> e = netServ.currentChannel.players.elements();
+			if (clear) {
+				playerAdapter = new PlayerListAdapter(ChatActivity.this, 0);
+				channelAdapter = new ChannelListAdapter(ChatActivity.this, 0);
+			}
+			Enumeration<PlayerInfo> e = netServ.joinedChannels.peek().players.elements();
 			playerAdapter.setNotifyOnChange(false);
 			while(e.hasMoreElements()) {
 				playerAdapter.add(e.nextElement());
@@ -259,8 +265,9 @@ public class ChatActivity extends Activity {
 				public void run() {
 			    	players.setAdapter(playerAdapter);
 			        channels.setAdapter(channelAdapter);
+			        playerAdapter.notifyDataSetChanged();
 					channelAdapter.notifyDataSetChanged();
-					chatBox.setText(netServ.currentChannel.hist);
+					chatBox.setText(netServ.joinedChannels.peek().hist);
 					chatScroll.post(new Runnable() {
 						public void run() {
 							chatScroll.smoothScrollTo(0, chatBox.getMeasuredHeight());
@@ -275,11 +282,11 @@ public class ChatActivity extends Activity {
 	public void updateChat() {
 		runOnUiThread(new Runnable() {
 			public void run() {
-				if (netServ.currentChannel == null)
+				if (netServ.joinedChannels.peek() == null)
 					return;
-				synchronized(netServ.currentChannel.histDelta) {
-					chatBox.append(netServ.currentChannel.histDelta);
-					if (netServ.currentChannel.histDelta.length() != 0) {
+				synchronized(netServ.joinedChannels.peek().histDelta) {
+					chatBox.append(netServ.joinedChannels.peek().histDelta);
+					if (netServ.joinedChannels.peek().histDelta.length() != 0) {
 						chatScroll.post(new Runnable() {
 							public void run() {						
 								if(!chatViewSwitcher.isPressed())
@@ -287,8 +294,8 @@ public class ChatActivity extends Activity {
 							}
 						});
 					}
-					netServ.currentChannel.hist.append(netServ.currentChannel.histDelta);
-					netServ.currentChannel.histDelta.clear();
+					netServ.joinedChannels.peek().hist.append(netServ.joinedChannels.peek().histDelta);
+					netServ.joinedChannels.peek().histDelta.clear();
 				}
 			}});
 	}
@@ -343,7 +350,6 @@ public class ChatActivity extends Activity {
 			TextView oppInfo, oppTeam, oppName, oppTier, oppRating;           
 			builder.setView(challengedLayout)
 			.setCancelable(false)
-			//.setMessage(this.getString(R.string.accept_challenge))
 			.setNegativeButton(this.getString(R.string.decline), new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
 					// Decline challenge
@@ -474,7 +480,6 @@ public class ChatActivity extends Activity {
 			return new TierAlertDialog(this, netServ.superTier);
 		case PlayerInfo:
 			View layout = inflater.inflate(R.layout.player_info_dialog, (LinearLayout)findViewById(R.id.player_info_dialog));
-            final PlayerInfo player = playerAdapter.getItem(lastClicked);
             ImageView[] pPokeIcons = new ImageView[6];
             TextView pInfo, pTeam, pName, pTier, pRating;           
 			builder.setView(layout)
@@ -499,22 +504,21 @@ public class ChatActivity extends Activity {
             for(int i = 0; i < 6; i++){
         	pPokeIcons[i] = (ImageView)layout.findViewById(getResources().getIdentifier("player_info_poke" + 
         			(i+1), "id", packName));
-        	pPokeIcons[i].setImageDrawable(getIcon(player.pokes[i]));
+        	pPokeIcons[i].setImageDrawable(getIcon(lastClickedPlayer.pokes[i]));
             }
         	pInfo = (TextView)layout.findViewById(getResources().getIdentifier("player_info", "id", packName));
-        	pInfo.setText(Html.fromHtml("<b>Info: </b>" + NetworkService.escapeHtml(player.info())));
+        	pInfo.setText(Html.fromHtml("<b>Info: </b>" + NetworkService.escapeHtml(lastClickedPlayer.info())));
         	pTeam = (TextView)layout.findViewById(getResources().getIdentifier("player_info_team", "id", packName));
-        	pTeam.setText(player.nick() + "'s team:");
+        	pTeam.setText(lastClickedPlayer.nick() + "'s team:");
         	pName = (TextView)layout.findViewById(getResources().getIdentifier("player_info_name", "id", packName));
-        	pName.setText(player.nick());
+        	pName.setText(lastClickedPlayer.nick());
         	pTier = (TextView)layout.findViewById(getResources().getIdentifier("player_info_tier", "id", packName));
-        	pTier.setText(Html.fromHtml("<b>Tier: </b>" + NetworkService.escapeHtml(player.tier)));
+        	pTier.setText(Html.fromHtml("<b>Tier: </b>" + NetworkService.escapeHtml(lastClickedPlayer.tier)));
         	pRating = (TextView)layout.findViewById(getResources().getIdentifier("player_info_rating", "id", packName));
-            pRating.setText(Html.fromHtml("<b>Rating: </b>" + NetworkService.escapeHtml(new Short(player.rating).toString())));    
+            pRating.setText(Html.fromHtml("<b>Rating: </b>" + NetworkService.escapeHtml(new Short(lastClickedPlayer.rating).toString())));    
         	
             return pInfoDialog;
 		case ChallengeMode:
-            final PlayerInfo playerZ = playerAdapter.getItem(lastClicked); // Scope here doesn't really work out so nicely with final variables
             final Clauses[] clauses = Clauses.values();
             int numClauses = clauses.length;
 			final boolean[] optionZ = new boolean[numClauses];
@@ -534,7 +538,7 @@ public class ChatActivity extends Activity {
 					for (int i = 0; i < optionZ.length; i++)
 						clauses |= (optionZ[i] ? Clauses.values()[i].mask() : 0);
 					if (netServ != null && netServ.socket != null && netServ.socket.isConnected())
-						netServ.socket.sendMessage(constructChallenge(ChallengeDesc.Sent.ordinal(), playerZ.id, clauses, Mode.Singles.ordinal()), Command.ChallengeStuff);
+						netServ.socket.sendMessage(constructChallenge(ChallengeDesc.Sent.ordinal(), lastClickedPlayer.id, clauses, Mode.Singles.ordinal()), Command.ChallengeStuff);
 					removeDialog(id);
 				}
 			})
@@ -630,26 +634,47 @@ public class ChatActivity extends Activity {
     }
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-      if (v.getId()==R.id.playerlisting) {
-       AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
-       String pname = playerAdapter.getItem(info.position).nick();
-        menu.setHeaderTitle(pname);
-          menu.add(Menu.NONE, CONTEXTMENU_CHALLENGEPLAYER, 0, "Challenge " + pname);
-          menu.add(Menu.NONE, CONTEXTMENU_VIEWPLAYERINFO, 0, "View Player Info");
-        }
-      }
-    
+    	AdapterView.AdapterContextMenuInfo aMenuInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
+    	switch(v.getId()){
+    	case R.id.playerlisting:
+    		lastClickedPlayer = playerAdapter.getItem(aMenuInfo.position);
+    		String pName = lastClickedPlayer.nick();
+    		menu.setHeaderTitle(pName);
+    		menu.add(Menu.NONE, ChatContext.ChallengePlayer.ordinal(), 0, "Challenge " + pName);
+    		menu.add(Menu.NONE, ChatContext.ViewPlayerInfo.ordinal(), 0, "View Player Info");
+    		break;
+    	case R.id.channellisting:
+    		lastClickedChannel = channelAdapter.getItem(aMenuInfo.position);
+    		String cName = lastClickedChannel.name;
+    		menu.setHeaderTitle(cName);
+    		if (netServ.joinedChannels.contains(lastClickedChannel))
+    			menu.add(Menu.NONE, ChatContext.LeaveChannel.ordinal(), 0, "Leave " + cName);
+    		else
+        		menu.add(Menu.NONE, ChatContext.JoinChannel.ordinal(), 0, "Join " + cName);
+    		break;
+    	}
+    }
+      
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-    	AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
-    	switch(item.getItemId()){
-    	case CONTEXTMENU_CHALLENGEPLAYER:
-    		lastClicked = info.position;
+    	switch(ChatContext.values()[item.getItemId()]){
+    	case ChallengePlayer:
     		showDialog(ChatDialog.ChallengeMode.ordinal());
     		break;
-    	case CONTEXTMENU_VIEWPLAYERINFO:
-    		lastClicked = info.position;
+    	case ViewPlayerInfo:
     		showDialog(ChatDialog.PlayerInfo.ordinal());
+    		break;
+    	case JoinChannel:
+    		Baos join = new Baos();
+    		join.putString(lastClickedChannel.name);
+    		if (netServ != null && netServ.socket != null && netServ.socket.isConnected())
+    			netServ.socket.sendMessage(join, Command.JoinChannel);
+    		break;
+    	case LeaveChannel:
+    		Baos leave = new Baos();
+    		leave.putInt(lastClickedChannel.id);
+    		if (netServ != null && netServ.socket != null && netServ.socket.isConnected())
+    			netServ.socket.sendMessage(leave, Command.LeaveChannel);
     		break;
     	}
     	return true;

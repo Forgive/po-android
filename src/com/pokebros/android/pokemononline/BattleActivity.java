@@ -8,7 +8,6 @@ import com.android.launcher.DragController;
 import com.android.launcher.DragLayer;
 import com.android.launcher.DragSource;
 import com.android.launcher.PokeDragIcon;
-import com.pokebros.android.pokemononline.ChatActivity.ChatDialog;
 import com.pokebros.android.pokemononline.poke.BattlePoke;
 import com.pokebros.android.pokemononline.poke.ShallowShownPoke;
 import com.pokebros.android.pokemononline.poke.UniqueID;

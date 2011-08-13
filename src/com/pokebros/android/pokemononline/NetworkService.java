@@ -37,7 +37,8 @@ public class NetworkService extends Service {
 	private final IBinder binder = new LocalBinder();
 	protected int NOTIFICATION = 4356;
 	protected NotificationManager noteMan;
-	public Channel currentChannel = null;
+	//public Channel currentChannel = null;
+	public LinkedList<Channel> joinedChannels = new LinkedList<Channel>();
 	Thread sThread, rThread;
 	PokeClientSocket socket = null;
 	boolean findingBattle = false;
@@ -269,16 +270,18 @@ public class NetworkService extends Service {
 			System.out.println("bID " + battleID + " battleDesc " + battleDesc + " id1 " + id1 + " id2 " + id2);
 			String[] outcome = new String[]{" won by forfeit against ", " won against ", " tied with "};
 			if (battle != null && battle.bID == battleID) {
-				if (mePlayer.id == id1 && battleDesc == 1) {
+				if (mePlayer.id == id1 && battleDesc < 2) {
 					showNotification(ChatActivity.class, "Chat", "You won!");
 				} else if (mePlayer.id == id2 && battleDesc < 2) {
 					showNotification(ChatActivity.class, "Chat", "You lost!");
 				} else if (battleDesc == 2) {
 					showNotification(ChatActivity.class, "Chat", "You tied!");
 				}
+				
 				if (players.get(id1) != null && players.get(id2) != null && battleDesc < 2)
-					currentChannel.writeToHist("\n" + players.get(id1).nick() + outcome[battleDesc] + players.get(id2).nick() + ".");
-				else if (battleDesc == 3) {
+					joinedChannels.peek().writeToHist("\n" + players.get(id1).nick() + outcome[battleDesc] + players.get(id2).nick() + ".");
+				
+				if (battleDesc == 0 || battleDesc == 3) {
 					battle = null;
 					if (battleActivity != null)
 						battleActivity.end();
@@ -314,7 +317,7 @@ public class NetworkService extends Service {
 				// Start the battle
 				battle = new Battle(conf, msg, players.get(conf.id(0)),
 					players.get(conf.id(1)), mePlayer.id, bID, this);
-				currentChannel.writeToHist("\nBattle between " + mePlayer.nick() + 
+				joinedChannels.peek().writeToHist("\nBattle between " + mePlayer.nick() + 
 					" and " + players.get(pID2).nick() + " started!");
 				Intent in;
 				in = new Intent(this, BattleActivity.class);
@@ -369,7 +372,7 @@ public class NetworkService extends Service {
 		}
 		if (battle != null && battleActivity != null && battle.histDelta.length() != 0)
 			battleActivity.updateBattleInfo();
-		if (chatActivity != null && currentChannel != null && currentChannel.histDelta.length() != 0)
+		if (chatActivity != null && joinedChannels.peek() != null && joinedChannels.peek().histDelta.length() != 0)
 			chatActivity.updateChat();
 	}
 
