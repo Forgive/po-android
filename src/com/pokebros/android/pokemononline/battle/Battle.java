@@ -205,7 +205,6 @@ public class Battle {
 			
 			if(netServ.battleActivity != null) {
 				netServ.battleActivity.updatePokes(player);
-				System.out.println("POKEBALLS");
 				netServ.battleActivity.updatePokeballs();
 			}
 			if(!isSilent)
@@ -228,8 +227,8 @@ public class Battle {
 					"Start of turn " + turn + "</font></b>"));
 			break;
 		} case Ko: {
-			writeToHist(Html.fromHtml("<br><b>" + tu(NetworkService.escapeHtml((currentPoke(player).nick) +
-					" fainted!</b>"))));
+			writeToHist(Html.fromHtml("<br><b>" + tu(NetworkService.escapeHtml((currentPoke(player).nick))) +
+					" fainted!</b>"));
 			break;
 		} case Hit: {
 			byte number = msg.readByte();

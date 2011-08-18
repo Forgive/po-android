@@ -1,6 +1,7 @@
 package com.pokebros.android.pokemononline;
 
 import com.pokebros.android.pokemononline.ColorEnums.TypeColor;
+import com.pokebros.android.pokemononline.battle.Battle;
 import com.pokebros.android.pokemononline.battle.BattleMove;
 import com.pokebros.android.pokemononline.battle.Type;
 import java.util.Random;
@@ -109,6 +110,8 @@ public class BattleActivity extends Activity {
 	LinearLayout struggleRowLayout;
 	RelativeLayout struggleLayout;
 	
+	Battle battle = null;
+	
 	Resources resources;
 	public NetworkService netServ = null;
 	int me, opp;
@@ -153,8 +156,8 @@ public class BattleActivity extends Activity {
 				}
 			}
 			
-			synchronized (netServ.battle) {
-				netServ.battle.notify();
+			synchronized (battle) {
+				battle.notify();
 			}
 		}
 
@@ -236,7 +239,7 @@ public class BattleActivity extends Activity {
     	
     	struggleLayout.setOnClickListener(new OnClickListener() {
     		public void onClick(View v) {
-    			netServ.socket.sendMessage(netServ.battle.constructAttack((byte)-1), Command.BattleMessage); // This is how you struggle
+    			netServ.socket.sendMessage(battle.constructAttack((byte)-1), Command.BattleMessage); // This is how you struggle
     		}
     	});
     }
@@ -245,17 +248,15 @@ public class BattleActivity extends Activity {
     
 	private Runnable updateTimeTask = new Runnable() {
 		public void run() {
-			if (netServ.battle == null)
-				return;
 			for(int i = 0; i < 2; i++) {
 				int seconds;
-				if (netServ.battle.ticking[i]) {
+				if (battle.ticking[i]) {
 					long millis = SystemClock.uptimeMillis()
-					- netServ.battle.startingTime[i];
-					seconds = netServ.battle.remainingTime[i] - (int) (millis / 1000);
+					- battle.startingTime[i];
+					seconds = battle.remainingTime[i] - (int) (millis / 1000);
 				}
 				else
-					seconds = netServ.battle.remainingTime[i];
+					seconds = battle.remainingTime[i];
 
 				if(seconds < 0) seconds = 0;
 				else if(seconds > 300) seconds = 300;
@@ -283,9 +284,9 @@ public class BattleActivity extends Activity {
 			public void run() {
 				if (!netServ.hasBattle())
 					return;
-				synchronized (netServ.battle.histDelta) {
-					infoView.append(netServ.battle.histDelta);
-					if (netServ.battle.histDelta.length() != 0 || true) {
+				synchronized (battle.histDelta) {
+					infoView.append(battle.histDelta);
+					if (battle.histDelta.length() != 0 || true) {
 						infoScroll.post(new Runnable() {
 							public void run() {
 								infoScroll.smoothScrollTo(0, infoView.getMeasuredHeight());
@@ -293,8 +294,8 @@ public class BattleActivity extends Activity {
 						});
 					}
 					infoScroll.invalidate();
-					netServ.battle.hist.append(netServ.battle.histDelta);
-					netServ.battle.histDelta.clear();
+					battle.hist.append(battle.histDelta);
+					battle.histDelta.clear();
 				}
 			}
 		});
@@ -308,14 +309,11 @@ public class BattleActivity extends Activity {
 	}
 	
 	public void updatePokeballs() {
-		System.out.println("OF STEEL");
-		if (netServ == null || netServ.battle == null)
-			return;
 		runOnUiThread(new Runnable() {
 			public void run() {
 				for (int i = 0; i < 2; i++) {
 					for (int j = 0; j < 6; j++) {
-						pokeballs[i][j].setImageResource(resources.getIdentifier("status" + netServ.battle.pokes[i][j].status(), "drawable", pkgName));
+						pokeballs[i][j].setImageResource(resources.getIdentifier("status" + battle.pokes[i][j].status(), "drawable", pkgName));
 					}
 				}
 			}
@@ -325,7 +323,7 @@ public class BattleActivity extends Activity {
 	private Drawable getSprite(ShallowBattlePoke poke, boolean front) {
         String res;
         
-        if (netServ.battle.shouldShowPreview || poke.status() == Status.Koed.poValue())
+        if (battle.shouldShowPreview || poke.status() == Status.Koed.poValue())
         	res = "empty_sprite";
         else if (poke.sub)
         	res = (front ? "sub_front" : "sub_back");
@@ -356,36 +354,30 @@ public class BattleActivity extends Activity {
 	}
 
 	public void updateCurrentPokeListEntry() {
-		if (netServ == null || netServ.battle == null)
-			return;
 		runOnUiThread(new Runnable() {
 			public void run() {
-				BattlePoke battlePoke = netServ.battle.myTeam.pokes[0];
-				pokeListHPs[0].setText(battlePoke.currentHP +
-						"/" + battlePoke.totalHP);
+				synchronized(battle) {
+					BattlePoke battlePoke = battle.myTeam.pokes[0];
+					pokeListHPs[0].setText(battlePoke.currentHP +
+							"/" + battlePoke.totalHP);
+				}
 				// TODO: Status ailments and stuff
 			}
 		});
 	}
 
 	public void updateMovePP(final int moveNum) {
-		if (netServ == null || netServ.battle == null)
-			return;
 		runOnUiThread(new Runnable() {
 			public void run() {
-				if (netServ == null || netServ.battle == null)
-					return;
-				BattleMove move = netServ.battle.displayedMoves[moveNum];
+				BattleMove move = battle.displayedMoves[moveNum];
 				attackPPs[moveNum].setText("PP " + move.currentPP + "/" + move.totalPP);
 			}
 		});
 	}
 	public void updateMyPoke() {
-		if (netServ == null || netServ.battle == null)
-			return;
 		runOnUiThread(new Runnable() {
 			public void run() {
-				ShallowBattlePoke poke = netServ.battle.currentPoke(me);
+				ShallowBattlePoke poke = battle.currentPoke(me);
 				// Load correct moveset and name
 				if(poke != null) {
 					currentPokeNames[me].setText(poke.rnick);
@@ -393,9 +385,9 @@ public class BattleActivity extends Activity {
 					currentPokeGenders[me].setImageResource(resources.getIdentifier("battle_gender" + poke.gender, "drawable", pkgName));
 					currentPokeStatuses[me].setImageResource(resources.getIdentifier("battle_status" + poke.status(), "drawable", pkgName));
 					setHpBarTo(me, poke.lifePercent);
-					BattlePoke battlePoke = netServ.battle.myTeam.pokes[0];
+					BattlePoke battlePoke = battle.myTeam.pokes[0];
 			        for(int i = 0; i < 4; i++) {
-			        	BattleMove move = netServ.battle.displayedMoves[i];
+			        	BattleMove move = battle.displayedMoves[i];
 			        	updateMovePP(i);
 			        	attackNames[i].setText(move.toString());
 			        	String type;
@@ -415,11 +407,9 @@ public class BattleActivity extends Activity {
 	}
 	
 	public void updateOppPoke() {
-		if (netServ == null || netServ.battle == null)
-			return;
 		runOnUiThread(new Runnable() {
 			public void run() {
-					ShallowBattlePoke poke = netServ.battle.currentPoke(opp);
+					ShallowBattlePoke poke = battle.currentPoke(opp);
 					// Load correct moveset and name
 					if(poke != null) {
 						currentPokeNames[opp].setText(poke.rnick);
@@ -434,8 +424,6 @@ public class BattleActivity extends Activity {
 	}
 	
 	public void updateButtons(final boolean allowSwitch, final boolean allowAttack, final boolean[] allowAttacks) {
-		if (netServ == null || netServ.battle == null)
-			return;
 		runOnUiThread(new Runnable() {
 			public void run() {
 				if (!checkStruggle()) {
@@ -449,7 +437,7 @@ public class BattleActivity extends Activity {
 					}
 				}
 				for(int i = 0; i < 6; i++) {
-					if (netServ.battle.myTeam.pokes[i].status() != Status.Koed.poValue())
+					if (battle.myTeam.pokes[i].status() != Status.Koed.poValue())
 						setPokeListButtonEnabled(i, allowSwitch);
 					else
 						setPokeListButtonEnabled(i, false);
@@ -460,7 +448,7 @@ public class BattleActivity extends Activity {
 	
 	public boolean checkStruggle() {
 		// This method should hide moves, show the button if necessary and return whether it showed the button
-		boolean struggle = netServ.battle.shouldStruggle;
+		boolean struggle = battle.shouldStruggle;
 		if(struggle) {
 			bottomAttackRowLayout.setVisibility(View.GONE);
 			topAttackRowLayout.setVisibility(View.GONE);
@@ -485,12 +473,10 @@ public class BattleActivity extends Activity {
 	}
 	
 	public void updateTeam() {
-		if (netServ == null || netServ.battle == null)
-			return;
 		runOnUiThread(new Runnable() {
 			public void run() {
 				for (int i = 0; i < 6; i++) {
-					BattlePoke poke = netServ.battle.myTeam.pokes[i];
+					BattlePoke poke = battle.myTeam.pokes[i];
 					pokeListIcons[i].setImageDrawable(getIcon(poke.uID));
 					pokeListNames[i].setText(poke.nick);
 					pokeListHPs[i].setText(poke.currentHP +
@@ -532,19 +518,19 @@ public class BattleActivity extends Activity {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			netServ = ((NetworkService.LocalBinder)service).getService();
 			netServ.herp();
+			battle = netServ.battle;
 			if (!netServ.hasBattle()) {
 	    		startActivity(new Intent(BattleActivity.this, ChatActivity.class));
 				finish();
 				return;
 			}
-
 			netServ.showNotification(BattleActivity.class, "Battle");
 
-			battleView.setBackgroundResource(resources.getIdentifier("bg" + netServ.battle.background, "drawable", pkgName));
+			battleView.setBackgroundResource(resources.getIdentifier("bg" + battle.background, "drawable", pkgName));
 			
 			// Set the UI to display the correct info
-	        me = netServ.battle.me;
-	        opp = netServ.battle.opp;
+	        me = battle.me;
+	        opp = battle.opp;
 	        // We don't know which timer is which until the battle starts,
 	        // so set them here.
 	        timers[me] = (TextView)findViewById(R.id.timerB);
@@ -559,8 +545,8 @@ public class BattleActivity extends Activity {
 	        }
 	        updatePokeballs();
 	        
-	        names[me].setText(netServ.battle.players[me].nick());
-	        names[opp].setText(netServ.battle.players[opp].nick());
+	        names[me].setText(battle.players[me].nick());
+	        names[opp].setText(battle.players[opp].nick());
 
 	        hpBars[me] = (TextProgressBar)findViewById(R.id.hpBarB);
 	        hpBars[opp] = (TextProgressBar)findViewById(R.id.hpBarA);
@@ -583,7 +569,7 @@ public class BattleActivity extends Activity {
 	        	pokeSprites[i].setOnLongClickListener(spriteListener);
 	        
 	        // Load scrollback
-	        infoView.setText(netServ.battle.hist);
+	        infoView.setText(battle.hist);
 	        updateBattleInfo(true);
 	    	
 	    	// Prompt a UI update of the pokemon
@@ -591,12 +577,12 @@ public class BattleActivity extends Activity {
 	        updateOppPoke();
 	        
 	        // Enable or disable buttons
-	        updateButtons(netServ.battle.allowSwitch, netServ.battle.allowAttack, netServ.battle.allowAttacks);
+	        updateButtons(battle.allowSwitch, battle.allowAttack, battle.allowAttacks);
 	        
 	    	// Start timer updating
 	        handler.postDelayed(updateTimeTask, 100);
 	        
-	        // Don't set netServ.battleActivity until after we've finished
+	        // Don't set battleActivity until after we've finished
 	        // getting UI elements. Otherwise there's a race condition if Battle
 	        // wants to update one of our UI elements we haven't gotten yet.
 			netServ.battleActivity = BattleActivity.this;
@@ -640,11 +626,11 @@ public class BattleActivity extends Activity {
     		// Check to see if click was on attack button
     		for(int i = 0; i < 4; i++)
     			if(id == attackLayouts[i].getId())
-    				netServ.socket.sendMessage(netServ.battle.constructAttack((byte)i), Command.BattleMessage);
+    				netServ.socket.sendMessage(battle.constructAttack((byte)i), Command.BattleMessage);
     		// Check to see if click was on pokelist button
     		for(int i = 0; i < 6; i++) {
     			if(id == pokeListButtons[i].getId()) {
-    				netServ.socket.sendMessage(netServ.battle.constructSwitch((byte)i), Command.BattleMessage);
+    				netServ.socket.sendMessage(battle.constructSwitch((byte)i), Command.BattleMessage);
     				realViewSwitcher.snapToScreen(0);
     			}
     		}
@@ -695,8 +681,8 @@ public class BattleActivity extends Activity {
     }
     @Override
     public void onBackPressed() {
-    	if(netServ != null && netServ.hasBattle() && !netServ.battle.gotEnd)
-    		netServ.socket.sendMessage(netServ.battle.constructCancel(), Command.BattleMessage);
+    	if(netServ != null && netServ.hasBattle() && !battle.gotEnd)
+    		netServ.socket.sendMessage(battle.constructCancel(), Command.BattleMessage);
     	else {
     		startActivity(new Intent(BattleActivity.this, ChatActivity.class));
     		finish();
@@ -719,7 +705,7 @@ public class BattleActivity extends Activity {
     		finish();
     		break;
     	case R.id.forfeit:
-    		if (netServ != null && netServ.hasBattle() && !netServ.battle.gotEnd)
+    		if (netServ != null && netServ.hasBattle() && !battle.gotEnd)
     			showDialog(BattleDialog.ConfirmForfeit.ordinal());
     		break;
     	case R.id.draw:
@@ -735,7 +721,7 @@ public class BattleActivity extends Activity {
 	}
 	
 	private void checkRearrangeTeamDialog() {
-		if (netServ != null && netServ.hasBattle() && netServ.battle.shouldShowPreview) {
+		if (netServ != null && netServ.hasBattle() && battle.shouldShowPreview) {
 			showDialog(BattleDialog.RearrangeTeam.ordinal());
 		}
 	}
@@ -743,7 +729,7 @@ public class BattleActivity extends Activity {
 	void endBattle() {
 		if (netServ != null && netServ.socket != null && netServ.socket.isConnected() && netServ.hasBattle()) {
     		Baos bID = new Baos();
-    		bID.putInt(netServ.battle.bID);
+    		bID.putInt(battle.bID);
     		netServ.socket.sendMessage(bID, Command.BattleFinished);
 		}
 	}
@@ -759,8 +745,8 @@ public class BattleActivity extends Activity {
         	builder.setView(layout)
         	.setPositiveButton("Done", new DialogInterface.OnClickListener(){
         		public void onClick(DialogInterface dialog, int which) {
-        			netServ.socket.sendMessage(netServ.battle.constructRearrange(), Command.BattleMessage);
-        			netServ.battle.shouldShowPreview = false;
+        			netServ.socket.sendMessage(battle.constructRearrange(), Command.BattleMessage);
+        			battle.shouldShowPreview = false;
         			removeDialog(id);
         		}})
         		.setCancelable(false);
@@ -768,14 +754,14 @@ public class BattleActivity extends Activity {
 
         	mDragLayer = (DragLayer)layout.findViewById(R.id.drag_my_poke);
         	for(int i = 0; i < 6; i++){
-        		BattlePoke poke = netServ.battle.myTeam.pokes[i];
+        		BattlePoke poke = battle.myTeam.pokes[i];
         		myArrangePokeIcons[i] = (PokeDragIcon)layout.findViewById(resources.getIdentifier("my_arrange_poke" + (i+1), "id", pkgName));
         		myArrangePokeIcons[i].setOnTouchListener(dialogListener);
         		myArrangePokeIcons[i].setImageDrawable(getIcon(poke.uID));
         		myArrangePokeIcons[i].num = i;
         		myArrangePokeIcons[i].battleActivity = this;
 
-        		ShallowShownPoke oppPoke = netServ.battle.oppTeam.pokes[i];
+        		ShallowShownPoke oppPoke = battle.oppTeam.pokes[i];
         		oppArrangePokeIcons[i] = (ImageView)layout.findViewById(resources.getIdentifier("foe_arrange_poke" + (i+1), "id", pkgName));
         		oppArrangePokeIcons[i].setImageDrawable(getIcon(oppPoke.uID));
         	}
@@ -798,9 +784,9 @@ public class BattleActivity extends Activity {
         		View layout = inflater.inflate(R.layout.dynamic_info_layout, (LinearLayout)findViewById(R.id.dynamic_info_layout));
         		builder.setView(layout);
         		TextView t = (TextView)layout.findViewById(R.id.statNamesView);
-        		t.setText(netServ.battle.dynamicInfo[player].statsAndHazards());
+        		t.setText(battle.dynamicInfo[player].statsAndHazards());
         		t = (TextView)layout.findViewById(R.id.statNumsView);
-        		t.setText(netServ.battle.dynamicInfo[player].numbers());
+        		t.setText(battle.dynamicInfo[player].numbers());
         		builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
 					public void onCancel(DialogInterface dialog) {
 						removeDialog(id);
