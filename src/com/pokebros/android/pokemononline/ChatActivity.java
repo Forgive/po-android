@@ -721,7 +721,9 @@ public class ChatActivity extends Activity {
 	public void removePlayer(final PlayerInfo pi){
 		runOnUiThread(new Runnable() {
 			public void run() {
-            	playerAdapter.removePlayer(pi);
+				synchronized(playerAdapter) {
+					playerAdapter.remove(pi);
+				}
 			}
 		});
 	}
@@ -729,7 +731,9 @@ public class ChatActivity extends Activity {
 	public void addPlayer(final PlayerInfo pi) {
 		runOnUiThread(new Runnable() {
 			public void run() {
-				playerAdapter.add(pi);
+				synchronized(playerAdapter) {
+					playerAdapter.add(pi);
+				}
 			}
 		});
 	}

@@ -19,17 +19,15 @@ public class PlayerListAdapter extends ArrayAdapter<com.pokebros.android.pokemon
 		super(context, resource);
 	}
 	
-	public void removePlayer(PlayerInfo p){
-		remove(p);
-	}
-	
 	public void sortByNick() {
 		setNotifyOnChange(false);
-		super.sort(new Comparator<PlayerInfo>() {
-			public int compare(PlayerInfo pi1, PlayerInfo pi2) {
-				return pi1.nick().toLowerCase().compareTo(pi2.nick().toLowerCase());
-			}
-		});
+		synchronized(this) {
+			super.sort(new Comparator<PlayerInfo>() {
+				public int compare(PlayerInfo pi1, PlayerInfo pi2) {
+					return pi1.nick().toLowerCase().compareTo(pi2.nick().toLowerCase());
+				}
+			});
+		}
 		setNotifyOnChange(true);
 	}
 	

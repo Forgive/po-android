@@ -579,8 +579,9 @@ public class Battle {
 				slot = msg.readByte();
 				byte PP = msg.readByte();
 				displayedMoves[slot].currentPP = PP;
-				netServ.battleActivity.updateMovePP(slot);
-				// if netServ.battleActivity != null, netServ.battleActivity.updatePP;
+				if (netServ.battleActivity !=null) {
+					netServ.battleActivity.updateMovePP(slot);
+				}
 				break;
 			case TempSprite:
 				UniqueID sprite = new UniqueID(msg);

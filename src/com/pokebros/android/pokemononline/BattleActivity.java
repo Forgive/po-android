@@ -75,6 +75,9 @@ public class BattleActivity extends Activity {
 	RelativeLayout battleView;
 	TextProgressBar[] hpBars = new TextProgressBar[2];
 	TextView[] currentPokeNames = new TextView[2];
+	TextView[] currentPokeLevels = new TextView[2];
+	ImageView[] currentPokeGenders = new ImageView[2];
+	ImageView[] currentPokeStatuses = new ImageView[2];
 	
 	TextView[] attackNames = new TextView[4];
 	TextView[] attackPPs = new TextView[4];
@@ -333,7 +336,7 @@ public class BattleActivity extends Activity {
 	}
 
 	public void updateCurrentPokeListEntry() {
-		if (netServ == null)
+		if (netServ == null || netServ.battle == null)
 			return;
 		runOnUiThread(new Runnable() {
 			public void run() {
@@ -346,20 +349,29 @@ public class BattleActivity extends Activity {
 	}
 
 	public void updateMovePP(final int moveNum) {
+		if (netServ == null || netServ.battle == null)
+			return;
 		runOnUiThread(new Runnable() {
 			public void run() {
+				if (netServ == null || netServ.battle == null)
+					return;
 				BattleMove move = netServ.battle.displayedMoves[moveNum];
 				attackPPs[moveNum].setText("PP " + move.currentPP + "/" + move.totalPP);
 			}
 		});
 	}
 	public void updateMyPoke() {
+		if (netServ == null || netServ.battle == null)
+			return;
 		runOnUiThread(new Runnable() {
 			public void run() {
 				ShallowBattlePoke poke = netServ.battle.currentPoke(me);
 				// Load correct moveset and name
 				if(poke != null) {
 					currentPokeNames[me].setText(poke.rnick);
+					currentPokeLevels[me].setText("Lv. " + poke.level);
+					currentPokeGenders[me].setImageResource(resources.getIdentifier("battle_gender" + poke.gender, "drawable", "com.pokebros.android.pokemononline"));
+					currentPokeStatuses[me].setImageResource(resources.getIdentifier("battle_status" + poke.status(), "drawable", "com.pokebros.android.pokemononline"));
 					setHpBarTo(me, poke.lifePercent);
 					BattlePoke battlePoke = netServ.battle.myTeam.pokes[0];
 			        for(int i = 0; i < 4; i++) {
@@ -372,8 +384,8 @@ public class BattleActivity extends Activity {
 			        	else
 			        		type = move.getTypeString();
 			        	type = type.toLowerCase();
-			        	attackLayouts[i].setBackgroundDrawable(resources.getDrawable(resources.getIdentifier(type + "_type_button",
-					      		"drawable", "com.pokebros.android.pokemononline")));
+			        	attackLayouts[i].setBackgroundResource(resources.getIdentifier(type + "_type_button",
+					      		"drawable", "com.pokebros.android.pokemononline"));
 			        }
 		        	pokeSprites[me].setImageDrawable(getSprite(poke, false));
 				}
@@ -383,12 +395,17 @@ public class BattleActivity extends Activity {
 	}
 	
 	public void updateOppPoke() {
+		if (netServ == null || netServ.battle == null)
+			return;
 		runOnUiThread(new Runnable() {
 			public void run() {
 					ShallowBattlePoke poke = netServ.battle.currentPoke(opp);
 					// Load correct moveset and name
 					if(poke != null) {
 						currentPokeNames[opp].setText(poke.rnick);
+						currentPokeLevels[opp].setText("Lv. " + poke.level);
+						currentPokeGenders[opp].setImageResource(resources.getIdentifier("battle_gender" + poke.gender, "drawable", "com.pokebros.android.pokemononline"));
+						currentPokeStatuses[opp].setImageResource(resources.getIdentifier("battle_status" + poke.status(), "drawable", "com.pokebros.android.pokemononline"));
 						setHpBarTo(opp, poke.lifePercent);
 						pokeSprites[opp].setImageDrawable(getSprite(poke, true));
 					}
@@ -397,6 +414,8 @@ public class BattleActivity extends Activity {
 	}
 	
 	public void updateButtons(final boolean allowSwitch, final boolean allowAttack, final boolean[] allowAttacks) {
+		if (netServ == null || netServ.battle == null)
+			return;
 		runOnUiThread(new Runnable() {
 			public void run() {
 				if (!checkStruggle()) {
@@ -422,7 +441,7 @@ public class BattleActivity extends Activity {
 	}
 	
 	public boolean checkStruggle() {
-		// XXX TODO This method should hide moves, show the button if necessary and return whether it showed the button
+		// This method should hide moves, show the button if necessary and return whether it showed the button
 		boolean struggle = netServ.battle.shouldStruggle;
 		if(struggle) {
 			bottomAttackRowLayout.setVisibility(View.GONE);
@@ -448,6 +467,8 @@ public class BattleActivity extends Activity {
 	}
 	
 	public void updateTeam() {
+		if (netServ == null || netServ.battle == null)
+			return;
 		runOnUiThread(new Runnable() {
 			public void run() {
 				for (int i = 0; i < 6; i++) {
@@ -518,6 +539,15 @@ public class BattleActivity extends Activity {
 	        
 	        currentPokeNames[me] = (TextView)findViewById(R.id.currentPokeNameB);
 	        currentPokeNames[opp] = (TextView)findViewById(R.id.currentPokeNameA);
+
+	        currentPokeLevels[me] = (TextView)findViewById(R.id.currentPokeLevelB);
+	        currentPokeLevels[opp] = (TextView)findViewById(R.id.currentPokeLevelA);
+	        
+	        currentPokeGenders[me] = (ImageView)findViewById(R.id.currentPokeGenderB);
+	        currentPokeGenders[opp] = (ImageView)findViewById(R.id.currentPokeGenderA);
+	        
+	        currentPokeStatuses[me] = (ImageView)findViewById(R.id.currentPokeStatusB);
+	        currentPokeStatuses[opp] = (ImageView)findViewById(R.id.currentPokeStatusA);
 	        
 	        pokeSprites[me] = (ImageView)findViewById(R.id.pokeSpriteB);
 	        pokeSprites[opp] = (ImageView)findViewById(R.id.pokeSpriteA);
@@ -637,7 +667,7 @@ public class BattleActivity extends Activity {
     }
     @Override
     public void onBackPressed() {
-    	if(netServ != null && !netServ.battle.gotEnd)
+    	if(netServ != null && netServ.hasBattle() && !netServ.battle.gotEnd)
     		netServ.socket.sendMessage(netServ.battle.constructCancel(), Command.BattleMessage);
     	else {
     		startActivity(new Intent(BattleActivity.this, ChatActivity.class));

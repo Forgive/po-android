@@ -30,7 +30,7 @@
 		<TextView
 			android:text="Timer A"
 			android:layout_height="fill_parent"
-			android:layout_weight="2"
+			android:layout_weight="3"
 			android:textColor="@color/poke_text_color"
 			android:background="@drawable/battle_border"
 			android:gravity="center"
@@ -85,8 +85,30 @@
 				android:id="@+id/currentPokeNameA"
 				android:layout_height="wrap_content"
 				android:layout_alignParentLeft="true"
+				android:layout_below="@id/hpBarA"/>
+				<TextView
+				android:layout_width="wrap_content"
+				android:textColor="@color/poke_text_color"
+				android:id="@+id/currentPokeLevelA"
+				android:layout_height="wrap_content"
+				android:layout_alignParentRight="true"
 				android:layout_below="@id/hpBarA"
-				android:layout_marginRight="5dp"/>
+				android:layout_marginLeft="2dp"/>
+				<ImageView
+				android:layout_width="wrap_content"
+				android:id="@+id/currentPokeGenderA"
+				android:layout_height="wrap_content"
+				android:layout_toLeftOf="@id/currentPokeLevelA"
+				android:layout_below="@id/hpBarA"
+				android:layout_marginLeft="2dp"
+				android:layout_marginTop="3dp"/>
+				<ImageView
+				android:layout_width="wrap_content"
+				android:id="@+id/currentPokeStatusA"
+				android:layout_height="wrap_content"
+				android:layout_toLeftOf="@id/currentPokeGenderA"
+				android:layout_below="@id/hpBarA"
+				android:layout_marginTop="3dp"/>
 				</RelativeLayout>
 				<ImageView
 					android:id="@+id/pokeSpriteB"
@@ -113,9 +135,31 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:id="@+id/currentPokeNameB"
+				android:layout_alignParentLeft="true"
+				android:layout_above="@id/hpBarB"/>
+			<TextView
+				android:textColor="@color/poke_text_color"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/currentPokeLevelB"
 				android:layout_alignParentRight="true"
 				android:layout_above="@id/hpBarB"
-				android:layout_marginLeft="5dp"/>
+				android:layout_marginLeft="2dp"/>
+			<ImageView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/currentPokeGenderB"
+				android:layout_toLeftOf="@id/currentPokeLevelB"
+				android:layout_above="@id/hpBarB"
+				android:layout_marginLeft="2dp"
+				android:layout_marginBottom="3dp"/>
+			<ImageView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/currentPokeStatusB"
+				android:layout_toLeftOf="@id/currentPokeGenderB"
+				android:layout_above="@id/hpBarB"
+				android:layout_marginBottom="3dp"/>
 			</RelativeLayout>
 					<!-- android:layout_alignBottom="@id/hpBarB"-->
 	</RelativeLayout>
@@ -143,7 +187,7 @@
 		<TextView
 			android:text="Timer B"
 			android:layout_height="fill_parent"
-			android:layout_weight="2"
+			android:layout_weight="3"
 			android:textColor="@color/poke_text_color"
 			android:background="@drawable/battle_border"
 			android:gravity="center"

@@ -15,7 +15,7 @@ public class ShallowBattlePoke extends SerializeBytes {
 	public boolean shiny = false;
 	public byte gender = 0;
 	public byte lifePercent = 0;
-	byte level = 0;
+	public byte level = 0;
 	public byte lastKnownPercent = 0;
 	public boolean sub = false;
 	public LinkedList<UniqueID> specialSprites = new LinkedList<UniqueID>();
