@@ -16,36 +16,75 @@
 	android:clickable="true">
 	
 	<!-- START Player A Title -->
-	<LinearLayout
+	<RelativeLayout
 		android:orientation="horizontal"
 		android:layout_width="fill_parent"
-		android:layout_marginTop="3dp"
-		android:layout_marginBottom="3dp"
-		android:layout_marginLeft="4dp"
-		android:layout_marginRight="4dp"
-		android:layout_margin="4dp" 
-		android:layout_weight="1" 
-		android:layout_height="22dp">
+		android:layout_margin="4dp"
+		android:layout_height="wrap_content">
 		
 		<TextView
 			android:text="Timer A"
-			android:layout_height="fill_parent"
-			android:layout_weight="3"
+			android:layout_height="wrap_content"
 			android:textColor="@color/poke_text_color"
 			android:background="@drawable/battle_border"
+			android:layout_alignParentLeft="true"
 			android:gravity="center"
-			android:id="@+id/timerA" 
-			android:layout_width="fill_parent"/>
+			android:id="@+id/timerA"
+			android:minWidth="60sp"
+			android:layout_marginRight="4dp"
+			android:layout_width="wrap_content"/>
 		<TextView
 			android:text="Name A"
-			android:layout_width="fill_parent"
-			android:layout_height="fill_parent"
-			android:layout_weight="1"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
 			android:textColor="@color/poke_text_color"
-			android:gravity="right|center_vertical"
+			android:layout_alignParentRight="true"
+			android:paddingTop="4dp"
+			android:paddingBottom="4dp"
 			android:id="@+id/nameA"/>
-		
-	</LinearLayout>
+		<ImageView
+			android:id="@+id/pokeball1A"
+			android:paddingTop="4dp"
+			android:paddingBottom="4dp"
+			android:layout_toRightOf="@id/timerA"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"/>
+		<ImageView
+			android:id="@+id/pokeball2A"
+			android:paddingTop="4dp"
+			android:paddingBottom="4dp"
+			android:layout_toRightOf="@id/pokeball1A"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"/>
+		<ImageView
+			android:id="@+id/pokeball3A"
+			android:paddingTop="4dp"
+			android:paddingBottom="4dp"
+			android:layout_toRightOf="@id/pokeball2A"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"/>
+		<ImageView
+			android:id="@+id/pokeball4A"
+			android:paddingTop="4dp"
+			android:paddingBottom="4dp"
+			android:layout_toRightOf="@id/pokeball3A"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"/>
+		<ImageView
+			android:id="@+id/pokeball5A"
+			android:paddingTop="4dp"
+			android:paddingBottom="4dp"
+			android:layout_toRightOf="@id/pokeball4A"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"/>
+		<ImageView
+			android:id="@+id/pokeball6A"
+			android:paddingTop="4dp"
+			android:paddingBottom="4dp"
+			android:layout_toRightOf="@id/pokeball5A"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"/>
+	</RelativeLayout>
 	<!-- END Player A Title -->
 	
 	<!-- START Battle Screen -->
@@ -166,34 +205,75 @@
 	<!-- END Battle Screen -->
 	
 	<!-- START Player B Title -->
-	<LinearLayout
+	<RelativeLayout
 		android:orientation="horizontal"
 		android:layout_width="fill_parent"
-		android:layout_marginTop="0dp"
-		android:layout_marginBottom="3dp"
-		android:layout_marginLeft="4dp"
-		android:layout_marginRight="4dp"
-		android:layout_margin="4dp" 
-		android:layout_weight="1" android:layout_height="22dp">
+		android:layout_margin="4dp"
+		android:layout_height="wrap_content">
 		
 		<TextView
-			android:text="Name B"
-			android:layout_width="fill_parent"
-			android:layout_height="fill_parent"
-			android:layout_weight="1"
-			android:textColor="@color/poke_text_color"
-			android:gravity="left|center_vertical"
-			android:id="@+id/nameB"/>
-		<TextView
 			android:text="Timer B"
-			android:layout_height="fill_parent"
-			android:layout_weight="3"
+			android:layout_height="wrap_content"
 			android:textColor="@color/poke_text_color"
 			android:background="@drawable/battle_border"
+			android:layout_alignParentRight="true"
 			android:gravity="center"
-			android:id="@+id/timerB" 
-			android:layout_width="fill_parent"/>
-	</LinearLayout>
+			android:id="@+id/timerB"
+			android:minWidth="60sp"
+			android:layout_marginLeft="4dp"
+			android:layout_width="wrap_content"/>
+		<TextView
+			android:text="Name B"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textColor="@color/poke_text_color"
+			android:layout_alignParentLeft="true"
+			android:paddingTop="4dp"
+			android:paddingBottom="4dp"
+			android:id="@+id/nameB"/>
+		<ImageView
+			android:id="@+id/pokeball6B"
+			android:paddingTop="4dp"
+			android:paddingBottom="4dp"
+			android:layout_toLeftOf="@id/timerB"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"/>
+		<ImageView
+			android:id="@+id/pokeball5B"
+			android:paddingTop="4dp"
+			android:paddingBottom="4dp"
+			android:layout_toLeftOf="@id/pokeball6B"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"/>
+		<ImageView
+			android:id="@+id/pokeball4B"
+			android:paddingTop="4dp"
+			android:paddingBottom="4dp"
+			android:layout_toLeftOf="@id/pokeball5B"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"/>
+		<ImageView
+			android:id="@+id/pokeball3B"
+			android:paddingTop="4dp"
+			android:paddingBottom="4dp"
+			android:layout_toLeftOf="@id/pokeball4B"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"/>
+		<ImageView
+			android:paddingTop="4dp"
+			android:paddingBottom="4dp"
+			android:id="@+id/pokeball2B"
+			android:layout_toLeftOf="@id/pokeball3B"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"/>
+		<ImageView
+			android:paddingTop="4dp"
+			android:paddingBottom="4dp"
+			android:id="@+id/pokeball1B"
+			android:layout_toLeftOf="@id/pokeball2B"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"/>
+	</RelativeLayout>
 	<!-- END Player B Title -->
 	
 	<!-- START Info Window -->

@@ -50,7 +50,7 @@ public class Battle {
 	public BattleMove[] displayedMoves = new BattleMove[4];
 	public BattleConf conf;
 	
-	ShallowBattlePoke[][] pokes = new ShallowBattlePoke[2][6];
+	public ShallowBattlePoke[][] pokes = new ShallowBattlePoke[2][6];
 	ArrayList<Boolean> pokeAlive = new ArrayList<Boolean>();
 	
 	public SpannableStringBuilder hist; //= new SpannableStringBuilder();
@@ -181,7 +181,7 @@ public class Battle {
 		byte player = msg.readByte();
 		System.out.println("Battle Command Received: " + bc.toString());
 		switch(bc) {
-		case SendOut:
+		case SendOut: {
 			boolean isSilent = msg.readBool();
 			byte fromSpot = msg.readByte();
 			
@@ -205,35 +205,37 @@ public class Battle {
 			
 			if(netServ.battleActivity != null) {
 				netServ.battleActivity.updatePokes(player);
+				System.out.println("POKEBALLS");
+				netServ.battleActivity.updatePokeballs();
 			}
 			if(!isSilent)
 				writeToHist("\n" + tu((players[player].nick() + " sent out " + 
 						currentPoke(player).rnick + "!")));
 			break;
-		case SendBack:
+		} case SendBack: {
 			writeToHist("\n" + tu((players[player].nick() + " called " + 
 					currentPoke(player).rnick + " back!")));
 			break;
-		case UseAttack:
+		} case UseAttack: {
 			short attack = msg.readShort();
 			writeToHist(Html.fromHtml("<br>" + tu(currentPoke(player).nick +
 					" used <font color =" + TypeColor.values()[new Integer(netServ.db.query("SELECT type FROM [Moves] WHERE _id = " + attack))] +
 					netServ.db.query("SELECT name FROM [Moves] WHERE _id = " + attack) + "</font>!")));
 			break;
-		case BeginTurn:
+		} case BeginTurn: {
 			int turn = msg.readInt();
 			writeToHist(Html.fromHtml("<br><b><font color=" + QtColor.Blue + 
 					"Start of turn " + turn + "</font></b>"));
 			break;
-		case Ko:
+		} case Ko: {
 			writeToHist(Html.fromHtml("<br><b>" + tu(NetworkService.escapeHtml((currentPoke(player).nick) +
 					" fainted!</b>"))));
 			break;
-		case Hit:
+		} case Hit: {
 			byte number = msg.readByte();
 			writeToHist("\nHit " + number + " time" + ((number > 1) ? "s!" : "!"));
 			break;
-		case Effective:
+		} case Effective: {
 			byte eff = msg.readByte();
 			switch (eff) {
 			case 0:
@@ -251,22 +253,22 @@ public class Battle {
 				break;
 			}
 			break;
-		case CriticalHit:
+		} case CriticalHit: {
 			writeToHist(Html.fromHtml("<br><font color=#6b0000>A critical hit!</font>"));
 			break;
-		case Miss:
+		} case Miss: {
 			writeToHist("\nThe attack of " + currentPoke(player).nick + " missed!");
 			break;
-		case Avoid:
+		} case Avoid: {
 			writeToHist("\n" + tu(currentPoke(player).nick + " avoided the attack!"));
 			break;
-		case StatChange:
+		} case StatChange: {
 			byte stat = msg.readByte(), boost=msg.readByte();
 			writeToHist("\n" + tu(currentPoke(player).nick + "'s " +
 					netServ.getString(Stat.values()[stat].rstring()) +
 					(Math.abs(boost) > 1 ? " sharply" : "") + (boost > 0 ? " rose!" : " fell!")));
 			break;
-		case StatusChange:
+		} case StatusChange: {
 			final String[] statusChangeMessages = {
 					" is paralyzed! It may be unable to move!",
 					" fell asleep!",
@@ -291,9 +293,9 @@ public class Battle {
 						currentPoke(player).nick + " became confused!</font>")));
 			}
 			break;
-		case AbsStatusChange:
+		} case AbsStatusChange: {
 			byte poke = msg.readByte();
-			status = msg.readByte();
+			byte status = msg.readByte();
 			
 			if (poke < 0 || poke >= 6)
 				break;
@@ -302,19 +304,21 @@ public class Battle {
 				pokes[player][poke].changeStatus(status);
 				if (player == me)
 					myTeam.pokes[poke].changeStatus(status);
-				if (isOut(poke) && netServ.battleActivity != null)
-					netServ.battleActivity.updatePokes(player);
+				if (netServ.battleActivity != null) {
+					if (isOut(poke))
+						netServ.battleActivity.updatePokes(player);
+					netServ.battleActivity.updatePokeballs();
+				}
 			}
-			// XXX PO updates pokeballs here
 			break;
-		case AlreadyStatusMessage:
-			status = msg.readByte();
+		} case AlreadyStatusMessage: {
+			byte status = msg.readByte();
 			writeToHist(Html.fromHtml("<br><font color=" + new StatusColor(status) + tu(
 					currentPoke(player).nick + " is already " + Status.poValues()[status] +
 					".</font>")));
 			break;
-		case StatusMessage:
-			status = msg.readByte();
+		} case StatusMessage: {
+			byte status = msg.readByte();
 			switch (StatusFeeling.values()[status]) {
 			case FeelConfusion:
 				writeToHist(Html.fromHtml("<br><font color=" + TypeColor.Ghost + tu(
@@ -358,11 +362,11 @@ public class Battle {
 				break;
 			}
 			break;
-		case Failed:
+		} case Failed: {
 			writeToHist("\nBut it failed!");
 			break;
-		case BattleChat:
-		case EndMessage:
+		} case BattleChat: {
+		} case EndMessage: {
 			String message = msg.readQString();
 			if (message.equals(""))
 				break;
@@ -370,19 +374,19 @@ public class Battle {
 					"<b>" + NetworkService.escapeHtml(players[player].nick()) + ": </b></font>" +
 					NetworkService.escapeHtml(message)));
 			break;
-		case Spectating:
+		} case Spectating: {
 			boolean come = msg.readBool();
 			int id = msg.readInt();
 			// TODO addSpectator(come, id);
 			break;
-		case SpectatorChat:
+		} case SpectatorChat: {
 			// TODO if (ignoreSpecs) break;
-			id = msg.readInt();
-			message = msg.readQString();
+			int id = msg.readInt();
+			String message = msg.readQString();
 			writeToHist(Html.fromHtml("<br><font color=" + QtColor.Blue + netServ.players.get(id) + 
 					": " + NetworkService.escapeHtml(message)));
 			break;
-		case MoveMessage:
+		} case MoveMessage: {
 			// TODO
 			short move = msg.readShort();
 			byte part = msg.readByte();
@@ -406,16 +410,16 @@ public class Battle {
 			
 			writeToHist(Html.fromHtml("<br><font color =" + TypeColor.values()[type] + tu(NetworkService.escapeHtml(s)) + "</font>"));
 			break;
-		case NoOpponent:
+		} case NoOpponent: {
 			writeToHist("\nBut there was no target...");
 			break;
-		case ItemMessage:
+		} case ItemMessage: {
 			short item = msg.readShort();
-			part = msg.readByte();
-			foe = msg.readByte();
+			byte part = msg.readByte();
+			byte foe = msg.readByte();
 			short berry = msg.readShort();
-			other = msg.readShort();
-			s = itemMessage(item, part);
+			short other = msg.readShort();
+			String s = itemMessage(item, part);
             if(other != -1 && s.contains("%st")) s = s.replaceAll("%st", Stat.values()[other].toString());
             s = s.replaceAll("%s", currentPoke(player).nick);
             if(foe   != -1) s = s.replaceAll("%f", currentPoke(foe).nick);
@@ -427,21 +431,21 @@ public class Battle {
             else
                 writeToHist("\n" + tu(s));
 			break;
-		case Flinch:
+		} case Flinch: {
 			writeToHist("\n" + tu(currentPoke(player).nick + " flinched!"));
 			break;
-		case Recoil:
+		} case Recoil: {
 			boolean damaging = msg.readBool();
 			if (damaging)
 				writeToHist("\n" + tu(currentPoke(player).nick + " is hit with recoil!"));
 			else
 				writeToHist("\n" + tu(currentPoke(player).nick + " had its energy drained!"));
 			break;
-		case WeatherMessage:
+		} case WeatherMessage: {
 			byte wstatus = msg.readByte(), weather = msg.readByte();
 			if (weather == Weather.NormalWeather.ordinal())
 				break;
-			
+			String message;
 			String color = new TypeForWeatherColor(weather).toString();
 			switch (WeatherState.values()[wstatus]) {
 			case EndWeather:
@@ -475,7 +479,7 @@ public class Battle {
 				break;
 			}
 			break;
-		case StraightDamage:
+		} case StraightDamage: {
 			short damage = msg.readShort();
 			if(player == me) {
 				writeToHist("\n" + tu(currentPoke(player).nick + " lost " + damage + 
@@ -485,14 +489,14 @@ public class Battle {
 				writeToHist("\n" + tu(currentPoke(player).nick + " lost " + damage + "% of its health!"));
 			}
 			break;
-		case AbilityMessage:
+		} case AbilityMessage: {
 			short ab = msg.readShort();
-			part = msg.readByte();
-			type = msg.readByte();
-			foe = msg.readByte();
-			other = msg.readShort();
+			byte part = msg.readByte();
+			byte type = msg.readByte();
+			byte foe = msg.readByte();
+			short other = msg.readShort();
 			System.out.println("OTHER IS: " + other);
-			s = netServ.db.query("SELECT Effect" + part + " FROM [Ability_message] WHERE _id = " + (ab + 1));
+			String s = netServ.db.query("SELECT Effect" + part + " FROM [Ability_message] WHERE _id = " + (ab + 1));
 	        if(other != -1 && s.contains("%st")) s = s.replaceAll("%st", netServ.getResources().getString((Stat.values()[other].rstring())));
 	        s = s.replaceAll("%s", currentPoke(player).nick);
 	        // Below commented out in PO code
@@ -502,7 +506,7 @@ public class Battle {
 	        if(foe   != -1) s = s.replaceAll("%f", currentPoke(foe).nick);
 	        if(other != -1 && s.contains("%m")) s = s.replaceAll("%m", netServ.db.query("SELECT Name FROM [Moves] WHERE _id = " + other));
 	        // Below commented out in PO code
-	        //            mess.replace("%d", QString::number(other));
+	        //            mess.replace("%d", QString: {:number(other));
 	        if(other != -1 && s.contains("%i")) s = s.replaceAll("%i", itemName(other));
 	        if(other != -1 && s.contains("%a")) s = s.replaceAll("%a", netServ.db.query("SELECT Name FROM [Abilities] WHERE _id = " + (other + 1)));
 	        if(other != -1 && s.contains("%p")) s = s.replaceAll("%p", netServ.db.query("SELECT Name FROM [Pokemons] WHERE _id = " + other));
@@ -512,7 +516,7 @@ public class Battle {
 	        	writeToHist(Html.fromHtml("<br><font color =" + TypeColor.values()[type] + tu(NetworkService.escapeHtml(s)) + "</font>"));
 	        }
 			break;
-		case Substitute:
+		} case Substitute: {
 			currentPoke(player).sub = msg.readBool();
 			if (player == me) {
 				if (netServ.battleActivity != null)
@@ -522,7 +526,7 @@ public class Battle {
 					netServ.battleActivity.updateOppPoke();
 			}
 			break;
-		case BattleEnd:
+		} case BattleEnd: {
 			byte res = msg.readByte();
 			if (res == BattleResult.Tie.ordinal())
 				writeToHist(Html.fromHtml("<br><b><font color =" + QtColor.Blue +
@@ -533,15 +537,15 @@ public class Battle {
 						players[player].nick() +" won the battle!</b></font>"));
 			gotEnd = true;
 			break;
-		case BlankMessage:
+		} case BlankMessage: {
 			// XXX This prints out a lot of extra space
 			// writeToHist("\n");
 			break;
-		case Clause:
+		} case Clause: {
 			if (player >= 0 && player < Clauses.values().length)
 				writeToHist("\n" + Clauses.values()[player].battleText());
 			break;
-		case Rated:
+		} case Rated: {
 			boolean rated = msg.readBool();
 			writeToHist(Html.fromHtml("<br><b><font color =" + QtColor.Blue + "Rule: " +
 					(rated ? "Rated" : "Unrated") + "</b></font>"));
@@ -552,19 +556,19 @@ public class Battle {
                 }
             }
 			break;
-		case TierSection:
+		} case TierSection: {
 			String tier = msg.readQString();
 			writeToHist(Html.fromHtml("<br><b><font color =" + QtColor.Blue +
 					"Tier: " + tier + "</b></font>"));
 			break;
-		case TempPokeChange:
-			id = msg.readByte();
+		} case TempPokeChange: {
+			byte id = msg.readByte();
 			System.out.println("Recieved: " + TempPokeChange.values()[id]);
 			switch(TempPokeChange.values()[id]) {
 			case TempMove:
 			case DefMove:
 				byte slot = msg.readByte();
-				move = msg.readShort();
+				short move = msg.readShort();
 				displayedMoves[slot].num = move;
 				BattleMove newMove = new BattleMove(displayedMoves[slot], netServ.db);
 				displayedMoves[slot] = newMove;
@@ -594,7 +598,7 @@ public class Battle {
 				}
 				break;
 			case DefiniteForme:
-				poke = msg.readByte();
+				byte poke = msg.readByte();
 				short newForm = msg.readShort();
 				pokes[player][poke].uID.pokeNum = newForm;
 				if (isOut(poke)) {
@@ -612,14 +616,14 @@ public class Battle {
 				}
 			}
 			break;
-		case MakeYourChoice:
+		} case MakeYourChoice: {
 			if (netServ.battleActivity != null) {
 				netServ.battleActivity.updateButtons(allowSwitch, allowAttack, allowAttacks);
 				if (allowSwitch && !allowAttack)
 					netServ.battleActivity.switchToPokeViewer();
 			}
 			break;
-		case OfferChoice:
+		} case OfferChoice: {
 			byte numSlot = msg.readByte(); // XXX what is this?
 			allowSwitch = msg.readBool();
 			System.out.println("Switch allowed: " + allowSwitch);
@@ -639,20 +643,20 @@ public class Battle {
 			if (netServ.battleActivity != null)
 				netServ.battleActivity.updateButtons(allowSwitch, allowAttack, allowAttacks);
 			break;
-		case CancelMove:
+		} case CancelMove: {
 			if (netServ.battleActivity != null)
 				netServ.battleActivity.updateButtons(allowSwitch, allowAttack, allowAttacks);
 			break;
-		case ClockStart:
+		} case ClockStart: {
 			remainingTime[player % 2] = msg.readShort();
 			startingTime[player % 2] = SystemClock.uptimeMillis();
 			ticking[player % 2] = true;
 			break;
-		case ClockStop:
+		} case ClockStop: {
 			remainingTime[player % 2] = msg.readShort();
 			ticking[player % 2] = false;
 			break;
-		case ChangeHp:
+		} case ChangeHp: {
 			short newHP = msg.readShort();
 			if(player == me) {
 				myTeam.pokes[0].currentHP = newHP;
@@ -675,30 +679,30 @@ public class Battle {
 				netServ.battleActivity.updateCurrentPokeListEntry();
 			}
 			break;
-		case SpotShifts:
+		} case SpotShifts: {
 			// TODO
 			break;
-		case RearrangeTeam:
+		} case RearrangeTeam: {
 			oppTeam = new ShallowShownTeam(msg);
 			shouldShowPreview = true;
 			if(netServ.battleActivity != null && netServ.battleActivity.hasWindowFocus())
 				netServ.battleActivity.notifyRearrangeTeamDialog();
 			break;
-		case ChangePP:
+		} case ChangePP: {
 			byte moveNum = msg.readByte();
 			byte newPP = msg.readByte();
 			displayedMoves[moveNum].currentPP = myTeam.pokes[0].moves[moveNum].currentPP = newPP;
 			if(netServ.battleActivity != null)
 				netServ.battleActivity.updateMovePP(moveNum);
 			break;
-		case DynamicInfo:
+		} case DynamicInfo: {
 			dynamicInfo[player] = new BattleDynamicInfo(msg);
 			System.out.println("PLAYER " + player + " " + dynamicInfo[player]);
 			break;
-		default:
+		} default: {
 			System.out.println("Battle command unimplemented -- " + bc);
 			break;
-			
+		}
 		}
 	}
 	

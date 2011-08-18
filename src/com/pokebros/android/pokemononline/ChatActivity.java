@@ -222,7 +222,7 @@ public class ChatActivity extends Activity {
 			netServ = ((NetworkService.LocalBinder)service).getService();
 			if (!netServ.hasBattle())
 				netServ.showNotification(ChatActivity.class, "Chat");
-			
+			updateTitle();
 			netServ.chatActivity = ChatActivity.this;
 			if (netServ.joinedChannels.peek() != null && !netServ.joinedChannels.isEmpty()) {
 				populateUI(false);
@@ -238,6 +238,14 @@ public class ChatActivity extends Activity {
 			netServ = null;
 		}
 	};
+	
+	void updateTitle() {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				ChatActivity.this.setTitle(netServ.serverName);
+			}
+		});
+	}
 	
 	public void populateUI(boolean clear) {
 		if (netServ.joinedChannels.peek() != null) {
@@ -338,7 +346,7 @@ public class ChatActivity extends Activity {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
 		switch (ChatDialog.values()[id]) {
-		case Challenge:
+		case Challenge: {
 			if (netServ == null) {
 				removeDialog(id);
 				dismissDialog(id);
@@ -404,7 +412,7 @@ public class ChatActivity extends Activity {
 			oppRating.setText(Html.fromHtml("<b>Rating: </b>" + NetworkService.escapeHtml(new Short(opp.rating).toString())));    
 
 			return oppInfoDialog;
-		case AskForPass:
+		} case AskForPass: {
         	//View layout = inflater.inflate(R.layout.ask_for_pass, null);
         	final EditText passField = new EditText(this);
         	passField.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
@@ -435,7 +443,7 @@ public class ChatActivity extends Activity {
 				}
 			});
 			return dialog;
-		case ConfirmDisconnect:
+		} case ConfirmDisconnect: {
 			builder.setMessage("Really disconnect?")
 			.setCancelable(true)
 			.setPositiveButton("Disconnect", new DialogInterface.OnClickListener() {
@@ -445,7 +453,7 @@ public class ChatActivity extends Activity {
 			})
 			.setNegativeButton("Cancel", null);
 			return builder.create();
-		case FindBattle:
+		} case FindBattle: {
 			final EditText range = new EditText(this);
 			range.setInputType(InputType.TYPE_CLASS_NUMBER);
 			range.setHint("Range");
@@ -454,7 +462,7 @@ public class ChatActivity extends Activity {
 			.setMultiChoiceItems(new CharSequence[]{"Force Rated", "Force Same Tier", "Only within range"}, null, new DialogInterface.OnMultiChoiceClickListener() {
 				public void onClick(DialogInterface dialog, int which, boolean isChecked) {
 					options[which] = isChecked;
-					System.out.println("FORCE RATED: " + options[0] + "FORCE SAME TIER: " + options[1] + "ONLY WITHIN RANGE: " + options[2]);
+					System.out.println("FORCE RATED: { " + options[0] + "FORCE SAME TIER: { " + options[1] + "ONLY WITHIN RANGE: " + options[2]);
 				}
 			})
 			.setView(range)
@@ -468,7 +476,7 @@ public class ChatActivity extends Activity {
 						} catch (NumberFormatException e) {
 							inRange = 200;
 						}
-						System.out.println("Force Rated: " + options[0] + " Force Same Tier: " + options[1] + " Only within Range: " + options[2]);
+						System.out.println("Force Rated: { " + options[0] + " Force Same Tier: { " + options[1] + " Only within Range: " + options[2]);
 						netServ.socket.sendMessage(
 								constructFindBattle(options[0], options[1], options[2], inRange, (byte) 0),
 								Command.FindBattle);
@@ -476,9 +484,9 @@ public class ChatActivity extends Activity {
 				}
 			});
 			return builder.create();
-		case TierSelection:
+		} case TierSelection: {
 			return new TierAlertDialog(this, netServ.superTier);
-		case PlayerInfo:
+		} case PlayerInfo: {
 			View layout = inflater.inflate(R.layout.player_info_dialog, (LinearLayout)findViewById(R.id.player_info_dialog));
             ImageView[] pPokeIcons = new ImageView[6];
             TextView pInfo, pTeam, pName, pTier, pRating;           
@@ -518,25 +526,25 @@ public class ChatActivity extends Activity {
             pRating.setText(Html.fromHtml("<b>Rating: </b>" + NetworkService.escapeHtml(new Short(lastClickedPlayer.rating).toString())));    
         	
             return pInfoDialog;
-		case ChallengeMode:
+		} case ChallengeMode: {
             final Clauses[] clauses = Clauses.values();
             int numClauses = clauses.length;
-			final boolean[] optionZ = new boolean[numClauses];
+			final boolean[] options = new boolean[numClauses];
 			final String[] clauseNames = new String[numClauses];
 			for (int i=0; i < numClauses; i++) {
-				optionZ[i] = false;
+				options[i] = false;
 				clauseNames[i] = clauses[i].toString();
 			}
             builder.setMultiChoiceItems(clauseNames, null, new DialogInterface.OnMultiChoiceClickListener() {
 				public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-					optionZ[which] = isChecked;
+					options[which] = isChecked;
 				}
 			})
 			.setPositiveButton("Challenge", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
 					int clauses = 0;
-					for (int i = 0; i < optionZ.length; i++)
-						clauses |= (optionZ[i] ? Clauses.values()[i].mask() : 0);
+					for (int i = 0; i < options.length; i++)
+						clauses |= (options[i] ? Clauses.values()[i].mask() : 0);
 					if (netServ != null && netServ.socket != null && netServ.socket.isConnected())
 						netServ.socket.sendMessage(constructChallenge(ChallengeDesc.Sent.ordinal(), lastClickedPlayer.id, clauses, Mode.Singles.ordinal()), Command.ChallengeStuff);
 					removeDialog(id);
@@ -554,8 +562,10 @@ public class ChatActivity extends Activity {
             })
             .setTitle("Select clauses");
             return builder.create();
+		} default: {
+			return new Dialog(this);
 		}
-		return new Dialog(this); // Should never get here but needed to run
+		}
 	}
 	
     @Override

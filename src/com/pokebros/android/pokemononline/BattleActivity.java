@@ -1,5 +1,6 @@
 package com.pokebros.android.pokemononline;
 
+import com.pokebros.android.pokemononline.ColorEnums.TypeColor;
 import com.pokebros.android.pokemononline.battle.BattleMove;
 import com.pokebros.android.pokemononline.battle.Type;
 import java.util.Random;
@@ -27,6 +28,7 @@ import android.content.ServiceConnection;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
@@ -50,6 +52,7 @@ import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -67,7 +70,7 @@ public class BattleActivity extends Activity {
 	}
 
 	public final static int SWIPE_TIME_THRESHOLD = 100;
-    final String packName = "com.pokebros.android.pokemononline";
+    final static String pkgName = "com.pokebros.android.pokemononline";
     
 	DragLayer mDragLayer;
 	
@@ -98,6 +101,7 @@ public class BattleActivity extends Activity {
 	TextView infoView;
 	ScrollView infoScroll;
 	TextView[] names = new TextView[2];
+	ImageView[][] pokeballs = new ImageView[2][6];
 	ImageView[] pokeSprites = new ImageView[2];
 	
 	LinearLayout topAttackRowLayout;
@@ -193,6 +197,7 @@ public class BattleActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
     	System.out.println("BattleActivity Created");
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.battle_pokeviewer);
 
         bindService(new Intent(BattleActivity.this, NetworkService.class), connection,
@@ -202,22 +207,22 @@ public class BattleActivity extends Activity {
         realViewSwitcher = (RealViewSwitcher)findViewById(R.id.battlePokeSwitcher);
         
         for(int i = 0; i < 4; i++) {
-        	attackNames[i] = (TextView)findViewById(resources.getIdentifier("attack" + (i+1) + "Name", "id", packName));
-        	attackPPs[i] = (TextView)findViewById(resources.getIdentifier("attack" + (i+1) + "PP", "id", packName));
-        	attackLayouts[i] = (RelativeLayout)findViewById(resources.getIdentifier("attack" + (i+1) + "Layout", "id", packName));
+        	attackNames[i] = (TextView)findViewById(resources.getIdentifier("attack" + (i+1) + "Name", "id", pkgName));
+        	attackPPs[i] = (TextView)findViewById(resources.getIdentifier("attack" + (i+1) + "PP", "id", pkgName));
+        	attackLayouts[i] = (RelativeLayout)findViewById(resources.getIdentifier("attack" + (i+1) + "Layout", "id", pkgName));
         	attackLayouts[i].setOnClickListener(battleListener);
         }
         for(int i = 0; i < 6; i++) {
-        	pokeListNames[i] = (TextView)findViewById(resources.getIdentifier("pokename" + (i+1), "id", packName));
-        	pokeListHPs[i] = (TextView)findViewById(resources.getIdentifier("hp" + (i+1), "id", packName));
-        	pokeListItems[i] = (TextView)findViewById(resources.getIdentifier("item" + (i+1), "id", packName));
-        	pokeListAbilities[i] = (TextView)findViewById(resources.getIdentifier("ability" + (i+1), "id", packName));
-        	pokeListButtons[i] = (RelativeLayout)findViewById(resources.getIdentifier("pokeViewLayout" + (i+1), "id", packName));
+        	pokeListNames[i] = (TextView)findViewById(resources.getIdentifier("pokename" + (i+1), "id", pkgName));
+        	pokeListHPs[i] = (TextView)findViewById(resources.getIdentifier("hp" + (i+1), "id", pkgName));
+        	pokeListItems[i] = (TextView)findViewById(resources.getIdentifier("item" + (i+1), "id", pkgName));
+        	pokeListAbilities[i] = (TextView)findViewById(resources.getIdentifier("ability" + (i+1), "id", pkgName));
+        	pokeListButtons[i] = (RelativeLayout)findViewById(resources.getIdentifier("pokeViewLayout" + (i+1), "id", pkgName));
         	pokeListButtons[i].setOnClickListener(battleListener);
-        	pokeListIcons[i] = (ImageView)findViewById(resources.getIdentifier("pokeViewIcon" + (i+1), "id", packName));
+        	pokeListIcons[i] = (ImageView)findViewById(resources.getIdentifier("pokeViewIcon" + (i+1), "id", pkgName));
         	
         	for(int j = 0; j < 4; j++)
-        		pokeListMovePreviews[i][j] = (TextView)findViewById(resources.getIdentifier("p" + (i+1) + "_attack" + (j+1), "id", packName));
+        		pokeListMovePreviews[i][j] = (TextView)findViewById(resources.getIdentifier("p" + (i+1) + "_attack" + (j+1), "id", pkgName));
         }
         
         infoView = (TextView)findViewById(R.id.infoWindow);
@@ -273,14 +278,14 @@ public class BattleActivity extends Activity {
 		new Thread(hpAnimator).start();
 	}
 	
-	public void updateBattleInfo() {
+	public void updateBattleInfo(boolean scroll) {
 		runOnUiThread(new Runnable() {
 			public void run() {
 				if (!netServ.hasBattle())
 					return;
 				synchronized (netServ.battle.histDelta) {
 					infoView.append(netServ.battle.histDelta);
-					if (netServ.battle.histDelta.length() != 0) {
+					if (netServ.battle.histDelta.length() != 0 || true) {
 						infoScroll.post(new Runnable() {
 							public void run() {
 								infoScroll.smoothScrollTo(0, infoView.getMeasuredHeight());
@@ -300,6 +305,21 @@ public class BattleActivity extends Activity {
 			updateMyPoke();
 		else
 			updateOppPoke();
+	}
+	
+	public void updatePokeballs() {
+		System.out.println("OF STEEL");
+		if (netServ == null || netServ.battle == null)
+			return;
+		runOnUiThread(new Runnable() {
+			public void run() {
+				for (int i = 0; i < 2; i++) {
+					for (int j = 0; j < 6; j++) {
+						pokeballs[i][j].setImageResource(resources.getIdentifier("status" + netServ.battle.pokes[i][j].status(), "drawable", pkgName));
+					}
+				}
+			}
+		});
 	}
 
 	private Drawable getSprite(ShallowBattlePoke poke, boolean front) {
@@ -323,7 +343,7 @@ public class BattleActivity extends Activity {
 	        	if (poke.gender != Gender.Female.ordinal())
 	        		res = res + (poke.shiny ? "s" : "");
 	        	else {
-	        		if (resources.getIdentifier(res + "f", "drawable", "com.pokebros.android.pokemononline") == 0)
+	        		if (resources.getIdentifier(res + "f", "drawable", pkgName) == 0)
 	        			// No special female sprite
 	        			res = res + (poke.shiny ? "s" : "");
 	        		else
@@ -332,7 +352,7 @@ public class BattleActivity extends Activity {
         	}
         }
         System.out.println("SPRITE: " + res);
-        return resources.getDrawable(resources.getIdentifier(res, "drawable", "com.pokebros.android.pokemononline"));
+        return resources.getDrawable(resources.getIdentifier(res, "drawable", pkgName));
 	}
 
 	public void updateCurrentPokeListEntry() {
@@ -370,8 +390,8 @@ public class BattleActivity extends Activity {
 				if(poke != null) {
 					currentPokeNames[me].setText(poke.rnick);
 					currentPokeLevels[me].setText("Lv. " + poke.level);
-					currentPokeGenders[me].setImageResource(resources.getIdentifier("battle_gender" + poke.gender, "drawable", "com.pokebros.android.pokemononline"));
-					currentPokeStatuses[me].setImageResource(resources.getIdentifier("battle_status" + poke.status(), "drawable", "com.pokebros.android.pokemononline"));
+					currentPokeGenders[me].setImageResource(resources.getIdentifier("battle_gender" + poke.gender, "drawable", pkgName));
+					currentPokeStatuses[me].setImageResource(resources.getIdentifier("battle_status" + poke.status(), "drawable", pkgName));
 					setHpBarTo(me, poke.lifePercent);
 					BattlePoke battlePoke = netServ.battle.myTeam.pokes[0];
 			        for(int i = 0; i < 4; i++) {
@@ -385,7 +405,7 @@ public class BattleActivity extends Activity {
 			        		type = move.getTypeString();
 			        	type = type.toLowerCase();
 			        	attackLayouts[i].setBackgroundResource(resources.getIdentifier(type + "_type_button",
-					      		"drawable", "com.pokebros.android.pokemononline"));
+					      		"drawable", pkgName));
 			        }
 		        	pokeSprites[me].setImageDrawable(getSprite(poke, false));
 				}
@@ -404,8 +424,8 @@ public class BattleActivity extends Activity {
 					if(poke != null) {
 						currentPokeNames[opp].setText(poke.rnick);
 						currentPokeLevels[opp].setText("Lv. " + poke.level);
-						currentPokeGenders[opp].setImageResource(resources.getIdentifier("battle_gender" + poke.gender, "drawable", "com.pokebros.android.pokemononline"));
-						currentPokeStatuses[opp].setImageResource(resources.getIdentifier("battle_status" + poke.status(), "drawable", "com.pokebros.android.pokemononline"));
+						currentPokeGenders[opp].setImageResource(resources.getIdentifier("battle_gender" + poke.gender, "drawable", pkgName));
+						currentPokeStatuses[opp].setImageResource(resources.getIdentifier("battle_status" + poke.status(), "drawable", pkgName));
 						setHpBarTo(opp, poke.lifePercent);
 						pokeSprites[opp].setImageDrawable(getSprite(poke, true));
 					}
@@ -422,11 +442,9 @@ public class BattleActivity extends Activity {
 					for (int i = 0; i < 4; i++) {
 						if (allowAttack) {
 							setAttackButtonEnabled(i, allowAttacks[i]);
-							//attackLayouts[i].setEnabled(allowAttacks[i]);
 						}
 						else {
 							setAttackButtonEnabled(i, false);
-							//attackLayouts[i].setEnabled(false);
 						}
 					}
 				}
@@ -459,10 +477,10 @@ public class BattleActivity extends Activity {
 	private Drawable getIcon(UniqueID uid) {
 		int resID = resources.getIdentifier("pi" + uid.pokeNum +
 				(uid.subNum == 0 ? "" : "_" + uid.subNum) +
-				"_icon", "drawable", "com.pokebros.android.pokemononline");
+				"_icon", "drawable", pkgName);
 		if (resID == 0)
 			resID = resources.getIdentifier("pi" + uid.pokeNum + "_icon",
-					"drawable", "com.pokebros.android.pokemononline");
+					"drawable", pkgName);
 		return resources.getDrawable(resID);
 	}
 	
@@ -482,8 +500,11 @@ public class BattleActivity extends Activity {
 					for (int j = 0; j < 4; j++) {
 						pokeListMovePreviews[i][j].setText(poke.moves[j].toString());
 						int color;
-						if (poke.moves[j].num == 237) // Hidden Power
-							color = poke.hiddenPowerType();
+						if (poke.moves[j].num == 237) { // Hidden Power
+							String s = TypeColor.values()[poke.hiddenPowerType()].toString();
+							s = s.replaceAll(">", "");
+							color = Color.parseColor(s);
+						}
 						else
 							color = poke.moves[j].getColor();
 						pokeListMovePreviews[i][j].getBackground().setColorFilter(color, PorterDuff.Mode.DARKEN);
@@ -519,7 +540,7 @@ public class BattleActivity extends Activity {
 
 			netServ.showNotification(BattleActivity.class, "Battle");
 
-			battleView.setBackgroundResource(resources.getIdentifier("bg" + netServ.battle.background, "drawable", "com.pokebros.android.pokemononline"));
+			battleView.setBackgroundResource(resources.getIdentifier("bg" + netServ.battle.background, "drawable", pkgName));
 			
 			// Set the UI to display the correct info
 	        me = netServ.battle.me;
@@ -528,12 +549,19 @@ public class BattleActivity extends Activity {
 	        // so set them here.
 	        timers[me] = (TextView)findViewById(R.id.timerB);
 	        timers[opp] = (TextView)findViewById(R.id.timerA);
+
 	        names[me] = (TextView)findViewById(R.id.nameB);
 	        names[opp] = (TextView)findViewById(R.id.nameA);
+
+	        for (int i = 0; i < 6; i++) {
+		        pokeballs[me][i] = (ImageView)findViewById(resources.getIdentifier("pokeball" + (i + 1) + "B", "id", pkgName));
+		        pokeballs[opp][i] = (ImageView)findViewById(resources.getIdentifier("pokeball" + (i + 1) + "A", "id", pkgName));
+	        }
+	        updatePokeballs();
 	        
 	        names[me].setText(netServ.battle.players[me].nick());
 	        names[opp].setText(netServ.battle.players[opp].nick());
-	        
+
 	        hpBars[me] = (TextProgressBar)findViewById(R.id.hpBarB);
 	        hpBars[opp] = (TextProgressBar)findViewById(R.id.hpBarA);
 	        
@@ -556,7 +584,7 @@ public class BattleActivity extends Activity {
 	        
 	        // Load scrollback
 	        infoView.setText(netServ.battle.hist);
-	        updateBattleInfo();
+	        updateBattleInfo(true);
 	    	
 	    	// Prompt a UI update of the pokemon
 	        updateMyPoke();
@@ -741,14 +769,14 @@ public class BattleActivity extends Activity {
         	mDragLayer = (DragLayer)layout.findViewById(R.id.drag_my_poke);
         	for(int i = 0; i < 6; i++){
         		BattlePoke poke = netServ.battle.myTeam.pokes[i];
-        		myArrangePokeIcons[i] = (PokeDragIcon)layout.findViewById(resources.getIdentifier("my_arrange_poke" + (i+1), "id", packName));
+        		myArrangePokeIcons[i] = (PokeDragIcon)layout.findViewById(resources.getIdentifier("my_arrange_poke" + (i+1), "id", pkgName));
         		myArrangePokeIcons[i].setOnTouchListener(dialogListener);
         		myArrangePokeIcons[i].setImageDrawable(getIcon(poke.uID));
         		myArrangePokeIcons[i].num = i;
         		myArrangePokeIcons[i].battleActivity = this;
 
         		ShallowShownPoke oppPoke = netServ.battle.oppTeam.pokes[i];
-        		oppArrangePokeIcons[i] = (ImageView)layout.findViewById(resources.getIdentifier("foe_arrange_poke" + (i+1), "id", packName));
+        		oppArrangePokeIcons[i] = (ImageView)layout.findViewById(resources.getIdentifier("foe_arrange_poke" + (i+1), "id", pkgName));
         		oppArrangePokeIcons[i].setImageDrawable(getIcon(oppPoke.uID));
         	}
             return dialog;

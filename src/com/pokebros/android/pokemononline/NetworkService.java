@@ -24,13 +24,14 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.Html;
 import android.widget.Toast;
 
 public class NetworkService extends Service {
 	public static String escapeHtml(String toEscape) {
-		toEscape.replaceAll("&", "&amp;");
-		toEscape.replaceAll("<", "&lt;");
-		toEscape.replaceAll(">", "&gt;");
+		toEscape = toEscape.replaceAll("&", "&amp;");
+		toEscape = toEscape.replaceAll("<", "&lt;");
+		toEscape = toEscape.replaceAll(">", "&gt;");
 		return toEscape;
 	}
 
@@ -49,6 +50,7 @@ public class NetworkService extends Service {
 	private String salt = null;
 	public boolean failedConnect = false;
 	public DataBaseHelper db;
+	public String serverName = "Not Connected";
 	
 	public boolean hasBattle() {
 		return battle != null;
@@ -175,8 +177,12 @@ public class NetworkService extends Service {
 			else
 				System.out.println("Received message for nonexistant channel");
 			break;
-		}
-		case TierSelection:
+		} case ServerName: {
+			serverName = msg.readQString();
+			if (chatActivity != null)
+				chatActivity.updateTitle();
+			break;
+		} case TierSelection: {
 			msg.readInt();
 			Tier prevTier = new Tier((byte)msg.read(), msg.readQString());
 			prevTier.parentTier = superTier;
@@ -200,7 +206,7 @@ public class NetworkService extends Service {
 				prevTier = t;
 			}
 			break;
-		case ChallengeStuff:
+		} case ChallengeStuff: {
 			IncomingChallenge challenge = new IncomingChallenge(msg);
 			challenge.setNick(players.get(challenge.opponent));
 			System.out.println("CHALLENGE STUFF: " + ChallengeEnums.ChallengeDesc.values()[challenge.desc]);
@@ -231,7 +237,7 @@ public class NetworkService extends Service {
 				break;
 			}
 			break;
-		case ChannelsList:
+		} case ChannelsList: {
 			int numChannels = msg.readInt();
 			for(int k = 0; k < numChannels; k++) {
 				int chanId = msg.readInt();
@@ -241,7 +247,7 @@ public class NetworkService extends Service {
 			}
 			System.out.println(channels.toString());
 			break;
-		case ChannelPlayers:
+		} case ChannelPlayers: {
 			Channel ch = channels.get(msg.readInt());
 			int numPlayers = msg.readInt();
 			if(ch != null) {
@@ -253,16 +259,16 @@ public class NetworkService extends Service {
 			else
 				System.out.println("Received message for nonexistant channel");
 			break;
-		case HtmlMessage:
+		} case HtmlMessage: {
 			String htmlMessage = msg.readQString();
 			System.out.println("Html Message: " + htmlMessage);
 			break;
-		/* Only sent when player is in a PM with you and logs out */
-		case Logout:
+		} case Logout: {
+			/* Only sent when player is in a PM with you and logs out */
 			int playerID = msg.readInt();
 			System.out.println("Player " + playerID + " logged out.");
 			break;
-		case BattleFinished:
+		} case BattleFinished: {
 			int battleID = msg.readInt();
 			byte battleDesc = msg.readByte();
 			int id1 = msg.readInt();
@@ -279,7 +285,7 @@ public class NetworkService extends Service {
 				}
 				
 				if (players.get(id1) != null && players.get(id2) != null && battleDesc < 2)
-					joinedChannels.peek().writeToHist("\n" + players.get(id1).nick() + outcome[battleDesc] + players.get(id2).nick() + ".");
+					joinedChannels.peek().writeToHist(Html.fromHtml("<br><b><i>" + escapeHtml(players.get(id1).nick()) + outcome[battleDesc] + escapeHtml(players.get(id2).nick()) + ".</b></i>"));
 				
 				if (battleDesc == 0 || battleDesc == 3) {
 					battle = null;
@@ -288,8 +294,8 @@ public class NetworkService extends Service {
 				}
 			}
 			break;
-		case SendPM:
-			playerID = msg.readInt();
+		} case SendPM: {
+			int playerID = msg.readInt();
 			// Ignore the message
 			String pm = new String("This user is running the Pokemon Online Android client and cannot respond to private messages.");
 			Baos bb = new Baos();
@@ -297,18 +303,18 @@ public class NetworkService extends Service {
 			bb.putString(pm);
 			socket.sendMessage(bb, Command.SendPM);
 			break;
-		case PlayersList:
+		} case PlayersList: {
 			PlayerInfo p = new PlayerInfo(msg);
 			if(!players.containsKey(p.id))
 				players.put(p.id, p);
 			break;
-		case BattleMessage:
+		} case BattleMessage: {
 			msg.readInt(); // currently support only one battle, unneeded
 			msg.readInt(); // discard the size, unneeded
 			if (battle != null)
 				battle.receiveCommand(msg);
 			break;
-		case EngageBattle:
+		} case EngageBattle: {
 			bID = msg.readInt();
 			int pID1 = msg.readInt();
 			int pID2 = msg.readInt();
@@ -326,11 +332,11 @@ public class NetworkService extends Service {
 				findingBattle = false;
 			}
 			break;
-		case Login:
+		} case Login: {
 			mePlayer = new PlayerInfo(msg);
 			players.put(mePlayer.id, mePlayer);
 			break;
-		case AskForPass:
+		} case AskForPass: {
 			salt = msg.readQString();
 			// XXX not sure what the second half is supposed to check
 			// from analyze.cpp : 265 of PO's code
@@ -343,35 +349,35 @@ public class NetworkService extends Service {
 				chatActivity.notifyAskForPass();
 			}
 			break;
-		case AddChannel:
+		} case AddChannel: {
 			addChannel(msg.readQString(),msg.readInt());
 			break;
-		case RemoveChannel:
+		} case RemoveChannel: {
 			int chanId = msg.readInt();
 			if (chatActivity != null)
 				chatActivity.removeChannel(channels.get(chanId));
 			channels.remove(chanId);
 			break;
-		case ChanNameChange:
-			chanId = msg.readInt();
+		} case ChanNameChange: {
+			int chanId = msg.readInt();
 			if (chatActivity != null)
 				chatActivity.removeChannel(channels.get(chanId));
 			channels.remove(chanId);
 			channels.put(chanId, new Channel(chanId, msg.readQString(), this));
 			break;
-		case SendMessage: {
+		} case SendMessage: {
 			// TODO print this to the screen
 			String message = msg.readQString();
 			System.out.println(message);
 			if (chatActivity != null && message.contains("Wrong password for this name."))
 				chatActivity.makeToast(message, "long");
 			break;
-		}
-		default:
+		} default: {
 			System.out.println("Unimplented message");
 		}
+		}
 		if (battle != null && battleActivity != null && battle.histDelta.length() != 0)
-			battleActivity.updateBattleInfo();
+			battleActivity.updateBattleInfo(false);
 		if (chatActivity != null && joinedChannels.peek() != null && joinedChannels.peek().histDelta.length() != 0)
 			chatActivity.updateChat();
 	}
