@@ -1,11 +1,12 @@
 package com.pokebros.android.pokemononline.battle;
 
 import android.text.Html;
+import android.text.SpannableStringBuilder;
 
 import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
 import com.pokebros.android.pokemononline.SerializeBytes;
-import com.pokebros.android.pokemononline.poke.PokeEnums;
+import com.pokebros.android.pokemononline.poke.ShallowBattlePoke;
 
 public class BattleDynamicInfo extends SerializeBytes {
 	public static final byte SPIKES = 1;
@@ -31,47 +32,30 @@ public class BattleDynamicInfo extends SerializeBytes {
 		return b;
 	}
 	
-	@Override
-	public String toString() {
-		String s = new String();
-		s += ("Attack: +" + boosts[0]);
-		s += ("\nDefense: +" + boosts[0]);
-		s += ("\nSp. Att: +" + boosts[0]);
-		s += ("\nSp. Def: +" + boosts[0]);
-		s += ("\nSpeed: +" + boosts[0]);
-		s += ("\nAccuracy: +" + boosts[0]);
-		s += ("\nEvasion: +" + boosts[0]);
-		
-		if((flags & SPIKES) != 0) s += "\n\nSpikes";
-		if((flags & SPIKESL2) != 0) s += "\nSpikes Lvl. 2";
-		if((flags & SPIKESL3) != 0) s += "\nSpikes Lvl. 3";
-		if((flags & STEALTHROCK) != 0) s += "\nStealth Rock";
-		if((flags & TOXICSPIKES) != 0) s += "\nToxic Spikes";
-		if((flags & TOXICSPIKESL2) != 0) s += "\nToxic Spikes Lvl. 2";
-		return s;
-	}
-	
-	public String statsAndHazards() {
-		String s;
-		s = "Attack:";
-		s += "\nDefense:";
-		s += "\nSp. Att:";
-		s += "\nSp. Def:";
-		s += "\nSpeed:";
-		s += "\nAccuracy:";
-		s += "\nEvasion:";
-		if(flags != 0) s += "\n";
-		if((flags & SPIKES) != 0) s += "\nSpikes";
-		if((flags & SPIKESL2) != 0) s += "\nSpikes Lvl. 2";
-		if((flags & SPIKESL3) != 0) s += "\nSpikes Lvl. 3";
-		if((flags & STEALTHROCK) != 0) s += "\nStealth Rock";
-		if((flags & TOXICSPIKES) != 0) s += "\nToxic Spikes";
-		if((flags & TOXICSPIKESL2) != 0) s += "\nToxic Spikes Lvl. 2";
+	public SpannableStringBuilder statsAndHazards(ShallowBattlePoke p) {
+		SpannableStringBuilder s;
+		s = new SpannableStringBuilder(Html.fromHtml("<b>" + p.pokeName + "</b>"));
+		s.append("\n" + p.types[0]);
+		if(p.types[1] != Type.Curse) s.append("/" + p.types[1]);
+		s.append("\n\nAttack:");
+		s.append("\nDefense:");
+		s.append("\nSp. Att:");
+		s.append("\nSp. Def:");
+		s.append("\nSpeed:");
+		s.append("\nAccuracy:");
+		s.append("\nEvasion:");
+		if(flags != 0) s.append("\n");
+		if((flags & SPIKES) != 0) s.append("\nSpikes");
+		if((flags & SPIKESL2) != 0) s.append("\nSpikes Lvl. 2");
+		if((flags & SPIKESL3) != 0) s.append("\nSpikes Lvl. 3");
+		if((flags & STEALTHROCK) != 0) s.append("\nStealth Rock");
+		if((flags & TOXICSPIKES) != 0) s.append("\nToxic Spikes");
+		if((flags & TOXICSPIKESL2) != 0) s.append("\nToxic Spikes Lvl. 2");
 		return s;
 	}
 	
 	public String numbers() {
-		String s = new String();
+		String s = "\n\n\n";
 		for(int i = 0; i < 7; i++)
 			s += ((i == 0 ? "" : "\n") + (boosts[i] < 0 ? "" : "+") + boosts[i]);
 		return s;

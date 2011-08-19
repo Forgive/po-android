@@ -784,7 +784,7 @@ public class BattleActivity extends Activity {
         		View layout = inflater.inflate(R.layout.dynamic_info_layout, (LinearLayout)findViewById(R.id.dynamic_info_layout));
         		builder.setView(layout);
         		TextView t = (TextView)layout.findViewById(R.id.statNamesView);
-        		t.setText(battle.dynamicInfo[player].statsAndHazards());
+        		t.setText(battle.dynamicInfo[player].statsAndHazards(battle.currentPoke(player)));
         		t = (TextView)layout.findViewById(R.id.statNumsView);
         		t.setText(battle.dynamicInfo[player].numbers());
         		builder.setOnCancelListener(new DialogInterface.OnCancelListener() {

@@ -37,7 +37,6 @@ public class Battle {
 	
 	int mode = 0, numberOfSlots = 0;
 	public byte me = 0, opp = 1;
-	int gen = 0;
 	public int bID = 0;
 	private static NetworkService netServ;
 	public BattleTeam myTeam;
@@ -200,8 +199,8 @@ public class Battle {
 			pokes[player][0] = pokes[player][fromSpot];
 			pokes[player][fromSpot] = tempPoke;
 			
-			if(msg.available() > 0) // this is the first time you've seen it
-				pokes[player][0] = new ShallowBattlePoke(msg, (player == me) ? true : false);
+			if(msg.available() > 0 && netServ != null) // this is the first time you've seen it
+				pokes[player][0] = new ShallowBattlePoke(msg, (player == me) ? true : false, netServ.db, conf.gen);
 			
 			if(netServ.battleActivity != null) {
 				netServ.battleActivity.updatePokes(player);
@@ -386,7 +385,6 @@ public class Battle {
 					": " + NetworkService.escapeHtml(message)));
 			break;
 		} case MoveMessage: {
-			// TODO
 			short move = msg.readShort();
 			byte part = msg.readByte();
 			byte type = msg.readByte();

@@ -4,14 +4,17 @@ import java.util.LinkedList;
 
 import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
+import com.pokebros.android.pokemononline.DataBaseHelper;
 import com.pokebros.android.pokemononline.SerializeBytes;
+import com.pokebros.android.pokemononline.battle.Type;
 import com.pokebros.android.pokemononline.poke.PokeEnums.Status;
 
 // This class represents the Opponent's poke during a battle.
 public class ShallowBattlePoke extends SerializeBytes {
-	public String rnick, nick = "";
+	public String rnick, nick = "", pokeName = "";
 	int fullStatus = 0;
 	public UniqueID uID = new UniqueID();
+	public Type[] types = new Type[2];
 	public boolean shiny = false;
 	public byte gender = 0;
 	public byte lifePercent = 0;
@@ -22,9 +25,14 @@ public class ShallowBattlePoke extends SerializeBytes {
 	
 	public ShallowBattlePoke() {}; // For pokes who have not been sent out;
 	
-	public ShallowBattlePoke(Bais msg, boolean isMe) {
+	public ShallowBattlePoke(Bais msg, boolean isMe, DataBaseHelper db, byte gen) {
 		uID = new UniqueID(msg);
 		rnick = nick = msg.readQString();
+		pokeName = db.query("SELECT Name from [Pokemons] WHERE (Num = " + 
+				uID.pokeNum + ") AND (Forme = " + uID.subNum + ")");
+		for(int i = 0; i < 2; i++)
+			types[i] = Type.values()[new Integer(db.query("SELECT G" + gen + "T" + (i+1) + " from [Pokemons] WHERE (Num = " +
+					uID.pokeNum + ") AND (Forme = " + uID.subNum + ")"))];
 		if (!isMe)
 			nick = "the foe's " + nick;
 		lifePercent = msg.readByte();
