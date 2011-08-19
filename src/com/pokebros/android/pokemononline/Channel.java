@@ -15,7 +15,7 @@ public class Channel {
 	protected int events = 0;
 	public int lastSeen = 0;
 	protected boolean isReadyToQuit = false;
-	public final static int HIST_LIMIT = 100;
+	public final static int HIST_LIMIT = 1000;
 	
 	public Hashtable<Integer, PlayerInfo> players = new Hashtable<Integer, PlayerInfo>();
 	

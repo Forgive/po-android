@@ -299,7 +299,7 @@ public class ChatActivity extends Activity {
 			public void run() {
 				LinkedList<SpannableStringBuilder> msgList = messageAdapter.channel.messageList;
 				int top = messageAdapter.channel.messageList.size() - delta;
-				ListIterator<SpannableStringBuilder> it = msgList.listIterator(top < 100 ? top : 100);
+				ListIterator<SpannableStringBuilder> it = msgList.listIterator(top < Channel.HIST_LIMIT ? top : Channel.HIST_LIMIT);
 				while (it.hasNext()) {
 					SpannableStringBuilder next = it.next();
 					messageAdapter.add(next);
