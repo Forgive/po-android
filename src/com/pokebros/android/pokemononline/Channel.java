@@ -2,6 +2,7 @@ package com.pokebros.android.pokemononline;
 
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 import android.text.Html;
 import android.text.SpannableStringBuilder;
@@ -12,16 +13,25 @@ public class Channel {
 	protected String name;
 	protected int id;
 	protected int events = 0;
+	public int lastSeen = 0;
 	protected boolean isReadyToQuit = false;
+	public final static int HIST_LIMIT = 100;
 	
 	public Hashtable<Integer, PlayerInfo> players = new Hashtable<Integer, PlayerInfo>();
 	
-	public SpannableStringBuilder hist = new SpannableStringBuilder();
-	public SpannableStringBuilder histDelta = new SpannableStringBuilder();
+	LinkedList<SpannableStringBuilder> messageList = new LinkedList<SpannableStringBuilder>();
 	
 	public void writeToHist(CharSequence text) {
-		synchronized(histDelta) {
-			histDelta.append(text);
+		SpannableStringBuilder spannable;
+		if (text.getClass() != SpannableStringBuilder.class)
+			spannable = new SpannableStringBuilder(text);
+		else
+			spannable = (SpannableStringBuilder)text;
+		synchronized(messageList) {
+			messageList.add(spannable);
+			lastSeen++;
+			if (messageList.size() > HIST_LIMIT)
+				messageList.remove();
 		}
 	}
 	
@@ -80,7 +90,7 @@ public class Channel {
 			}
 			case ChannelMessage:
 				//makes name bold since first occurrence of : marks end of name in msg.
-				 String message = "<br><b>" + msg.readQString();
+				 String message = "<b>" + msg.readQString();
 				 message = message.replaceFirst(":", ":</b>");
 				 writeToHist(Html.fromHtml(message));
 				break;

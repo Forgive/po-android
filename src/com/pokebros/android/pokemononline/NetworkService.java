@@ -285,7 +285,7 @@ public class NetworkService extends Service {
 				}
 				
 				if (players.get(id1) != null && players.get(id2) != null && battleDesc < 2)
-					joinedChannels.peek().writeToHist(Html.fromHtml("<br><b><i>" + escapeHtml(players.get(id1).nick()) + outcome[battleDesc] + escapeHtml(players.get(id2).nick()) + ".</b></i>"));
+					joinedChannels.peek().writeToHist(Html.fromHtml("<b><i>" + escapeHtml(players.get(id1).nick()) + outcome[battleDesc] + escapeHtml(players.get(id2).nick()) + ".</b></i>"));
 				
 				if (battleDesc == 0 || battleDesc == 3) {
 					battle = null;
@@ -323,7 +323,7 @@ public class NetworkService extends Service {
 				// Start the battle
 				battle = new Battle(conf, msg, players.get(conf.id(0)),
 					players.get(conf.id(1)), mePlayer.id, bID, this);
-				joinedChannels.peek().writeToHist("\nBattle between " + mePlayer.nick() + 
+				joinedChannels.peek().writeToHist("Battle between " + mePlayer.nick() + 
 					" and " + players.get(pID2).nick() + " started!");
 				Intent in;
 				in = new Intent(this, BattleActivity.class);
@@ -378,7 +378,7 @@ public class NetworkService extends Service {
 		}
 		if (battle != null && battleActivity != null && battle.histDelta.length() != 0)
 			battleActivity.updateBattleInfo(false);
-		if (chatActivity != null && joinedChannels.peek() != null && joinedChannels.peek().histDelta.length() != 0)
+		if (chatActivity != null && joinedChannels.peek() != null)
 			chatActivity.updateChat();
 	}
 

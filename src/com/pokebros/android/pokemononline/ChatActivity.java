@@ -1,6 +1,8 @@
 package com.pokebros.android.pokemononline;
 
 import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.ListIterator;
 
 import com.pokebros.android.pokemononline.player.PlayerInfo;
 import com.pokebros.android.pokemononline.poke.ShallowShownPoke;
@@ -23,6 +25,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.text.Html;
 import android.text.InputType;
+import android.text.SpannableStringBuilder;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -68,14 +71,15 @@ public class ChatActivity extends Activity {
 	
 	private PlayerListAdapter playerAdapter = null;
 	private ChannelListAdapter channelAdapter = null;
+	private MessageListAdapter messageAdapter = null;
 	
 	public ProgressDialog progressDialog;
 
 	private ListView players;
 	private ListView channels;
 	private NetworkService netServ = null;
-	private ScrollView chatScroll;
-	private TextView chatBox;
+	//private ScrollView chatScroll;
+	private ListView chatView;
 	private EditText chatInput;
 	private ChatRealViewSwitcher chatViewSwitcher;
 	private String packName = "com.pokebros.android.pokemononline";
@@ -145,8 +149,7 @@ public class ChatActivity extends Activity {
 		
 		super.onCreate(savedInstanceState);
         setContentView(R.layout.chat);
-        chatScroll = (ScrollView) findViewById(R.id.chatScroll);
-    	chatBox = (TextView)findViewById(R.id.chatBox);
+        chatView = (ListView) findViewById(R.id.chatView);
     	chatViewSwitcher = (ChatRealViewSwitcher)findViewById(R.id.chatPokeSwitcher);
     	chatViewSwitcher.setCurrentScreen(1);
  
@@ -248,12 +251,14 @@ public class ChatActivity extends Activity {
 	}
 	
 	public void populateUI(boolean clear) {
-		if (netServ.joinedChannels.peek() != null) {
+		Channel currentChannel = netServ.joinedChannels.peek();
+		if (currentChannel != null) {
 			// Populate the player list
 			if (clear) {
 				playerAdapter = new PlayerListAdapter(ChatActivity.this, 0);
 				channelAdapter = new ChannelListAdapter(ChatActivity.this, 0);
 			}
+			messageAdapter = new MessageListAdapter(currentChannel, ChatActivity.this);
 			Enumeration<PlayerInfo> e = netServ.joinedChannels.peek().players.elements();
 			playerAdapter.setNotifyOnChange(false);
 			while(e.hasMoreElements()) {
@@ -261,51 +266,61 @@ public class ChatActivity extends Activity {
 			}
 			playerAdapter.sortByNick();
 			playerAdapter.setNotifyOnChange(true);
-			//Populate the Channel list
+			// Populate the Channel list
 			Enumeration<Channel> c = netServ.channels.elements();
 			channelAdapter.setNotifyOnChange(false);
 			while(c.hasMoreElements())
 				channelAdapter.addChannel(c.nextElement());
 			channelAdapter.sortByName();
 			channelAdapter.setNotifyOnChange(true);
-			//Load scrollback	
+			// Load scrollback
 			runOnUiThread(new Runnable() {
 				public void run() {
 			    	players.setAdapter(playerAdapter);
 			        channels.setAdapter(channelAdapter);
+			        chatView.setAdapter(messageAdapter);
 			        playerAdapter.notifyDataSetChanged();
 					channelAdapter.notifyDataSetChanged();
-					chatBox.setText(netServ.joinedChannels.peek().hist);
-					chatScroll.post(new Runnable() {
-						public void run() {
-							chatScroll.smoothScrollTo(0, chatBox.getMeasuredHeight());
-						}
-					});
-					updateChat();
+					messageAdapter.notifyDataSetChanged();
+					chatView.setSelection(messageAdapter.getCount() - 1);
 					chatViewSwitcher.invalidate();
-				}});
+				}
+			});
 		}
 	}
 	
 	public void updateChat() {
-		runOnUiThread(new Runnable() {
+		if (messageAdapter == null)
+			return;
+		final int delta = messageAdapter.channel.lastSeen - messageAdapter.lastSeen;
+		if (delta <= 0)
+			return;
+		Runnable update = new Runnable() {
 			public void run() {
-				if (netServ.joinedChannels.peek() == null)
-					return;
-				synchronized(netServ.joinedChannels.peek().histDelta) {
-					chatBox.append(netServ.joinedChannels.peek().histDelta);
-					if (netServ.joinedChannels.peek().histDelta.length() != 0) {
-						chatScroll.post(new Runnable() {
-							public void run() {						
-								if(!chatViewSwitcher.isPressed())
-								chatScroll.smoothScrollTo(0, chatBox.getMeasuredHeight());
-							}
-						});
-					}
-					netServ.joinedChannels.peek().hist.append(netServ.joinedChannels.peek().histDelta);
-					netServ.joinedChannels.peek().histDelta.clear();
+				LinkedList<SpannableStringBuilder> msgList = messageAdapter.channel.messageList;
+				int top = messageAdapter.channel.messageList.size() - delta;
+				ListIterator<SpannableStringBuilder> it = msgList.listIterator(top < 100 ? top : 100);
+				while (it.hasNext()) {
+					SpannableStringBuilder next = it.next();
+					messageAdapter.add(next);
+					messageAdapter.lastSeen++;
 				}
-			}});
+				messageAdapter.notifyDataSetChanged();
+				if (!chatViewSwitcher.isPressed())
+					chatView.setSelection(messageAdapter.getCount() - 1);
+				synchronized(this) {
+					this.notify();
+				}
+			}
+		};
+		synchronized(update) {
+			runOnUiThread(update);
+			try {
+				update.wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public void notifyChallenge() {
@@ -462,7 +477,7 @@ public class ChatActivity extends Activity {
 			.setMultiChoiceItems(new CharSequence[]{"Force Rated", "Force Same Tier", "Only within range"}, null, new DialogInterface.OnMultiChoiceClickListener() {
 				public void onClick(DialogInterface dialog, int which, boolean isChecked) {
 					options[which] = isChecked;
-					System.out.println("FORCE RATED: { " + options[0] + "FORCE SAME TIER: { " + options[1] + "ONLY WITHIN RANGE: " + options[2]);
+					System.out.println("FORCE RATED: " + options[0] + "FORCE SAME TIER: " + options[1] + "ONLY WITHIN RANGE: " + options[2]);
 				}
 			})
 			.setView(range)
@@ -476,7 +491,7 @@ public class ChatActivity extends Activity {
 						} catch (NumberFormatException e) {
 							inRange = 200;
 						}
-						System.out.println("Force Rated: { " + options[0] + " Force Same Tier: { " + options[1] + " Only within Range: " + options[2]);
+						System.out.println("Force Rated: " + options[0] + " Force Same Tier: " + options[1] + " Only within Range: " + options[2]);
 						netServ.socket.sendMessage(
 								constructFindBattle(options[0], options[1], options[2], inRange, (byte) 0),
 								Command.FindBattle);

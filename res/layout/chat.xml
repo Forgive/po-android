@@ -13,43 +13,39 @@
   android:background="@drawable/battle_border_dark"
   android:clickable="true" >
     <TextView android:layout_height="wrap_content" android:textSize="15sp" android:layout_gravity="right" android:id="@+id/playerlisttitle" android:text="@string/player_list" android:layout_width="wrap_content" android:textStyle="bold"></TextView>
-    <ListView android:layout_height="wrap_content" android:id="@+id/playerlisting" android:layout_width="fill_parent"></ListView>
+    <ListView android:layout_height="fill_parent" android:id="@+id/playerlisting" android:layout_width="fill_parent"></ListView>
     
 </LinearLayout>
    <!-- End Page 1 -->
    <!-- Begin Page2 -->
-<LinearLayout
+<RelativeLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent"
 	android:id="@+id/chatlayout"
 	android:clickable="true" >
-		<ScrollView
-		android:id="@+id/chatScroll"
-		android:layout_marginBottom="50dp"
-		android:layout_marginLeft="4dp"
-		android:layout_marginRight="4dp"
-		android:layout_height="fill_parent"
-		android:layout_width="fill_parent"
-		android:fillViewport="true"
-		android:clickable="true"
-	>
-		<TextView
-			android:layout_height="wrap_content"
-			android:id="@+id/chatBox"
-			android:layout_width="fill_parent"
-		>
-		</TextView>
-	</ScrollView>
 		<EditText
 			android:id="@+id/chatInput"
-			android:layout_marginTop="-48dp"
+			android:layout_alignParentBottom="true"
+			android:layout_marginLeft="4dp"
+			android:layout_marginRight="4dp"
 			android:layout_height="wrap_content"
 			android:layout_width="fill_parent"
 		>
 		</EditText>
-</LinearLayout>
+	<ListView
+		android:layout_height="fill_parent"
+		android:layout_above="@id/chatInput"
+		android:layout_marginBottom="2dp"
+		android:layout_marginLeft="4dp"
+		android:layout_marginRight="4dp"
+		android:divider="#0000"
+		android:id="@+id/chatView"
+		android:layout_width="fill_parent"
+	>
+	</ListView>
+</RelativeLayout>
 <!-- End Page 2 -->
 <!-- Begin Page 3 -->
 <LinearLayout
@@ -60,7 +56,7 @@
   android:background="@drawable/battle_border_dark"
   android:clickable="true" >
     <TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_gravity="left" android:id="@+id/channellisttitle" android:text="@string/channel_list" android:textStyle="bold" android:textSize="15sp"></TextView>
-    <ListView android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_gravity="left" android:id="@+id/channellisting"></ListView>
+    <ListView android:layout_height="fill_parent" android:layout_width="fill_parent" android:layout_gravity="left" android:id="@+id/channellisting"></ListView>
     
 </LinearLayout>
 <!-- End Page 3 -->
