@@ -394,8 +394,8 @@ public class Battle {
 			
 			String s = netServ.db.query("SELECT EFFECT" + part + " FROM [Move_message] WHERE _id = " + move);
 			s = s.replaceAll("%s", currentPoke(player).nick);
-			s = s.replaceAll("%ts", players[me].nick());
-			s = s.replaceAll("%tf", players[opp].nick());
+			s = s.replaceAll("%ts", players[player].nick());
+			s = s.replaceAll("%tf", players[(player == 0 ? 1 : 0)].nick());
 			if(type  != -1) s = s.replaceAll("%t", Type.values()[type].toString());
 			if(foe   != -1) s = s.replaceAll("%f", currentPoke(foe).nick);
 			if(other  != -1 && s.contains("%m")) s = s.replaceAll("%m", netServ.db.query("SELECT name FROM [Moves] WHERE _id = " + other));
