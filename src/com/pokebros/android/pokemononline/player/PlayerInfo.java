@@ -11,14 +11,15 @@ import com.pokebros.android.pokemononline.poke.UniqueID;
 // Represents a player in the player list
 public class PlayerInfo extends SerializeBytes {
 	public int id = 0;
-	String nick = "BROLOLHAH";
-	String info = "SUP";
-	byte auth = 0, flags = 0;
+	String nick = "null";
+	String info = "";
+	public byte auth = 0;
+	byte flags = 0;
 	public short rating = 0;
 	public UniqueID[] pokes = new UniqueID[6];
-	short avatar = 72;
+	short avatar = 0;
 	public String tier = "OU";
-	QColor color = new QColor();
+	public QColor color = new QColor();
 	byte gen = 5;
 	
 	public String nick() { return nick; }
@@ -26,6 +27,8 @@ public class PlayerInfo extends SerializeBytes {
 	public String toString() { return nick; }
 	
 	public PlayerInfo(FullPlayerInfo player) { nick = player.nick(); }
+	
+	public PlayerInfo() {}
 	
 	public PlayerInfo(Bais msg) {
 		id = msg.readInt();

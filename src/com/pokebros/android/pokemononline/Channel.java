@@ -1,7 +1,6 @@
 package com.pokebros.android.pokemononline;
 
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.LinkedList;
 
 import android.text.Html;
@@ -89,10 +88,25 @@ public class Channel {
 				break;
 			}
 			case ChannelMessage:
-				//makes name bold since first occurrence of : marks end of name in msg.
-				 String message = "<b>" + msg.readQString();
-				 message = message.replaceFirst(":", ":</b>");
-				 writeToHist(Html.fromHtml(message));
+				//int id = msg.readInt();
+				PlayerInfo player = null;
+				//if (id != 0) {
+					//player = netServ.players.get(id);
+					//if (player == null)
+						player = new PlayerInfo();
+					String[] splitMessage = msg.readQString().split(":", 2);
+					if (splitMessage.length < 2) // XXX only necessary while playerId is not included in ChannelMessage
+						writeToHist(Html.fromHtml(splitMessage[0]));
+					//if (player.auth < 3)
+						splitMessage[1] = NetworkService.escapeHtml(splitMessage[1]);
+					/*else
+						message = splitMessage[1].toString();*/
+					splitMessage[0] = "<font " + player.color + (player.auth > 0 ? "+<i><b>" : "<b>") +
+							splitMessage[0] + (player.auth > 0 ? "</i>:</b></font>" : ":</b></font>");
+					writeToHist(Html.fromHtml(splitMessage[0] + splitMessage[1]));
+				/*} else {
+					writeToHist(Html.fromHtml(splitMessage[0]));
+				}*/
 				break;
 			case HtmlChannel:
 				writeToHist(Html.fromHtml(msg.readQString()));

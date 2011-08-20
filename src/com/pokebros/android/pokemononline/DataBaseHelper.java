@@ -13,40 +13,43 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DataBaseHelper extends SQLiteOpenHelper {
 
+	private static final int DATABASE_VERSION = 1; // Increment when database should be updated on users' devices
 	private static final String DBNAME = "po_database";
 	private static final String DBPATH = "/data/data/com.pokebros.android.pokemononline/databases/";
 	private final Context myContext;
-	private boolean created;
 
 	public DataBaseHelper(Context context) {
 		super(context, DBNAME, null, 1);
 		myContext = context;
-		created = exists();
-		if (!created)
+		if (!currentVersionExists())
 			create();
 	}
 	
 	@Override
 	public void onCreate(SQLiteDatabase db) {}
 	
-    private boolean exists() {
+    private boolean currentVersionExists() {
     	SQLiteDatabase checkDB = null;
     	try{
     		checkDB = SQLiteDatabase.openDatabase(DBPATH + DBNAME, null, SQLiteDatabase.OPEN_READONLY);
-    	}catch(SQLiteException e){
-    		//database does't exist yet.
+    	} catch(SQLiteException e) {
+    		// database does't exist yet.
     	}
-    	if(checkDB != null){
+    	if(checkDB != null && !checkDB.needUpgrade(DATABASE_VERSION)) {
+    		// XXX There is literally no documentation for the needUpgrade function 
+    		// other than its existence, so I'm just assuming it behaves logically.
+    		// Don't blame me if it doesn't work.
     		checkDB.close();
+    		return true;
     	}
-    	return checkDB != null ? true : false;
+    	return false;
     }
 	
 	public void create() {
 		try {
 			InputStream assetsDB;
 			assetsDB = myContext.getAssets().open(DBNAME);
-			getReadableDatabase(); // Create file to overwrite
+			SQLiteDatabase db = getReadableDatabase(); // Create file to overwrite
 			OutputStream dbOut = new FileOutputStream(DBPATH + DBNAME);
 
 			byte[] buffer = new byte[1024];
@@ -57,6 +60,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
 			dbOut.flush();
 			dbOut.close();
+			db.setVersion(DATABASE_VERSION);
 			assetsDB.close();
 		} catch (IOException e) {
 			e.printStackTrace();

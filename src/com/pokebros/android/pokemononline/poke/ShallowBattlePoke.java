@@ -30,9 +30,20 @@ public class ShallowBattlePoke extends SerializeBytes {
 		rnick = nick = msg.readQString();
 		pokeName = db.query("SELECT Name from [Pokemons] WHERE (Num = " + 
 				uID.pokeNum + ") AND (Forme = " + uID.subNum + ")");
-		for(int i = 0; i < 2; i++)
-			types[i] = Type.values()[new Integer(db.query("SELECT G" + gen + "T" + (i+1) + " from [Pokemons] WHERE (Num = " +
-					uID.pokeNum + ") AND (Forme = " + uID.subNum + ")"))];
+		for(int i = 0; i < 2; i++) {
+			String res = db.query("SELECT G" + gen + "T" + (i+1) + " from [Pokemons] WHERE (Num = " +
+					uID.pokeNum + ") AND (Forme = " + uID.subNum + ")");
+			if (uID.subNum != 0 && res.length() == 0)
+				// No type specified for this forme,
+				// attempt to lookup for base forme
+				res = db.query("SELECT G" + gen + "T" + (i+1) + " from [Pokemons] WHERE (Num = " +
+						uID.pokeNum + ") AND (Forme = 0)");
+			if (res.length() == 0)
+				// This should never happen but not having a type is probably bad
+				// give it curse type at least
+				res = new Integer(Type.Curse.ordinal()).toString();
+			types[i] = Type.values()[new Integer(res)];
+		}
 		if (!isMe)
 			nick = "the foe's " + nick;
 		lifePercent = msg.readByte();
