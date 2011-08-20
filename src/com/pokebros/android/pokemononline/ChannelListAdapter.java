@@ -3,6 +3,7 @@ package com.pokebros.android.pokemononline;
 import java.util.Comparator;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,6 +44,7 @@ public class ChannelListAdapter extends ArrayAdapter<com.pokebros.android.pokemo
 		if (channel != null) {
 			TextView nick = (TextView)view.findViewById(R.id.channel_list_name);
 			nick.setText(channel.name());
+			nick.setBackgroundColor(channel.players.size() > 0 ? Color.GRAY : Color.BLACK);
 		}
 		return view;
 	}

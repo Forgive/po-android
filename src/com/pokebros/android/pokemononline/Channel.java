@@ -46,7 +46,6 @@ public class Channel {
 		id = i;
 		name = n;
 		netServ = net;
-		writeToHist(Html.fromHtml("<i>Joined channel: <b>" + name + "</b></i>"));
 	}
 
 	public void addPlayer(PlayerInfo p) {
@@ -90,6 +89,7 @@ public class Channel {
 						netServ.chatActivity.populateUI(true);
 						netServ.chatActivity.progressDialog.dismiss();
 					}
+					writeToHist(Html.fromHtml("<i>Joined channel: <b>" + name + "</b></i>"));
 				}
 				addPlayer(p);
 				break;
@@ -150,11 +150,13 @@ public class Channel {
 			case LeaveChannel:
 				PlayerInfo p = netServ.players.get(msg.readInt());
 				if (p.id == netServ.mePlayer.id) { // We left the channel
+					players.clear();
 					// XXX this runtime complexity sucks
 					netServ.joinedChannels.remove(this);
 					if (netServ.chatActivity != null) {
 						netServ.chatActivity.populateUI(true);
 					}
+					writeToHist(Html.fromHtml("<i>Left channel: <b>" + name + "</b></i>"));
 				}
 				removePlayer(p);
 				break;
