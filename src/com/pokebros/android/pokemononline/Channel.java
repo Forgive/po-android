@@ -73,6 +73,13 @@ public class Channel {
 					"from channel " + name + ", ignoring");
 	}
 	
+	public void updatePlayer(PlayerInfo p) {
+		if (players.containsKey(p.id)) {
+			if (netServ != null && netServ.chatActivity != null && this.equals(netServ.joinedChannels.peek()))
+				netServ.chatActivity.updatePlayer(p);
+		}
+	}
+	
 	public void handleChannelMsg(Command c, Bais msg) {
 			switch(c) {
 			case JoinChannel: {
@@ -87,29 +94,56 @@ public class Channel {
 				addPlayer(p);
 				break;
 			}
-			case ChannelMessage:
-				//int id = msg.readInt();
-				PlayerInfo player = null;
-				//if (id != 0) {
-					//player = netServ.players.get(id);
-					//if (player == null)
-						player = new PlayerInfo();
-					String[] splitMessage = msg.readQString().split(":", 2);
-					if (splitMessage.length < 2) {// XXX only necessary while playerId is not included in ChannelMessage
-						writeToHist(splitMessage[0]);
-						break;
+			case ChannelMessage: {
+				// decorate the message just like Qt client
+				String message = msg.readQString();
+				// /me like message
+				if (message.substring(0, 3).equals("***")) {
+					// TODO: choose a color near magenta which is knows by android html
+					message = "<font color='magenta'>" + NetworkService.escapeHtml(message) + "</font>";
+					writeToHist(Html.fromHtml(message));
+					break;
+				}   
+				String[] name_message = message.split(":", 2); 
+				// decorate only if : is present
+				if (name_message.length == 2) {
+					PlayerInfo info = netServ.getPlayerByName(name_message[0]);
+					String color;
+					boolean auth = false;
+
+					// player exists
+					if (info != null) {
+						color = info.color.toHexString();
+						auth = 0 < info.auth && info.auth <= 3;
+						System.out.println(color != null ? "playercolor: " + color : "null color");
+						if (color == null) {
+							color = ColorEnums.defaultPlayerColors[info.id % ColorEnums.defaultPlayerColors.length];
+						}   
+					} else {
+						// special names
+						if (name_message[0].equals("~~Server~~"))
+							color = "orange";
+						else if (name_message[0].equals("Welcome Message"))
+							color = "blue";
+						else
+							color = "#3daa68";
 					}
-					if (player.auth < 3 && !splitMessage[0].equals("Shanai")) // XXX shanai shouldn't really need an exception
-						splitMessage[1] = NetworkService.escapeHtml(splitMessage[1]);
-					/*else
-						message = splitMessage[1].toString();*/
-					splitMessage[0] = "<font " + player.color + (player.auth > 0 ? "+<i><b>" : "<b>") +
-							splitMessage[0] + (player.auth > 0 ? "</i>:</b></font>" : ":</b></font>");
-					writeToHist(Html.fromHtml(splitMessage[0] + splitMessage[1]));
-				/*} else {
-					writeToHist(splitMessage[0]);
-				}*/
+					if (auth) {
+						message = "<b><font color='" + color + "'>+<i>"
+								+ NetworkService.escapeHtml(name_message[0]) + ":</font></i></b>"
+								+ NetworkService.escapeHtml(name_message[1]);
+					} else {
+						message = "<b><font color='" + color + "'>"
+								+ NetworkService.escapeHtml(name_message[0]) + ":</font></b>";
+						if (info != null && info.auth > 3) // don't escape html for higher
+							message += name_message[1];
+						else 
+							message += NetworkService.escapeHtml(name_message[1]);
+					}
+				}
+				writeToHist(Html.fromHtml(message));
 				break;
+			}
 			case HtmlChannel:
 				writeToHist(Html.fromHtml(msg.readQString()));
 				break;

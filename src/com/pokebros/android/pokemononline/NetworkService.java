@@ -6,6 +6,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.LinkedList;
 
@@ -308,6 +309,21 @@ public class NetworkService extends Service {
 			if(!players.containsKey(p.id))
 				players.put(p.id, p);
 			break;
+		} case SendTeam: {
+			PlayerInfo p = new PlayerInfo(msg);
+			if (players.containsKey(p.id)) {
+				PlayerInfo player = players.get(p.id);
+				player.update(p);
+				Enumeration<Channel> e = channels.elements();
+				while (e.hasMoreElements()) {
+					Channel ch = e.nextElement();
+					if (ch.players.containsKey(player.id)) {
+						ch.updatePlayer(player);
+					}
+				}
+			}
+			break;
+
 		} case BattleMessage: {
 			msg.readInt(); // currently support only one battle, unneeded
 			msg.readInt(); // discard the size, unneeded
@@ -430,5 +446,14 @@ public class NetworkService extends Service {
     	this.stopForeground(true);
     	this.stopSelf();
     }
-	
+    
+    public PlayerInfo getPlayerByName(String playerName) {
+    	Enumeration<Integer> e = players.keys();
+    	while(e.hasMoreElements()) {
+    		PlayerInfo info = players.get(e.nextElement());
+    		if (info.nick().equals(playerName))
+    			return info;
+    	}
+    	return null;
+    }
 }

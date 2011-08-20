@@ -74,4 +74,16 @@ public class PlayerInfo extends SerializeBytes {
 	public boolean equals(PlayerInfo p) {
 		return nick.equals(p);
 	}
+	public void update(PlayerInfo p) {
+		this.auth = p.auth;
+		this.nick = p.nick;
+		this.info = p.info;
+		this.flags = p.flags;
+		this.rating = p.rating;
+		for (int i = 0; i < 6; ++i)
+			this.pokes[i] = p.pokes[i];
+		this.avatar = p.avatar;
+		this.gen = p.gen;
+		this.tier = p.tier;
+	}
 }

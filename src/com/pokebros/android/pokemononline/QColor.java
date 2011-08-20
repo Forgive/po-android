@@ -44,5 +44,17 @@ public class QColor extends SerializeBytes {
 	public String toString() {
 		return html; 
 	}
+	
+	       
+	public String toHexString() {
+		if (spec == 1) {
+			int red = 0 > this.red ? this.red + 32767 + 32768 : this.red;
+			int green = 0 > this.green ? this.red + 32767 + 32768 : this.green;
+			int blue = 0 > this.blue ? this.red + 32767 + 32768 : this.blue;
+			return String.format("#%02x%02x%02x", red >> 8, green >> 8, blue >> 8);
+		} else {
+			return null; // TODO: fix other color formats
+		}
+	}
 }
 

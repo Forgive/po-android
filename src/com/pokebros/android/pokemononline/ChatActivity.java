@@ -763,6 +763,15 @@ public class ChatActivity extends Activity {
 		});
 	}
 	
+	public void updatePlayer(final PlayerInfo pi) {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				synchronized (playerAdapter) {
+					playerAdapter.notifyDataSetChanged();				}
+			}
+		});
+	}
+
 	public void removeChannel(final Channel ch){
 		runOnUiThread(new Runnable() {
 			public void run() {
