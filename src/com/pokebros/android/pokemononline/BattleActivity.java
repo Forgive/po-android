@@ -37,6 +37,7 @@ import android.graphics.Rect;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -55,6 +56,7 @@ import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -567,6 +569,33 @@ public class BattleActivity extends Activity {
 	        pokeSprites[opp] = (ImageView)findViewById(R.id.pokeSpriteA);
 	        for(int i = 0; i < 2; i++)
 	        	pokeSprites[i].setOnLongClickListener(spriteListener);
+	        
+	        
+	        infoView.setOnLongClickListener(new OnLongClickListener() {
+				public boolean onLongClick(View view) {
+			        final EditText input = new EditText(BattleActivity.this);
+					new AlertDialog.Builder(BattleActivity.this)
+					.setTitle("Battle Chat")
+					.setMessage("Send Battle Message")
+					.setView(input)
+					.setPositiveButton("Send", new DialogInterface.OnClickListener() {			
+						public void onClick(DialogInterface i, int j) {
+							String message = input.getText().toString();
+							if (message.length() > 0) {
+								Baos msg = new Baos();
+								msg.putInt(BattleActivity.this.battle.bID);
+								msg.putString(message);
+					    		netServ.socket.sendMessage(msg, Command.BattleChat);
+							}
+						}
+					}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface arg0, int arg1) {
+						}
+					}).show();
+					return false;
+				}
+			});
+			
 	        
 	        // Load scrollback
 	        infoView.setText(battle.hist);
