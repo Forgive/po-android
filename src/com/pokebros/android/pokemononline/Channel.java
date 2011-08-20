@@ -95,8 +95,10 @@ public class Channel {
 					//if (player == null)
 						player = new PlayerInfo();
 					String[] splitMessage = msg.readQString().split(":", 2);
-					if (splitMessage.length < 2) // XXX only necessary while playerId is not included in ChannelMessage
+					if (splitMessage.length < 2) {// XXX only necessary while playerId is not included in ChannelMessage
 						writeToHist(splitMessage[0]);
+						break;
+					}
 					if (player.auth < 3 && !splitMessage[0].equals("Shanai")) // XXX shanai shouldn't really need an exception
 						splitMessage[1] = NetworkService.escapeHtml(splitMessage[1]);
 					/*else
