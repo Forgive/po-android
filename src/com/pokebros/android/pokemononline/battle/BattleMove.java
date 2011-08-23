@@ -12,8 +12,8 @@ public class BattleMove extends SerializeBytes {
 	public byte currentPP = 0;
 	public byte totalPP = 0;
 	public short num = 0;
-	public String name = "null";
-	public byte type;
+	public String name = "No Move";
+	public byte type = (byte) Type.Curse.ordinal();
 	
 	public String toString() {
 		return name;
@@ -33,17 +33,20 @@ public class BattleMove extends SerializeBytes {
 		return type;
 	}
 	
+	public BattleMove() {}
+	
 	public BattleMove(int n, DataBaseHelper db) {
 		num = (short) n;
+		totalPP = (byte)(new Byte(db.query("SELECT pp FROM [Moves] WHERE _id = " + num)) * 1.6);
 		name = db.query("SELECT name FROM [Moves] WHERE _id = " + num);
 		type = new Byte(db.query("SELECT type FROM [Moves] WHERE _id = " + num));
 	}
 	
-	public BattleMove(BattleMove bm, DataBaseHelper db) {
+	public BattleMove(BattleMove bm) {
 		currentPP = bm.currentPP;
+		totalPP = bm.totalPP;
 		num = bm.num;
-		totalPP = (byte)(new Byte(db.query("SELECT pp FROM [Moves] WHERE _id = " + num)) * 1.6);
-		name = db.query("SELECT name FROM [Moves] WHERE _id = " + num);
+		name = bm.name;
 		type = bm.type;
 	}
 	

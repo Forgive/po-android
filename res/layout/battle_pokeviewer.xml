@@ -6,8 +6,7 @@
   android:layout_width="fill_parent"
   android:layout_height="fill_parent">
    <!-- Begin Page 1 -->
-    <LinearLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
+    <RelativeLayout
 	android:orientation="vertical"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent"
@@ -17,10 +16,11 @@
 	
 	<!-- START Player A Title -->
 	<RelativeLayout
-		android:orientation="horizontal"
 		android:layout_width="fill_parent"
 		android:layout_margin="4dp"
-		android:layout_height="wrap_content">
+		android:layout_height="wrap_content"
+		android:layout_alignParentTop="true"
+		android:id="@+id/titleA">
 		
 		<TextView
 			android:text="Timer A"
@@ -90,15 +90,14 @@
 	<!-- START Battle Screen -->
 	<RelativeLayout
 		android:text="Battle Screen"
-		android:layout_width="fill_parent"
+		android:layout_width="wrap_content"
 		android:textColor="@color/poke_text_color"
 		android:background="@drawable/battle_border"
-		android:layout_marginTop="0dp"
-		android:layout_marginBottom="3dp"
 		android:layout_marginLeft="4dp"
 		android:layout_marginRight="4dp"
 		android:id="@+id/battleScreen"  
-		android:layout_height="150dp">
+		android:layout_height="150dp"
+		android:layout_below="@id/titleA">
 				<ImageView
 					android:id="@+id/pokeSpriteA"
 					android:layout_height="wrap_content"
@@ -206,10 +205,11 @@
 	
 	<!-- START Player B Title -->
 	<RelativeLayout
-		android:orientation="horizontal"
 		android:layout_width="fill_parent"
 		android:layout_margin="4dp"
-		android:layout_height="wrap_content">
+		android:layout_height="wrap_content"
+		android:id="@+id/titleB"
+		android:layout_below="@id/battleScreen">
 		
 		<TextView
 			android:text="Timer B"
@@ -275,17 +275,17 @@
 			android:layout_height="wrap_content"/>
 	</RelativeLayout>
 	<!-- END Player B Title -->
-	
+
 	<!-- START Info Window -->
 	<ScrollView android:layout_width="fill_parent" 
 	android:id="@+id/infoScroll" 
-	android:padding="5dp" 
 	android:background="@drawable/battle_border" 
 	android:layout_marginLeft="4dp" 
 	android:layout_marginRight="4dp" 
-	android:layout_marginTop="1dp" 
-	android:layout_weight="40"
-	android:layout_height="0dp">
+	android:layout_marginBottom="128dp"
+	android:layout_height="fill_parent"
+	android:layout_below="@id/titleB"
+	android:layout_weight="1">
 		<TextView android:layout_width="fill_parent" 
 		android:id="@+id/infoWindow" 
 		android:textColor="@color/poke_text_color" 
@@ -294,63 +294,53 @@
 		</TextView>
 	</ScrollView>
 	<!-- END Info Window -->
-	
+		
 	<!-- START Action Buttons -->
-	<LinearLayout
+	<RelativeLayout
+		android:id="@+id/struggleLayout"
+		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
-		android:layout_height="180dp"
-		android:layout_marginTop="4dp"
-		android:orientation="horizontal"
-		android:id="@+id/struggleRowLayout"
-		android:visibility="gone">		
-		<RelativeLayout
-			android:id="@+id/struggleLayout"
-			android:layout_height="fill_parent"
-			android:layout_width="fill_parent"
-			android:layout_weight="1"
-			android:background="@drawable/curse_type_button"
-			android:layout_alignParentTop="true"
-			android:layout_marginTop="3dp"
-			android:layout_marginBottom="3dp"
-			android:layout_marginRight="3dp"
-			android:layout_marginLeft="3dp"
-			android:clickable="true">
-			<TextView
-				android:text="STRUGGLE"
-				android:textSize="30sp"
-				android:layout_marginTop="20dp"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:id="@+id/struggleName"
-				android:textColor="@color/poke_text_color"
-				android:layout_centerHorizontal="true"
-				android:textStyle="bold"/>
-		</RelativeLayout>
-		</LinearLayout>
+		android:background="@drawable/curse_type_button"
+		android:layout_below="@id/infoScroll"
+		android:layout_marginTop="-126dp"
+		android:layout_marginBottom="2dp"
+		android:layout_marginRight="4dp"
+		android:layout_marginLeft="4dp"
+		android:clickable="true">
+		<TextView
+			android:text="STRUGGLE"
+			android:textSize="30sp"
+			android:layout_marginTop="20dp"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:id="@+id/struggleName"
+			android:textColor="@color/poke_text_color"
+			android:layout_centerHorizontal="true"
+			android:textStyle="bold"/>
+	</RelativeLayout>
+
 	<LinearLayout
-		android:layout_width="fill_parent"
-		android:layout_height="80dp"
-		android:layout_marginTop="4dp"
+		android:id="@+id/attackRow1"
 		android:orientation="horizontal"
-		android:id="@+id/topAttackRowLayout">		
+		android:layout_below="@id/infoScroll"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:layout_marginTop="-126dp"
+		android:layout_marginBottom="64dp">
 		<RelativeLayout
 			android:id="@+id/attack1Layout"
 			android:layout_height="fill_parent"
 			android:layout_width="fill_parent"
 			android:layout_weight="1"
-			android:background="@drawable/battle_border_button"
-			android:layout_alignParentTop = "true"
-			android:layout_marginTop="3dp"
-			android:layout_marginBottom="3dp"
-			android:layout_marginRight="3dp"
-			android:layout_marginLeft="3dp">
+			android:layout_marginLeft="4dp"
+			android:layout_marginRight="2dp"
+			android:background="@drawable/battle_border_button">
 			<TextView
 				android:text="Attack 1"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:id="@+id/attack1Name"
 				android:textColor="@color/poke_text_color"
-				android:layout_marginTop="10dp"
 				android:layout_centerHorizontal="true"
 				android:textStyle="bold"/>
 			<TextView
@@ -367,17 +357,14 @@
 			android:layout_height="fill_parent"
 			android:layout_width="fill_parent"
 			android:layout_weight="1"
-			android:background="@drawable/battle_border_button"
-			android:layout_marginTop="3dp"
-			android:layout_marginRight="3dp"
-			android:layout_marginLeft="3dp"
-			android:layout_marginBottom="3dp">
+			android:layout_marginLeft="2dp"
+			android:layout_marginRight="4dp"
+			android:background="@drawable/battle_border_button">
 			<TextView
 				android:text="Attack 2"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:id="@+id/attack2Name"
-				android:layout_marginTop="10dp"
 				android:textColor="@color/poke_text_color"
 				android:layout_centerHorizontal="true"
 				android:textStyle="bold"/>
@@ -392,30 +379,27 @@
 		</RelativeLayout>
 	</LinearLayout>
 	<LinearLayout
-		android:layout_width="fill_parent"
-		android:layout_height="70dp"
-		android:layout_marginTop="4dp"
+		android:id="@+id/attackRow2"
 		android:orientation="horizontal"
-		android:id="@+id/bottomAttackRowLayout"
-		android:layout_weight="1">
-		
+		android:layout_below="@id/attackRow1"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:layout_marginTop="-62dp"
+		android:layout_marginBottom="2dp">
 		<RelativeLayout
-			android:layout_below="@id/attack1Layout"
 			android:id="@+id/attack3Layout"
 			android:layout_height="fill_parent"
 			android:layout_width="fill_parent"
 			android:layout_weight="1"
-			android:background="@drawable/battle_border_button"
-			android:layout_marginBottom="3dp"
-			android:layout_marginRight="3dp"
-			android:layout_marginLeft="3dp">
+			android:layout_marginLeft="4dp"
+			android:layout_marginRight="2dp"
+			android:background="@drawable/battle_border_button">
 			<TextView
 				android:text="Attack 3"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:id="@+id/attack3Name"
 				android:textColor="@color/poke_text_color"
-				android:layout_marginTop="10dp"
 				android:layout_centerHorizontal="true"
 				android:textStyle="bold"/>
 			<TextView
@@ -428,22 +412,18 @@
 				android:layout_alignParentRight="true"/>
 		</RelativeLayout>
 		<RelativeLayout
-			android:layout_below="@id/attack2Layout"
-			android:layout_toRightOf="@id/attack3Layout"
 			android:id="@+id/attack4Layout"
 			android:layout_height="fill_parent"
 			android:layout_width="fill_parent"
 			android:layout_weight="1"
-			android:background="@drawable/battle_border_button"
-			android:layout_marginBottom="3dp"
-			android:layout_marginRight="3dp"
-			android:layout_marginLeft="3dp">
+			android:layout_marginLeft="2dp"
+			android:layout_marginRight="4dp"
+			android:background="@drawable/battle_border_button">
 			<TextView
 				android:text="Attack 4"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:id="@+id/attack4Name"
-				android:layout_marginTop="10dp"
 				android:textColor="@color/poke_text_color"
 				android:layout_centerHorizontal="true"
 				android:textStyle="bold"/>
@@ -457,9 +437,11 @@
 				android:layout_alignParentRight="true"/>
 		</RelativeLayout>
 	</LinearLayout>
-</LinearLayout>
 
 	<!-- END Action Buttons -->
+
+</RelativeLayout>
+
 <!-- END Page 1 -->
 	
 <!-- Begin Page 2 -->

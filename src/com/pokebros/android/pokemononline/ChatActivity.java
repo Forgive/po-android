@@ -500,6 +500,10 @@ public class ChatActivity extends Activity {
 			});
 			return builder.create();
 		} case TierSelection: {
+			if (netServ == null) {
+				removeDialog(id);
+				dismissDialog(id);
+			}
 			return new TierAlertDialog(this, netServ.superTier);
 		} case PlayerInfo: {
 			View layout = inflater.inflate(R.layout.player_info_dialog, (LinearLayout)findViewById(R.id.player_info_dialog));

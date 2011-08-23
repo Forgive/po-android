@@ -14,6 +14,7 @@ public class Channel {
 	protected int events = 0;
 	public int lastSeen = 0;
 	protected boolean isReadyToQuit = false;
+	public boolean joined = false;
 	public final static int HIST_LIMIT = 1000;
 	
 	public Hashtable<Integer, PlayerInfo> players = new Hashtable<Integer, PlayerInfo>();
@@ -85,6 +86,7 @@ public class Channel {
 				PlayerInfo p = netServ.players.get(msg.readInt());
 				if (p.id == netServ.mePlayer.id) { // We joined the channel
 					netServ.joinedChannels.addFirst(this);
+					joined = true;
 					if (netServ.chatActivity != null) {
 						netServ.chatActivity.populateUI(true);
 						netServ.chatActivity.progressDialog.dismiss();
@@ -98,7 +100,7 @@ public class Channel {
 				// decorate the message just like Qt client
 				String message = msg.readQString();
 				// /me like message
-				if (message.substring(0, 3).equals("***")) {
+				if (message.length() >= 3 && message.substring(0, 3).equals("***")) {
 					// TODO: choose a color near magenta which is knows by android html
 					message = "<font color='magenta'>" + NetworkService.escapeHtml(message) + "</font>";
 					writeToHist(Html.fromHtml(message));
@@ -151,6 +153,7 @@ public class Channel {
 				PlayerInfo p = netServ.players.get(msg.readInt());
 				if (p.id == netServ.mePlayer.id) { // We left the channel
 					players.clear();
+					joined = false;
 					// XXX this runtime complexity sucks
 					netServ.joinedChannels.remove(this);
 					if (netServ.chatActivity != null) {

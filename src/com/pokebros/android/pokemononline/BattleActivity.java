@@ -106,11 +106,10 @@ public class BattleActivity extends Activity {
 	TextView[] names = new TextView[2];
 	ImageView[][] pokeballs = new ImageView[2][6];
 	ImageView[] pokeSprites = new ImageView[2];
-	
-	LinearLayout topAttackRowLayout;
-	LinearLayout bottomAttackRowLayout;
-	LinearLayout struggleRowLayout;
+
 	RelativeLayout struggleLayout;
+	LinearLayout attackRow1;
+	LinearLayout attackRow2;
 	
 	Battle battle = null;
 	
@@ -234,10 +233,9 @@ public class BattleActivity extends Activity {
         infoScroll = (ScrollView)findViewById(R.id.infoScroll);
         battleView = (RelativeLayout)findViewById(R.id.battleScreen);
         
-        topAttackRowLayout = (LinearLayout)findViewById(R.id.topAttackRowLayout);
-    	bottomAttackRowLayout = (LinearLayout)findViewById(R.id.bottomAttackRowLayout);
-    	struggleRowLayout = (LinearLayout)findViewById(R.id.struggleRowLayout);
     	struggleLayout = (RelativeLayout)findViewById(R.id.struggleLayout);
+    	attackRow1 = (LinearLayout)findViewById(R.id.attackRow1);
+    	attackRow2 = (LinearLayout)findViewById(R.id.attackRow2);
     	
     	struggleLayout.setOnClickListener(new OnClickListener() {
     		public void onClick(View v) {
@@ -452,14 +450,14 @@ public class BattleActivity extends Activity {
 		// This method should hide moves, show the button if necessary and return whether it showed the button
 		boolean struggle = battle.shouldStruggle;
 		if(struggle) {
-			bottomAttackRowLayout.setVisibility(View.GONE);
-			topAttackRowLayout.setVisibility(View.GONE);
-			struggleRowLayout.setVisibility(View.VISIBLE);
+			attackRow1.setVisibility(View.GONE);
+			attackRow2.setVisibility(View.GONE);
+			struggleLayout.setVisibility(View.VISIBLE);
 		}
 		else {
-			bottomAttackRowLayout.setVisibility(View.VISIBLE);
-			topAttackRowLayout.setVisibility(View.VISIBLE);
-			struggleRowLayout.setVisibility(View.GONE);
+			attackRow1.setVisibility(View.VISIBLE);
+			attackRow2.setVisibility(View.VISIBLE);
+			struggleLayout.setVisibility(View.GONE);
 		}
 		return struggle;
 	}
@@ -513,7 +511,8 @@ public class BattleActivity extends Activity {
 	public void onResume() {
 		// XXX we might want more stuff here
 		super.onResume();
-		checkRearrangeTeamDialog();
+		if (battle != null)
+			checkRearrangeTeamDialog();
 	}
 	
 	private ServiceConnection connection = new ServiceConnection() {
@@ -696,7 +695,9 @@ public class BattleActivity extends Activity {
     void setAttackButtonEnabled(int num, boolean enabled) {
     	attackLayouts[num].setEnabled(enabled);
 		attackNames[num].setEnabled(enabled);
+		attackNames[num].setShadowLayer((float)1.5, 1, 1, resources.getColor(enabled ? R.color.poke_text_shadow_enabled : R.color.poke_text_shadow_disabled));
 		attackPPs[num].setEnabled(enabled);
+		attackPPs[num].setShadowLayer((float)1.5, 1, 1, resources.getColor(enabled ? R.color.pp_text_shadow_enabled : R.color.pp_text_shadow_disabled));
     }
     
     void setLayoutEnabled(ViewGroup v, boolean enabled) {

@@ -4,6 +4,7 @@ import java.util.Comparator;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +29,12 @@ public class ChannelListAdapter extends ArrayAdapter<com.pokebros.android.pokemo
 		setNotifyOnChange(false);
 		super.sort(new Comparator<Channel>() {
 			public int compare(Channel ch1, Channel ch2) {
-				return ch1.name().toLowerCase().compareTo(ch2.name().toLowerCase());
+				if (ch1.joined && !ch2.joined)
+					return -1;
+				else if (!ch1.joined && ch2.joined)
+					return 1;
+				else
+					return ch1.name().toLowerCase().compareTo(ch2.name().toLowerCase());
 			}
 		});
 		setNotifyOnChange(true);
@@ -43,8 +49,9 @@ public class ChannelListAdapter extends ArrayAdapter<com.pokebros.android.pokemo
 		Channel channel = getItem(position);
 		if (channel != null) {
 			TextView nick = (TextView)view.findViewById(R.id.channel_list_name);
-			nick.setText(channel.name());
-			nick.setBackgroundColor(channel.players.size() > 0 ? Color.GRAY : Color.BLACK);
+			nick.setText(Html.fromHtml((channel.joined ? "<b><i>" : "" ) +
+					NetworkService.escapeHtml(channel.name()) +
+					(channel.joined ? "</i></b>" : "" )));
 		}
 		return view;
 	}

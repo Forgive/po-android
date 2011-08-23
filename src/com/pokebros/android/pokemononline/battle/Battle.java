@@ -191,7 +191,7 @@ public class Battle {
 				myTeam.pokes[fromSpot] = temp;
 				
 				for (int i=0; i < 4; i++) {
-					displayedMoves[i] = new BattleMove(myTeam.pokes[0].moves[i], netServ.db);
+					displayedMoves[i] = new BattleMove(myTeam.pokes[0].moves[i]);
 				}
 			}
 			
@@ -565,9 +565,7 @@ public class Battle {
 			case TempMove:
 			case DefMove:
 				byte slot = msg.readByte();
-				short move = msg.readShort();
-				displayedMoves[slot].num = move;
-				BattleMove newMove = new BattleMove(displayedMoves[slot], netServ.db);
+				BattleMove newMove = new BattleMove(msg.readShort(), netServ.db);
 				displayedMoves[slot] = newMove;
 				if (id == TempPokeChange.DefMove.ordinal()) {
 					myTeam.pokes[0].moves[slot] = newMove;

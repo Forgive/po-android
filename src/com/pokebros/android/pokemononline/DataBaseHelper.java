@@ -35,10 +35,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     	} catch(SQLiteException e) {
     		// database does't exist yet.
     	}
-    	if(checkDB != null && !checkDB.needUpgrade(DATABASE_VERSION)) {
-    		// XXX There is literally no documentation for the needUpgrade function 
-    		// other than its existence, so I'm just assuming it behaves logically.
-    		// Don't blame me if it doesn't work.
+    	if(checkDB != null && checkDB.getVersion() == DATABASE_VERSION) {
     		checkDB.close();
     		return true;
     	}
@@ -49,7 +46,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 		try {
 			InputStream assetsDB;
 			assetsDB = myContext.getAssets().open(DBNAME);
-			SQLiteDatabase db = getReadableDatabase(); // Create file to overwrite
+			SQLiteDatabase db = getWritableDatabase(); // Create file to overwrite
 			OutputStream dbOut = new FileOutputStream(DBPATH + DBNAME);
 
 			byte[] buffer = new byte[1024];

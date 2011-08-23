@@ -284,6 +284,8 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 		if (scanResult != null && "QR_CODE".equals(scanResult.getFormatName())) {
 			try {
 				byte[] qrRead = intent.getByteArrayExtra("SCAN_RESULT_BYTES");
+				if (qrRead == null)
+					Toast.makeText(RegistryActivity.this, "Team from QR code could not be parsed successfully.", Toast.LENGTH_LONG).show();
 				// Discard the first 4 bits. These set the mode of the qr data (always the same for us)
 				for(int i = 0; i < qrRead.length - 1; i++)
 					// The new byte is your lower 4 bits and the upper 4 bits of the next guy
