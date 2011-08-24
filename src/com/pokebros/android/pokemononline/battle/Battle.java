@@ -69,7 +69,7 @@ public class Battle {
 		netServ = ns;
 		conf = bc; // singles, doubles, triples
 		this.bID = bID;
-		myTeam = new BattleTeam(msg, netServ.db);
+		myTeam = new BattleTeam(msg, netServ.db, conf.gen);
 		
 		// Only supporting singles for now
 		numberOfSlots = 2;
@@ -176,6 +176,7 @@ public class Battle {
 	}
 	
 	public void receiveCommand(Bais msg)  {
+		synchronized (this) {
 		BattleCommand bc = BattleCommand.values()[msg.readByte()];
 		byte player = msg.readByte();
 		System.out.println("Battle Command Received: " + bc.toString());
@@ -199,7 +200,7 @@ public class Battle {
 			pokes[player][0] = pokes[player][fromSpot];
 			pokes[player][fromSpot] = tempPoke;
 			
-			if(msg.available() > 0 && netServ != null) // this is the first time you've seen it
+			if(msg.available() > 0) // this is the first time you've seen it
 				pokes[player][0] = new ShallowBattlePoke(msg, (player == me) ? true : false, netServ.db, conf.gen);
 			
 			if(netServ.battleActivity != null) {
@@ -692,11 +693,15 @@ public class Battle {
 			break;
 		} case DynamicInfo: {
 			dynamicInfo[player] = new BattleDynamicInfo(msg);
-			System.out.println("PLAYER " + player + " " + dynamicInfo[player]);
+			break;
+		} case DynamicStats: {
+			for (int i = 0; i < 5; i++)
+				myTeam.pokes[player / 2].stats[i] = msg.readShort();
 			break;
 		} default: {
 			System.out.println("Battle command unimplemented -- " + bc);
 			break;
+		}
 		}
 		}
 	}

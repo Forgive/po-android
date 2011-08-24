@@ -14,9 +14,9 @@ public class BattleTeam extends SerializeBytes {
 	public BattlePoke[] pokes = new BattlePoke[6];
 	int[] indexes = new int[6];
 	
-	public BattleTeam(Bais msg, DataBaseHelper db) {
+	public BattleTeam(Bais msg, DataBaseHelper db, byte gen) {
 		for(int i = 0; i < 6; i++) {
-			pokes[i] = new BattlePoke(msg, db);
+			pokes[i] = new BattlePoke(msg, db, gen);
 			pokes[i].teamNum = (byte)i;
 		}
 	}

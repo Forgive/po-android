@@ -2,6 +2,9 @@ package com.pokebros.android.pokemononline.poke;
 
 import java.util.LinkedList;
 
+import android.text.Html;
+import android.text.SpannableStringBuilder;
+
 import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
 import com.pokebros.android.pokemononline.DataBaseHelper;
@@ -28,24 +31,13 @@ public class ShallowBattlePoke extends SerializeBytes {
 	public ShallowBattlePoke(Bais msg, boolean isMe, DataBaseHelper db, byte gen) {
 		uID = new UniqueID(msg);
 		rnick = nick = msg.readQString();
-		pokeName = db.query("SELECT Name from [Pokemons] WHERE (Num = " + 
-				uID.pokeNum + ") AND (Forme = " + uID.subNum + ")");
-		for(int i = 0; i < 2; i++) {
-			String res = db.query("SELECT G" + gen + "T" + (i+1) + " from [Pokemons] WHERE (Num = " +
-					uID.pokeNum + ") AND (Forme = " + uID.subNum + ")");
-			if (uID.subNum != 0 && res.length() == 0)
-				// No type specified for this forme,
-				// attempt to lookup for base forme
-				res = db.query("SELECT G" + gen + "T" + (i+1) + " from [Pokemons] WHERE (Num = " +
-						uID.pokeNum + ") AND (Forme = 0)");
-			if (res.length() == 0)
-				// This should never happen but not having a type is probably bad
-				// give it curse type at least
-				res = new Integer(Type.Curse.ordinal()).toString();
-			types[i] = Type.values()[new Integer(res)];
-		}
-		if (!isMe)
+		if (!isMe) {
 			nick = "the foe's " + nick;
+			
+			// A little optimization; these only matter if it's not your poke
+			getName(db);
+			getTypes(db, gen);
+		}
 		lifePercent = msg.readByte();
 		fullStatus = msg.readInt();
 		gender = msg.readByte();
@@ -63,6 +55,36 @@ public class ShallowBattlePoke extends SerializeBytes {
 		b.putBool(shiny);
 		b.write(level);
 		return b;
+	}
+	
+	public SpannableStringBuilder nameAndType() {
+		SpannableStringBuilder s = new SpannableStringBuilder(Html.fromHtml("<b>" + pokeName + "</b>"));
+		s.append("\n" + types[0]);
+		if(types[1] != Type.Curse) s.append("/" + types[1]);
+		return s;
+	}
+	
+	void getName(DataBaseHelper db) {
+		pokeName = db.query("SELECT Name from [Pokemons] WHERE (Num = " + 
+				uID.pokeNum + ") AND (Forme = " + uID.subNum + ")");
+	}
+	
+	
+	void getTypes(DataBaseHelper db, byte gen) {
+		for(int i = 0; i < 2; i++) {
+			String res = db.query("SELECT G" + gen + "T" + (i+1) + " from [Pokemons] WHERE (Num = " +
+					uID.pokeNum + ") AND (Forme = " + uID.subNum + ")");
+			if (uID.subNum != 0 && res.length() == 0)
+				// No type specified for this forme,
+				// attempt to lookup for base forme
+				res = db.query("SELECT G" + gen + "T" + (i+1) + " from [Pokemons] WHERE (Num = " +
+						uID.pokeNum + ") AND (Forme = 0)");
+			if (res.length() == 0)
+				// This should never happen but not having a type is probably bad
+				// give it curse type at least
+				res = new Integer(Type.Curse.ordinal()).toString();
+			types[i] = Type.values()[new Integer(res)];
+		}
 	}
 	
 	public void changeStatus(byte status) {

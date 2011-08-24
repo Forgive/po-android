@@ -22,13 +22,13 @@ public class BattlePoke extends ShallowBattlePoke {
 	byte happiness = 0;
 	public byte teamNum;
 	
-	short[] stats = new short[5];
+	public short[] stats = new short[5];
 	public BattleMove[] moves = new BattleMove[4];
 	
 	int[] DVs = new int[6];
 	int[] EVs = new int[6];
 	
-	public BattlePoke(Bais msg, DataBaseHelper db) {
+	public BattlePoke(Bais msg, DataBaseHelper db, byte gen) {
 		uID = new UniqueID(msg);
 		nick = msg.readQString();
 		totalHP = msg.readShort();
@@ -41,6 +41,8 @@ public class BattlePoke extends ShallowBattlePoke {
 		ability = msg.readShort();
 		abilityString = db.query("SELECT Name FROM [Abilities] WHERE _id = " + (ability + 1));
 		happiness = msg.readByte();
+		getTypes(db, gen);
+		getName(db);
 		
 		for(int i = 0; i < 5; i++)
 			stats[i] = msg.readShort();
@@ -83,5 +85,12 @@ public class BattlePoke extends ShallowBattlePoke {
 	
 	public int hiddenPowerType() {
 		return ( ( ( (DVs[0] & 1) + 2 * (DVs[1] & 1) + 4 * (DVs[2] & 1) + 8 * (DVs[5] & 1) + 16 * (DVs[3] & 1) + 32 * (DVs[4] & 1) ) * 15) / 63 ) + 1;
+	}
+	
+	public String printStats() {
+		String s = "";
+		for (int i = 0; i < 5; i++)
+			s += (i == 0 ? "" : "\n") + stats[i];
+		return s;
 	}
 }

@@ -4,11 +4,9 @@ import com.pokebros.android.pokemononline.ColorEnums.TypeColor;
 import com.pokebros.android.pokemononline.battle.Battle;
 import com.pokebros.android.pokemononline.battle.BattleMove;
 import com.pokebros.android.pokemononline.battle.Type;
-import java.util.Random;
 
 import com.android.launcher.DragController;
 import com.android.launcher.DragLayer;
-import com.android.launcher.DragSource;
 import com.android.launcher.PokeDragIcon;
 import com.pokebros.android.pokemononline.poke.BattlePoke;
 import com.pokebros.android.pokemononline.poke.ShallowShownPoke;
@@ -27,23 +25,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.LinearGradient;
-import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
-import android.graphics.Shader.TileMode;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
-import android.text.Html;
-import android.text.SpannableStringBuilder;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -55,14 +44,12 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
 import android.view.Window;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class BattleActivity extends Activity {
 	public enum BattleDialog {
@@ -594,8 +581,14 @@ public class BattleActivity extends Activity {
 					return false;
 				}
 			});
-			
-	        
+
+	        // Don't set battleActivity until after we've finished
+	        // getting UI elements. Otherwise there's a race condition if Battle
+	        // wants to update one of our UI elements we haven't gotten yet.
+	        synchronized(battle) {
+	        	netServ.battleActivity = BattleActivity.this;
+	        }
+
 	        // Load scrollback
 	        infoView.setText(battle.hist);
 	        updateBattleInfo(true);
@@ -610,11 +603,6 @@ public class BattleActivity extends Activity {
 	    	// Start timer updating
 	        handler.postDelayed(updateTimeTask, 100);
 	        
-	        // Don't set battleActivity until after we've finished
-	        // getting UI elements. Otherwise there's a race condition if Battle
-	        // wants to update one of our UI elements we haven't gotten yet.
-			netServ.battleActivity = BattleActivity.this;
-
 			checkRearrangeTeamDialog();
 		}
 		
@@ -811,18 +799,38 @@ public class BattleActivity extends Activity {
         	player = opp;
         case MyDynamicInfo:
         	if(netServ != null) {
-        		View layout = inflater.inflate(R.layout.dynamic_info_layout, (LinearLayout)findViewById(R.id.dynamic_info_layout));
-        		builder.setView(layout);
-        		TextView t = (TextView)layout.findViewById(R.id.statNamesView);
-        		t.setText(battle.dynamicInfo[player].statsAndHazards(battle.currentPoke(player)));
-        		t = (TextView)layout.findViewById(R.id.statNumsView);
-        		t.setText(battle.dynamicInfo[player].numbers());
-        		builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+        		final Dialog simpleDialog = new Dialog(this);
+        		simpleDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        		simpleDialog.setContentView(R.layout.dynamic_info_layout);
+
+        		TextView t = (TextView)simpleDialog.findViewById(R.id.nameTypeView); 
+        		t.setText((player == me ? battle.myTeam.pokes[0] : battle.currentPoke(player)).nameAndType());
+				t = (TextView)simpleDialog.findViewById(R.id.statNamesView);
+        		t.setText(battle.dynamicInfo[player].statsAndHazards());
+        		t = (TextView)simpleDialog.findViewById(R.id.statNumsView);
+        		if (player == me)
+	        		t.setText(battle.myTeam.pokes[0].printStats());
+        		else
+        			t.setVisibility(View.GONE);
+        		t = (TextView)simpleDialog.findViewById(R.id.statBoostView);
+        		String s = battle.dynamicInfo[player].boosts(player == me);
+        		if (!"\n\n\n\n".equals(s))
+        			t.setText(s);
+        		else
+        			t.setVisibility(View.GONE);
+        		
+        		simpleDialog.setCanceledOnTouchOutside(true);
+        		simpleDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
 					public void onCancel(DialogInterface dialog) {
 						removeDialog(id);
 					}
-				});
-        		return builder.create();
+        		});
+        		simpleDialog.findViewById(R.id.dynamic_info_layout).setOnClickListener(new OnClickListener() {
+					public void onClick(View v) {
+						simpleDialog.cancel();
+					}
+        		});
+        		return simpleDialog;
         	}
         default:
             return new Dialog(this);
