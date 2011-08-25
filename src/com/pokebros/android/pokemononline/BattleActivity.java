@@ -56,7 +56,8 @@ public class BattleActivity extends Activity {
 		RearrangeTeam,
 		ConfirmForfeit, 
 		OppDynamicInfo, 
-		MyDynamicInfo
+		MyDynamicInfo,
+		MoveInfo
 	}
 
 	public final static int SWIPE_TIME_THRESHOLD = 100;
@@ -99,6 +100,8 @@ public class BattleActivity extends Activity {
 	LinearLayout attackRow2;
 	
 	Battle battle = null;
+	
+	BattleMove lastClickedMove;
 	
 	Resources resources;
 	public NetworkService netServ = null;
@@ -202,6 +205,7 @@ public class BattleActivity extends Activity {
         	attackPPs[i] = (TextView)findViewById(resources.getIdentifier("attack" + (i+1) + "PP", "id", pkgName));
         	attackLayouts[i] = (RelativeLayout)findViewById(resources.getIdentifier("attack" + (i+1) + "Layout", "id", pkgName));
         	attackLayouts[i].setOnClickListener(battleListener);
+        	attackLayouts[i].setOnLongClickListener(moveListener);
         }
         for(int i = 0; i < 6; i++) {
         	pokeListNames[i] = (TextView)findViewById(resources.getIdentifier("pokename" + (i+1), "id", pkgName));
@@ -650,12 +654,20 @@ public class BattleActivity extends Activity {
     				realViewSwitcher.snapToScreen(0);
     			}
     		}
-    		for(int i = 0; i < 4; i++) {
-    			setAttackButtonEnabled(i, false);
-			}
-			for(int i = 0; i < 6; i++) {
-				setPokeListButtonEnabled(i, false);
-			}
+    	}
+    };
+    
+
+    public OnLongClickListener moveListener = new OnLongClickListener() {
+    	public boolean onLongClick(View v) {
+    		int id = v.getId();
+    		for(int i = 0; i < 4; i++)
+    			if(id == attackLayouts[i].getId() && !attackNames[i].equals("No Move")) {
+    				lastClickedMove = battle.displayedMoves[i];
+    				showDialog(BattleDialog.MoveInfo.ordinal());
+    				return true;
+    			}
+    		return false;
     	}
     };
     
@@ -832,9 +844,19 @@ public class BattleActivity extends Activity {
         		});
         		return simpleDialog;
         	}
+        case MoveInfo:
+        	dialog = builder.setTitle(lastClickedMove.name)
+        	.setMessage(lastClickedMove.descAndEffects())
+        	.setOnCancelListener(new DialogInterface.OnCancelListener() {
+        		public void onCancel(DialogInterface dialog) {
+        			removeDialog(id);
+        		}
+        	})
+        	.create();
+        	dialog.setCanceledOnTouchOutside(true);
+        	return dialog;
         default:
             return new Dialog(this);
         }
     }
-    
 }

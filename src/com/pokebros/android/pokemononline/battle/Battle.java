@@ -102,7 +102,7 @@ public class Battle {
 		}
 
 		for (int i = 0; i < 4; i++)
-			displayedMoves[i] = new BattleMove(0, netServ.db);
+			displayedMoves[i] = new BattleMove();
 	}
 	
 	public Boolean isMyTimerTicking() {

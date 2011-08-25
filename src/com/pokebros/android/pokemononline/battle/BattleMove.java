@@ -14,6 +14,10 @@ public class BattleMove extends SerializeBytes {
 	public short num = 0;
 	public String name = "No Move";
 	public byte type = (byte) Type.Curse.ordinal();
+	private String power = "--";
+	private String accuracy = "--";
+	private String description = "";
+	private String effect = "";
 	
 	public String toString() {
 		return name;
@@ -37,9 +41,13 @@ public class BattleMove extends SerializeBytes {
 	
 	public BattleMove(int n, DataBaseHelper db) {
 		num = (short) n;
-		totalPP = (byte)(new Byte(db.query("SELECT pp FROM [Moves] WHERE _id = " + num)) * 1.6);
 		name = db.query("SELECT name FROM [Moves] WHERE _id = " + num);
 		type = new Byte(db.query("SELECT type FROM [Moves] WHERE _id = " + num));
+		totalPP = (byte)(new Byte(db.query("SELECT pp FROM [Moves] WHERE _id = " + num)) * 1.6);
+		power = db.query("SELECT power FROM [Moves] WHERE _id = " + num);
+		accuracy = db.query("SELECT accuracy FROM [Moves] WHERE _id = " + num);
+		//description = db.query("SELECT description FROM [Moves] WHERE _id = " + num);
+		effect = db.query("SELECT effect FROM [Moves] WHERE _id = " + num);
 	}
 	
 	public BattleMove(BattleMove bm) {
@@ -48,14 +56,16 @@ public class BattleMove extends SerializeBytes {
 		num = bm.num;
 		name = bm.name;
 		type = bm.type;
+		power = bm.power;
+		accuracy = bm.accuracy;
+		description = bm.description;
+		effect = bm.effect;
 	}
 	
 	public BattleMove(Bais msg, DataBaseHelper db) {
-		num = msg.readShort();
+		this(msg.readShort(), db);
 		currentPP = msg.readByte();
 		totalPP = msg.readByte();
-		name = db.query("SELECT name FROM [Moves] WHERE _id = " + num);
-		type = new Byte(db.query("SELECT type FROM [Moves] WHERE _id = " + num));
 	}
 	
 	public Baos serializeBytes() {
@@ -64,5 +74,15 @@ public class BattleMove extends SerializeBytes {
 		b.write(currentPP);
 		b.write(totalPP);
 		return b;
+	}
+	
+	public String descAndEffects() {
+		String s = "";
+		s += "Power: " + power;
+		s += "\nAccuracy: " + accuracy;
+		s += "\n";
+		s += "\nDescription: " + description;
+		s += "\nEffect: " + effect;
+		return s;
 	}
 }
