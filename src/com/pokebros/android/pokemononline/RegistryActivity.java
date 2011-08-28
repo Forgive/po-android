@@ -17,6 +17,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.InputType;
@@ -51,6 +52,7 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 	private boolean bound = false;
 	private String path;
 	private FullPlayerInfo meLoginPlayer;
+	private SharedPreferences prefs;
 	RegistryConnectionService service;
 
 	enum RegistryDialog {
@@ -81,8 +83,11 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
         this.stopService(new Intent(RegistryActivity.this, NetworkService.class));
         
         setContentView(R.layout.main);
+
+        prefs = getPreferences(MODE_PRIVATE);
          
 		editAddr = (EditText)RegistryActivity.this.findViewById(R.id.addredit);
+		editAddr.setText(prefs.getString("lastAddr", ""));
 		editName = (EditText)RegistryActivity.this.findViewById(R.id.nameedit);
 		// Hide the soft-keyboard when the activity is created
 		editName.setInputType(InputType.TYPE_NULL);
@@ -196,6 +201,7 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 				intent.putExtra("ip", ipString);
 				intent.putExtra("port", portVal);
 				intent.putExtra("loginPlayer", meLoginPlayer.serializeBytes().toByteArray());
+				prefs.edit().putString("lastAddr", editAddr.getText().toString()).commit();
 
 				startService(intent);
 				startActivity(new Intent(RegistryActivity.this, ChatActivity.class));
