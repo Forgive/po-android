@@ -17,6 +17,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -33,6 +34,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.WindowManager;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnKeyListener;
@@ -805,6 +807,17 @@ public class ChatActivity extends Activity {
 			resID = resources.getIdentifier("pi" + uid.pokeNum + "_icon",
 					"drawable", packName);
 		return resources.getDrawable(resID);
+	}
+	
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		chatViewSwitcher.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+			public void onGlobalLayout() {
+				chatViewSwitcher.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+				chatViewSwitcher.setCurrentScreen(1);
+			}
+		});
 	}
 	
     @Override
