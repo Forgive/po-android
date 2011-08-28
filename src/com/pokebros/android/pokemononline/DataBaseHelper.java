@@ -19,7 +19,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 	private final Context myContext;
 
 	public DataBaseHelper(Context context) {
-		super(context, DBNAME, null, 1);
+		super(context, DBNAME, null, DATABASE_VERSION);
 		myContext = context;
 		if (!currentVersionExists())
 			create();

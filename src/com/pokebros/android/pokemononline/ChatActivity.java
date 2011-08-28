@@ -85,6 +85,7 @@ public class ChatActivity extends Activity {
 	private String packName = "com.pokebros.android.pokemononline";
 	private PlayerInfo lastClickedPlayer;
 	private Channel lastClickedChannel;
+	private boolean loading = true;
 	
 	class TierAlertDialog extends AlertDialog {
 		public Tier parentTier = null;
@@ -139,13 +140,15 @@ public class ChatActivity extends Activity {
 	@Override
     public void onCreate(Bundle savedInstanceState) { 
 		System.out.println("CREATED CHAT ACTIVITY");
-		progressDialog = ProgressDialog.show(ChatActivity.this, "","Loading. Please wait...", true);
-		progressDialog.setCancelable(true);
-		progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-			public void onCancel(DialogInterface dialog) {
-				disconnect();
-			}
-		});
+		if (loading) {
+			progressDialog = ProgressDialog.show(ChatActivity.this, "","Loading. Please wait...", true);
+			progressDialog.setCancelable(true);
+			progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+				public void onCancel(DialogInterface dialog) {
+					disconnect();
+				}
+			});
+		}
 		
 		super.onCreate(savedInstanceState);
         setContentView(R.layout.chat);
@@ -229,7 +232,9 @@ public class ChatActivity extends Activity {
 			netServ.chatActivity = ChatActivity.this;
 			if (netServ.joinedChannels.peek() != null && !netServ.joinedChannels.isEmpty()) {
 				populateUI(false);
-				progressDialog.dismiss();
+				if (progressDialog.isShowing())
+					progressDialog.dismiss();
+				loading = false;
 			}
 	        checkChallenges();
 	        checkAskForPass();
@@ -501,7 +506,6 @@ public class ChatActivity extends Activity {
 			return builder.create();
 		} case TierSelection: {
 			if (netServ == null) {
-				removeDialog(id);
 				dismissDialog(id);
 			}
 			return new TierAlertDialog(this, netServ.superTier);
