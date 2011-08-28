@@ -42,7 +42,7 @@ public class Battle {
 	public BattleTeam myTeam;
 	public ShallowShownTeam oppTeam;
 	public boolean gotEnd = false;
-	public boolean allowSwitch, allowAttack;
+	public boolean allowSwitch, allowAttack, clicked = false;
 	public boolean[] allowAttacks = new boolean[4];
 	public int background;
 	public boolean shouldShowPreview = false, shouldStruggle = false;
@@ -614,7 +614,7 @@ public class Battle {
 			break;
 		} case MakeYourChoice: {
 			if (netServ.battleActivity != null) {
-				netServ.battleActivity.updateButtons(allowSwitch, allowAttack, allowAttacks);
+				netServ.battleActivity.updateButtons();
 				if (allowSwitch && !allowAttack)
 					netServ.battleActivity.switchToPokeViewer();
 			}
@@ -636,12 +636,15 @@ public class Battle {
 			else
 				shouldStruggle = false;
 			
+			clicked = false;
+			
 			if (netServ.battleActivity != null)
-				netServ.battleActivity.updateButtons(allowSwitch, allowAttack, allowAttacks);
+				netServ.battleActivity.updateButtons();
 			break;
 		} case CancelMove: {
+			clicked = false;
 			if (netServ.battleActivity != null)
-				netServ.battleActivity.updateButtons(allowSwitch, allowAttack, allowAttacks);
+				netServ.battleActivity.updateButtons();
 			break;
 		} case ClockStart: {
 			remainingTime[player % 2] = msg.readShort();

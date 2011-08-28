@@ -414,13 +414,13 @@ public class BattleActivity extends Activity {
 		});		
 	}
 	
-	public void updateButtons(final boolean allowSwitch, final boolean allowAttack, final boolean[] allowAttacks) {
+	public void updateButtons() {
 		runOnUiThread(new Runnable() {
 			public void run() {
 				if (!checkStruggle()) {
 					for (int i = 0; i < 4; i++) {
-						if (allowAttack) {
-							setAttackButtonEnabled(i, allowAttacks[i]);
+						if (battle.allowAttack && !battle.clicked) {
+							setAttackButtonEnabled(i, battle.allowAttacks[i]);
 						}
 						else {
 							setAttackButtonEnabled(i, false);
@@ -428,8 +428,8 @@ public class BattleActivity extends Activity {
 					}
 				}
 				for(int i = 0; i < 6; i++) {
-					if (battle.myTeam.pokes[i].status() != Status.Koed.poValue())
-						setPokeListButtonEnabled(i, allowSwitch);
+					if (battle.myTeam.pokes[i].status() != Status.Koed.poValue() && !battle.clicked)
+						setPokeListButtonEnabled(i, battle.allowSwitch);
 					else
 						setPokeListButtonEnabled(i, false);
 				}
@@ -602,7 +602,7 @@ public class BattleActivity extends Activity {
 	        updateOppPoke();
 	        
 	        // Enable or disable buttons
-	        updateButtons(battle.allowSwitch, battle.allowAttack, battle.allowAttacks);
+	        updateButtons();
 	        
 	    	// Start timer updating
 	        handler.postDelayed(updateTimeTask, 100);
@@ -654,6 +654,8 @@ public class BattleActivity extends Activity {
     				realViewSwitcher.snapToScreen(0);
     			}
     		}
+    		battle.clicked = true;
+    		updateButtons();
     	}
     };
     
