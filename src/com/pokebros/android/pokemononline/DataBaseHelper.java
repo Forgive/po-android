@@ -13,7 +13,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DataBaseHelper extends SQLiteOpenHelper {
 
-	private static final int DATABASE_VERSION = 3; // Increment when database should be updated on users' devices
+	private static final int DATABASE_VERSION = 4; // Increment when database should be updated on users' devices
 	private static final String DBNAME = "po_database";
 	private static final String DBPATH = "/data/data/com.pokebros.android.pokemononline/databases/";
 	private final Context myContext;
