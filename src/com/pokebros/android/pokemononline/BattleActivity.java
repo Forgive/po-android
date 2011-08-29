@@ -476,15 +476,15 @@ public class BattleActivity extends Activity {
 					pokeListAbilities[i].setText(poke.abilityString);
 					for (int j = 0; j < 4; j++) {
 						pokeListMovePreviews[i][j].setText(poke.moves[j].toString());
-						int color;
-						if (poke.moves[j].num == 237) { // Hidden Power
-							String s = TypeColor.values()[poke.hiddenPowerType()].toString();
-							s = s.replaceAll(">", "");
-							color = Color.parseColor(s);
-						}
-						else
-							color = poke.moves[j].getColor();
-						pokeListMovePreviews[i][j].getBackground().setColorFilter(color, PorterDuff.Mode.DARKEN);
+						pokeListMovePreviews[i][j].setShadowLayer((float)1, 1, 1, resources.getColor(battle.allowSwitch && !battle.clicked ? R.color.poke_text_shadow_enabled : R.color.poke_text_shadow_disabled));
+			        	String type;
+			        	if (poke.moves[j].num == 237)
+			        		type = Type.values()[poke.hiddenPowerType()].toString();
+			        	else
+			        		type = poke.moves[j].getTypeString();
+			        	type = type.toLowerCase();
+			        	pokeListMovePreviews[i][j].setBackgroundResource(resources.getIdentifier(type + "_type_button",
+					      		"drawable", pkgName));
 					}
 				}
 			}
