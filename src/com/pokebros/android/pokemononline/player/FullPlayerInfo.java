@@ -26,7 +26,7 @@ public class FullPlayerInfo extends SerializeBytes {
 		nameColor = new QColor(msg);
 	}
 	
-	public FullPlayerInfo(Context context) {
+	public FullPlayerInfo(Context context, String name) {
 		try {
 			context.openFileInput("team.xml");
 			playerTeam = new PlayerTeam(new PokeParser(context));
@@ -34,11 +34,11 @@ public class FullPlayerInfo extends SerializeBytes {
 		} catch (FileNotFoundException e) {
 			//TODO Warn player that default team has loaded
 			System.out.println("NO TEAM FOUND, SYSTEM LOADED DEFAULT TEAM");
-			playerTeam = new PlayerTeam();
+			playerTeam = new PlayerTeam(name);
 		} catch (NumberFormatException e) {
 			// The file could not be parsed correctly
 			System.out.println("INVALID TEAM FOUND, SYSTEM LOADED DEFAULT TEAM");
-			playerTeam = new PlayerTeam();
+			playerTeam = new PlayerTeam(name);
 		}
 	}
 	

@@ -16,6 +16,7 @@ import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -88,6 +89,7 @@ public class ChatActivity extends Activity {
 	private PlayerInfo lastClickedPlayer;
 	private Channel lastClickedChannel;
 	private boolean loading = true;
+	private SharedPreferences prefs;
 	
 	class TierAlertDialog extends AlertDialog {
 		public Tier parentTier = null;
@@ -154,6 +156,7 @@ public class ChatActivity extends Activity {
 		
 		super.onCreate(savedInstanceState);
         setContentView(R.layout.chat);
+        prefs = getPreferences(MODE_PRIVATE);
         chatView = (ListView) findViewById(R.id.chatView);
     	chatViewSwitcher = (ChatRealViewSwitcher)findViewById(R.id.chatPokeSwitcher);
     	chatViewSwitcher.setCurrentScreen(1);
@@ -477,14 +480,13 @@ public class ChatActivity extends Activity {
 			return builder.create();
 		} case FindBattle: {
 			final EditText range = new EditText(this);
+			range.append("" + (prefs.contains("range") ? prefs.getInt("range", 0) : ""));
 			range.setInputType(InputType.TYPE_CLASS_NUMBER);
 			range.setHint("Range");
-			final boolean[] options = new boolean[]{false, false, false};
 			builder.setTitle(R.string.find_a_battle)
-			.setMultiChoiceItems(new CharSequence[]{"Force Rated", "Force Same Tier", "Only within range"}, null, new DialogInterface.OnMultiChoiceClickListener() {
+			.setMultiChoiceItems(new CharSequence[]{"Force Rated", "Force Same Tier", "Only within range"}, new boolean[]{prefs.getBoolean("findOption0", false), prefs.getBoolean("findOption1", false), prefs.getBoolean("findOption2", false)}, new DialogInterface.OnMultiChoiceClickListener() {
 				public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-					options[which] = isChecked;
-					System.out.println("FORCE RATED: " + options[0] + "FORCE SAME TIER: " + options[1] + "ONLY WITHIN RANGE: " + options[2]);
+					prefs.edit().putBoolean("findOption" + which, isChecked).commit();
 				}
 			})
 			.setView(range)
@@ -492,15 +494,13 @@ public class ChatActivity extends Activity {
 				public void onClick(DialogInterface dialog, int which) {
 					if (netServ != null && netServ.socket.isConnected()) {
 						netServ.findingBattle = true;
-						Short inRange;
 						try {
-							inRange = new Short(range.getText().toString());
+							prefs.edit().putInt("range", new Integer(range.getText().toString()).intValue()).commit();
 						} catch (NumberFormatException e) {
-							inRange = 200;
+							prefs.edit().remove("range").commit();
 						}
-						System.out.println("Force Rated: " + options[0] + " Force Same Tier: " + options[1] + " Only within Range: " + options[2]);
 						netServ.socket.sendMessage(
-								constructFindBattle(options[0], options[1], options[2], inRange, (byte) 0),
+								constructFindBattle(prefs.getBoolean("findOption0", false), prefs.getBoolean("findOption1", false), prefs.getBoolean("findOption2", false), prefs.getInt("range", 200), (byte) 0),
 								Command.FindBattle);
 					}
 				}
@@ -553,23 +553,23 @@ public class ChatActivity extends Activity {
             return pInfoDialog;
 		} case ChallengeMode: {
             final Clauses[] clauses = Clauses.values();
-            int numClauses = clauses.length;
-			final boolean[] options = new boolean[numClauses];
+            final int numClauses = clauses.length;
 			final String[] clauseNames = new String[numClauses];
+			final boolean[] checked = new boolean[numClauses];
 			for (int i=0; i < numClauses; i++) {
-				options[i] = false;
 				clauseNames[i] = clauses[i].toString();
+				checked[i] = prefs.getBoolean("challengeOption" + i, false);
 			}
-            builder.setMultiChoiceItems(clauseNames, null, new DialogInterface.OnMultiChoiceClickListener() {
+            builder.setMultiChoiceItems(clauseNames, checked, new DialogInterface.OnMultiChoiceClickListener() {
 				public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-					options[which] = isChecked;
+					prefs.edit().putBoolean("challengeOption" + which, isChecked).commit();
 				}
 			})
 			.setPositiveButton("Challenge", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
 					int clauses = 0;
-					for (int i = 0; i < options.length; i++)
-						clauses |= (options[i] ? Clauses.values()[i].mask() : 0);
+					for (int i = 0; i < numClauses; i++)
+						clauses |= (prefs.getBoolean("challengeOption" + i, false) ? Clauses.values()[i].mask() : 0);
 					if (netServ != null && netServ.socket != null && netServ.socket.isConnected())
 						netServ.socket.sendMessage(constructChallenge(ChallengeDesc.Sent.ordinal(), lastClickedPlayer.id, clauses, Mode.Singles.ordinal()), Command.ChallengeStuff);
 					removeDialog(id);
@@ -741,14 +741,14 @@ public class ChatActivity extends Activity {
     }
     
     private Baos constructFindBattle(boolean forceRated, boolean forceSameTier,
-    		boolean onlyInRange, short range, byte mode) {
+    		boolean onlyInRange, int i, byte mode) {
 		Baos find = new Baos();
 		int flags = 0;
 		flags |= (forceRated ? 1:0);
 		flags |= (forceSameTier ? 2:0);
 		flags |= (onlyInRange ? 4:0);
 		find.putInt(flags);
-		find.putShort(range);
+		find.putShort((short)i);
 		find.write(mode);
 		return find;
     }

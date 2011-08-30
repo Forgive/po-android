@@ -42,7 +42,7 @@ public class PlayerTeam extends SerializeBytes {
 		team = new Team(p);
 	}
 	
-	public PlayerTeam() { nick = new BigInteger(128, new Random()).toString().substring(0, 11); }
+	public PlayerTeam(String name) { nick = name == null ? new BigInteger(128, new Random()).toString().substring(0, 11) : name; }
 	
 	public String toString() {
 		return nick;

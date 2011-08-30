@@ -99,7 +99,7 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 			}
 		});
 
-		meLoginPlayer = new FullPlayerInfo(RegistryActivity.this);
+		meLoginPlayer = new FullPlayerInfo(RegistryActivity.this, prefs.getString("lastName", null));
 		editName.append(meLoginPlayer.nick());
 		
 		//Capture out button from layout
@@ -201,7 +201,7 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 				intent.putExtra("ip", ipString);
 				intent.putExtra("port", portVal);
 				intent.putExtra("loginPlayer", meLoginPlayer.serializeBytes().toByteArray());
-				prefs.edit().putString("lastAddr", editAddr.getText().toString()).commit();
+				prefs.edit().putString("lastAddr", editAddr.getText().toString()).putString("lastName", editName.getText().toString()).commit();
 
 				startService(intent);
 				startActivity(new Intent(RegistryActivity.this, ChatActivity.class));
@@ -264,7 +264,7 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 							saveTeam.flush();
 							saveTeam.close();
 							team.close();
-							meLoginPlayer = new FullPlayerInfo(RegistryActivity.this);
+							meLoginPlayer = new FullPlayerInfo(RegistryActivity.this, prefs.getString("lastName", null));
 							editName.setText("");
 							editName.append(meLoginPlayer.nick());
 							if (!meLoginPlayer.isDefault)
@@ -306,7 +306,7 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 					saveTeam.write(buffer, 0, length);
 				saveTeam.flush();
 				saveTeam.close();
-				meLoginPlayer = new FullPlayerInfo(RegistryActivity.this);
+				meLoginPlayer = new FullPlayerInfo(RegistryActivity.this, prefs.getString("lastName", null));
 				editName.setText("");
 				editName.append(meLoginPlayer.nick());
 				if (!meLoginPlayer.isDefault)

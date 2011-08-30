@@ -15,12 +15,13 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
 	private static final int DATABASE_VERSION = 4; // Increment when database should be updated on users' devices
 	private static final String DBNAME = "po_database";
-	private static final String DBPATH = "/data/data/com.pokebros.android.pokemononline/databases/";
+	private final String dbPath;
 	private final Context myContext;
 
 	public DataBaseHelper(Context context) {
 		super(context, DBNAME, null, DATABASE_VERSION);
 		myContext = context;
+		dbPath = myContext.getDatabasePath(DBNAME).getAbsolutePath();
 		if (!currentVersionExists())
 			create();
 	}
@@ -31,7 +32,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     private boolean currentVersionExists() {
     	SQLiteDatabase checkDB = null;
     	try{
-    		checkDB = SQLiteDatabase.openDatabase(DBPATH + DBNAME, null, SQLiteDatabase.OPEN_READONLY);
+    		checkDB = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READONLY);
     	} catch(SQLiteException e) {
     		// database does't exist yet.
     	}
@@ -47,7 +48,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 			InputStream assetsDB;
 			assetsDB = myContext.getAssets().open(DBNAME);
 			SQLiteDatabase db = getWritableDatabase(); // Create file to overwrite
-			OutputStream dbOut = new FileOutputStream(DBPATH + DBNAME);
+			OutputStream dbOut = new FileOutputStream(dbPath);
 
 			byte[] buffer = new byte[1024];
 			int length;
