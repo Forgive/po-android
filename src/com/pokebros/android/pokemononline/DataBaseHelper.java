@@ -36,9 +36,13 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     	} catch(SQLiteException e) {
     		// database does't exist yet.
     	}
-    	if(checkDB != null && checkDB.getVersion() == DATABASE_VERSION) {
-    		checkDB.close();
-    		return true;
+    	if(checkDB != null) {
+    		if (checkDB.getVersion() == DATABASE_VERSION) {
+        		checkDB.close();
+    			return true;
+    		}
+    		else 
+    			checkDB.close();
     	}
     	return false;
     }
@@ -48,6 +52,8 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 			InputStream assetsDB;
 			assetsDB = myContext.getAssets().open(DBNAME);
 			SQLiteDatabase db = getWritableDatabase(); // Create file to overwrite
+			db.setVersion(DATABASE_VERSION);
+			db.close();
 			OutputStream dbOut = new FileOutputStream(dbPath);
 
 			byte[] buffer = new byte[1024];
@@ -58,7 +64,6 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
 			dbOut.flush();
 			dbOut.close();
-			db.setVersion(DATABASE_VERSION);
 			assetsDB.close();
 		} catch (IOException e) {
 			e.printStackTrace();
