@@ -1,21 +1,5 @@
 package com.pokebros.android.pokemononline;
 
-import com.pokebros.android.pokemononline.ColorEnums.TypeColor;
-import com.pokebros.android.pokemononline.battle.Battle;
-import com.pokebros.android.pokemononline.battle.BattleMove;
-import com.pokebros.android.pokemononline.battle.Type;
-
-import com.android.launcher.DragController;
-import com.android.launcher.DragLayer;
-import com.android.launcher.PokeDragIcon;
-import com.pokebros.android.pokemononline.poke.BattlePoke;
-import com.pokebros.android.pokemononline.poke.ShallowShownPoke;
-import com.pokebros.android.pokemononline.poke.UniqueID;
-import com.pokebros.android.pokemononline.poke.PokeEnums.Gender;
-import com.pokebros.android.pokemononline.poke.ShallowBattlePoke;
-import com.pokebros.android.pokemononline.poke.PokeEnums.Status;
-
-import de.marcreichelt.android.RealViewSwitcher;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -25,8 +9,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Resources;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -40,16 +22,31 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
-import android.view.Window;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+
+import com.android.launcher.DragController;
+import com.android.launcher.DragLayer;
+import com.android.launcher.PokeDragIcon;
+import com.pokebros.android.pokemononline.battle.Battle;
+import com.pokebros.android.pokemononline.battle.BattleMove;
+import com.pokebros.android.pokemononline.battle.Type;
+import com.pokebros.android.pokemononline.poke.BattlePoke;
+import com.pokebros.android.pokemononline.poke.ShallowBattlePoke;
+import com.pokebros.android.pokemononline.poke.ShallowShownPoke;
+import com.pokebros.android.pokemononline.poke.UniqueID;
+import com.pokebros.android.pokemononline.poke.PokeEnums.Gender;
+import com.pokebros.android.pokemononline.poke.PokeEnums.Status;
+
+import de.marcreichelt.android.RealViewSwitcher;
 
 public class BattleActivity extends Activity {
 	public enum BattleDialog {

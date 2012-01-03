@@ -1,13 +1,8 @@
 package com.pokebros.android.pokemononline.battle;
 
-import android.text.Html;
-import android.text.SpannableStringBuilder;
-
 import com.pokebros.android.pokemononline.Bais;
 import com.pokebros.android.pokemononline.Baos;
 import com.pokebros.android.pokemononline.SerializeBytes;
-import com.pokebros.android.pokemononline.poke.BattlePoke;
-import com.pokebros.android.pokemononline.poke.ShallowBattlePoke;
 
 public class BattleDynamicInfo extends SerializeBytes {
 	public static final byte SPIKES = 1;

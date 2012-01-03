@@ -50,7 +50,6 @@ public class RegistryActivity extends Activity implements ServiceConnection, Reg
 	private EditText editAddr;
 	private EditText editName;
 	private boolean bound = false;
-	private String path;
 	private FullPlayerInfo meLoginPlayer;
 	private SharedPreferences prefs;
 	RegistryConnectionService service;
